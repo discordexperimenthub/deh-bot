@@ -72,6 +72,7 @@ client.on('interactionCreate', async interaction => {
         try {
             await command.execute(interaction);
         } catch (error) {
+            console.log(error)
             logger('error', 'COMMAND', 'Error while executing command:', `${error.message}\n`, error.stack);
 
             return interaction.reply({
