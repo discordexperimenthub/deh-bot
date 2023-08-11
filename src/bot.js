@@ -30,26 +30,48 @@ for (const file of commandFiles) {
 };
 
 async function checkScripts() {
-    let code1Old = '';
+    let currentOld = '';
+    let stringsOld = '';
 
     try {
-        code1Old = readFileSync('scripts/current.js').toString();
+        currentOld = readFileSync('scripts/current.js').toString();
     } catch (error) {
         logger('error', 'SCRIPT', 'Error while reading script', 'current.js', `${error.code}\n`, JSON.stringify(error, null, 4));
     };
 
-    let code1;
+    try {
+        stringsOld = readFileSync('scripts/strings.js').toString();
+        stringsOld = JSON.parse(stringsOld);
+    } catch (error) {
+        logger('error', 'SCRIPT', 'Error while reading script', 'strings.js', `${error.code}\n`, JSON.stringify(error, null, 4));
+    };
+
+    let current;
+    let strings;
 
     try {
-        code1 = await axios.get('https://raw.githubusercontent.com/Discord-Datamining/Discord-Datamining/master/current.js');
+        current = await axios.get('https://raw.githubusercontent.com/Discord-Datamining/Discord-Datamining/master/current.js');
     } catch (error) {
         return logger('error', 'SCRIPT', 'Error while fetching script', 'current.js', `${error.response.status} ${error.response.statusText}\n`, JSON.stringify(error.response.data, null, 4));
     };
 
-    if (code1.status === 200) code1 = code1.data;
-    else return logger('error', 'SCRIPT', 'Error while fetching script', 'current.js', `${code1.status} ${code1.statusText}\n`, JSON.stringify(code1.data, null, 4));
+    if (current.status === 200) current = current.data;
+    else return logger('error', 'SCRIPT', 'Error while fetching script', 'current.js', `${current.status} ${current.statusText}\n`, JSON.stringify(current.data, null, 4));
 
-    writeFileSync('scripts/current.js', code1);
+    writeFileSync('scripts/current.js', current);
+    logger('success', 'SCRIPT', 'Fetched code', 'current.js');
+
+    try {
+        strings = await axios.get('https://raw.githubusercontent.com/xHyroM/discord-datamining/master/data/client/strings.json');
+    } catch (error) {
+        return logger('error', 'SCRIPT', 'Error while fetching script', 'strings.js', `${error.response.status} ${error.response.statusText}\n`, JSON.stringify(error.response.data, null, 4));
+    };
+
+    if (strings.status === 200) strings = JSON.parse(strings.data);
+    else return logger('error', 'SCRIPT', 'Error while fetching script', 'strings.js', `${strings.status} ${strings.statusText}\n`, JSON.stringify(strings.data, null, 4));
+
+    writeFileSync('scripts/strings.js', strings);
+    logger('success', 'SCRIPT', 'Fetched code', 'strings.js');
 
     /*
     let options = {
@@ -61,41 +83,39 @@ async function checkScripts() {
     writeFileSync('scripts/current.js', code1);
     */
 
-    logger('success', 'SCRIPT', 'Fetched script', 'current.js');
+    let diffCurrent;
+    let diffCurrentText = '';
 
-    let diff1;
-    let diff1Text = '';
-
-    if (code1Old !== '') {
+    if (currentOld !== '') {
         diff1 = diffChars(code1Old, code1);
 
         let last = [];
         let added = false;
         let removed = false;
 
-        for (let part of diff1) {
+        for (let part of diffCurrent) {
             if (part.added) {
-                diff1Text += `${(!added && !removed && last.length > 0) ? '\n\n...\n\n' : ''}${(!added && !removed) ? last.map(line => line).join('\n') : ''}${!added ? '<added>' : ''}${part.value}`;
+                diffCurrentText += `${(!added && !removed && last.length > 0) ? '\n\n...\n\n' : ''}${(!added && !removed) ? last.map(line => line).join('\n') : ''}${!added ? '<added>' : ''}${part.value}`;
                 added = true;
             } else if (part.removed) {
-                diff1Text += `${(!added && !removed && last.length > 0) ? '\n\n...\n\n' : ''}${(!added && !removed) ? last.map(line => line).join('\n') : ''}${!removed ? '<removed>' : ''}${part.value}`;
+                diffCurrentText += `${(!added && !removed && last.length > 0) ? '\n\n...\n\n' : ''}${(!added && !removed) ? last.map(line => line).join('\n') : ''}${!removed ? '<removed>' : ''}${part.value}`;
                 removed = true;
             } else {
                 last = part.value.split('\n').slice(-15);
 
                 if (added) {
-                    diff1Text += '</added>';
+                    diffCurrentText += '</added>';
                     added = false;
                 };
                 if (removed) {
-                    diff1Text += '</removed>';
+                    diffCurrentText += '</removed>';
                     removed = false;
                 };
             };
         };
 
-        writeFileSync('scripts/diff/current.diff', diff1Text);
-        logger('success', 'SCRIPT', 'Generated diff', 'current.diff');
+        writeFileSync('scripts/diff/current.diff', diffCurrentText);
+        logger('success', 'SCRIPT', 'Generated diff for', 'current.js');
     };
 
     const extraStuffWebhook = new WebhookClient({
@@ -104,7 +124,7 @@ async function checkScripts() {
 
     let response1;
 
-    if (diff1Text !== '') try {
+    if (diffCurrentText !== '') try {
         response1 = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
             model: 'gpt-3.5-turbo-16k',
             messages: [
@@ -114,7 +134,7 @@ async function checkScripts() {
                 },
                 {
                     role: 'user',
-                    content: diff1Text
+                    content: diffCurrentText
                 }
             ]
         }, {
@@ -139,6 +159,40 @@ async function checkScripts() {
             content: `<@&${roleIds.extraStuff}> <@&${roleIds.codeChanges}>`,
             embeds: [embed]
         });
+    };
+    if (stringsOld !== '') {
+        let removed = [];
+        let added = [];
+        let changed = [];
+
+        for (let key in strings) {
+            if (!stringsOld[key]) added.push(key);
+        };
+
+        for (let key in stringsOld) {
+            if (!strings[key]) removed.push(key);
+        };
+
+        for (let key in strings) {
+            if (stringsOld[key] && stringsOld[key] !== strings[key]) changed.push(key);
+        };
+
+        logger('success', 'SCRIPT', 'Generated diff for', 'strings.js');
+
+        if (added.length > 0 || removed.length > 0) {
+            const embed = new EmbedMaker(client)
+                .setTitle('Strings')
+                .setDescription(`\`\`\`diff\n${removed.map(s => `- ${s}: ${stringsOld[s]}`).join('\n')}\n${changed.map(s => `- ${s}: ${stringsOld[s]}\n+ ${s}: ${strings[s]}`)}\n${added.map(s => `+ ${s}: ${strings[s]}`)}\n\`\`\``);
+
+            embed.data.footer.text = 'Powered by xHyroM/discord-datamining';
+
+            extraStuffWebhook.send({
+                content: `<@&${roleIds.extraStuff}> <@&${roleIds.stringChanges}>`,
+                embeds: [embed]
+            });
+
+            logger('success', 'SCRIPT', 'Generated response for', 'strings.js');
+        };
     };
 };
 
