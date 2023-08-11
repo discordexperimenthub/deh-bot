@@ -10,7 +10,7 @@
   "author": "Tolgchu",
   "license": "MIT",
   "dependencies": {
-    "@tolga1452/logchu": "^2.0.1",
+    "@tolga1452/logchu": "^2.0.2",
     "axios": "^1.4.0",
     "chalk": "^4.1.2",
     "diff": "^5.1.0",
