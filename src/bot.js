@@ -313,7 +313,7 @@ async function checkScripts() {
                 },
                 {
                     role: 'system',
-                    content: 'Your current job is catching en-Us string changes. You have to report any en-US string changes in the script. Here is an example of string codes:\n```\ne.GUILD_CREATE_INVITE_SUGGESTION = "Guild Create Invite Suggestion";\n...\n```\n\nYou have to respond with JSON format using this template:\n\n```json\n{\t"stringsChanged": true, // Whether strings changed or not\n\t"changes": "- REMOVED_STRING_KEY: Removed string value\n+ ADDED_STRING_KEY: Added string value\n+ ADDED_STRING_KEY_2: Added string value 2"\n}\n```'
+                    content: 'Your current job is catching en-Us string changes. You have to report any en-US string changes in the script. Here is an example of string codes:\n```\ne.GUILD_CREATE_INVITE_SUGGESTION = "Guild Create Invite Suggestion";\n```\nor\n```\nEMBEDDED_ACTIVITIES_ALT_WUMPUS_ROCKET: "Wumpus riding a rocket",\n```\nor\n```\nt(n, "EMBEDDED_ACTIVITIES_EMBED_START", "Start a new one?")\n```\n\n\nYou have to respond with JSON format using this template:\n\n```json\n{\t"stringsChanged": true, // Whether strings changed or not\n\t"changes": "- REMOVED_STRING_KEY: Removed string value\n+ ADDED_STRING_KEY: Added string value\n+ ADDED_STRING_KEY_2: Added string value 2"\n}\n```'
                 },
                 {
                     role: 'user',
@@ -572,7 +572,6 @@ client.on('ready', () => {
     }).then(() => logger('success', 'COMMAND', 'Registered commands')).catch(error => logger('error', 'COMMAND', 'Error while registering commands', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4)));
 
     checkScripts();
-
     setInterval(checkScripts, 1000 * 60 * 3);
 });
 
