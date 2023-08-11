@@ -72,9 +72,11 @@ async function checkScripts() {
     };
 
     code1 = execSync('beautifier ./scripts/324c8a951a18de9ee5fb.js', options).toString();
-    code2 = execSync('beautifier ./scripts/fc2d75812a85e24e2458.js', options).toString();
 
     writeFileSync('scripts/324c8a951a18de9ee5fb.js', code1);
+
+    code2 = execSync('beautifier ./scripts/fc2d75812a85e24e2458.js', options).toString();
+
     writeFileSync('scripts/fc2d75812a85e24e2458.js', code2);
 
     logger('success', 'SCRIPT', 'Fetched script', '324c8a951a18de9ee5fb.js');
