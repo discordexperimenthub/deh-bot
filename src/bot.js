@@ -87,7 +87,7 @@ async function checkScripts() {
     let diffCurrentText = '';
 
     if (currentOld !== '') {
-        diff1 = diffChars(currentOld, current);
+        diffCurrent = diffChars(currentOld, current);
 
         let last = [];
         let added = false;
