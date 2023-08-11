@@ -301,7 +301,7 @@ async function checkScripts() {
 
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    try {
+    if (diff2Text !== '') try {
         response = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
             model: 'gpt-3.5-turbo-16k',
             messages: [
@@ -353,7 +353,7 @@ async function checkScripts() {
 
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    try {
+    if (diff2Text !== '') try {
         response = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
             model: 'gpt-3.5-turbo-16k',
             messages: [
@@ -405,7 +405,7 @@ async function checkScripts() {
 
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    try {
+    if (diff2Text !== '') try {
         response = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
             model: 'gpt-3.5-turbo-16k',
             messages: [
@@ -457,7 +457,7 @@ async function checkScripts() {
 
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    try {
+    if (diff2Text !== '') try {
         response = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
             model: 'gpt-3.5-turbo-16k',
             messages: [
@@ -509,7 +509,7 @@ async function checkScripts() {
 
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    try {
+    if (diff2Text !== '') try {
         response = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
             model: 'gpt-3.5-turbo-16k',
             messages: [
@@ -535,7 +535,7 @@ async function checkScripts() {
     } catch (error) {
         return logger('error', 'SCRIPT', 'Error while generating response for', 'fc2d75812a85e24e2458.diff', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4));
     };
-    if (response) {
+    if (diff2Text !== '') if (response) {
         let jsonRegex = /```json\n([\s\S]+?)\n```/g;
         let jsonMatch = jsonRegex.exec(response.data.choices[0].message.content);
 
