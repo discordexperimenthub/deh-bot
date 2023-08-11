@@ -32,6 +32,7 @@ for (const file of commandFiles) {
 async function checkScripts() {
     let code1Old = '';
     let code2Old = '';
+    let code3Old = '';
 
     try {
         code1Old = readFileSync('scripts/324c8a951a18de9ee5fb.js').toString();
@@ -45,8 +46,15 @@ async function checkScripts() {
         logger('error', 'SCRIPT', 'Error while reading script', 'fc2d75812a85e24e2458.js', `${error.code}\n`, JSON.stringify(error, null, 4));
     };
 
+    try {
+        code3Old = readFileSync('scripts/b8e48b2963e8a8322bad.js').toString();
+    } catch (error) {
+        logger('error', 'SCRIPT', 'Error while reading script', 'b8e48b2963e8a8322bad.js', `${error.code}\n`, JSON.stringify(error, null, 4));
+    };
+
     let code1;
     let code2;
+    let code3;
 
     try {
         code1 = await axios.get('https://canary.discord.com/assets/324c8a951a18de9ee5fb.js');
@@ -60,14 +68,24 @@ async function checkScripts() {
         return logger('error', 'SCRIPT', 'Error while fetching script', 'fc2d75812a85e24e2458.js', `${error.response.status} ${error.response.statusText}\n`, JSON.stringify(error.response.data, null, 4));
     };
 
+    try {
+        code3 = await axios.get('https://canary.discord.com/assets/b8e48b2963e8a8322bad.js');
+    } catch (error) {
+        return logger('error', 'SCRIPT', 'Error while fetching script', 'b8e48b2963e8a8322bad.js', `${error.response.status} ${error.response.statusText}\n`, JSON.stringify(error.response.data, null, 4));
+    };
+
     if (code1.status === 200) code1 = code1.data;
     else return logger('error', 'SCRIPT', 'Error while fetching script', '324c8a951a18de9ee5fb.js', `${code1.status} ${code1.statusText}\n`, JSON.stringify(code1.data, null, 4));
 
     if (code2.status === 200) code2 = code2.data;
     else return logger('error', 'SCRIPT', 'Error while fetching script', 'fc2d75812a85e24e2458.js', `${code1.status} ${code1.statusText}\n`, JSON.stringify(code1.data, null, 4));
 
+    if (code3.status === 200) code3 = code3.data;
+    else return logger('error', 'SCRIPT', 'Error while fetching script', 'b8e48b2963e8a8322bad.js', `${code1.status} ${code1.statusText}\n`, JSON.stringify(code1.data, null, 4));
+
     writeFileSync('scripts/324c8a951a18de9ee5fb.js', code1);
     writeFileSync('scripts/fc2d75812a85e24e2458.js', code2);
+    writeFileSync('scripts/b8e48b2963e8a8322bad.js', code3);
 
     let options = {
         maxBuffer: 1024 * 1024 * 1000
@@ -77,12 +95,17 @@ async function checkScripts() {
 
     writeFileSync('scripts/324c8a951a18de9ee5fb.js', code1);
 
+    logger('success', 'SCRIPT', 'Fetched script', '324c8a951a18de9ee5fb.js');
+
     code2 = execSync('beautifier ./scripts/fc2d75812a85e24e2458.js', options).toString();
 
     writeFileSync('scripts/fc2d75812a85e24e2458.js', code2);
 
-    logger('success', 'SCRIPT', 'Fetched script', '324c8a951a18de9ee5fb.js');
     logger('success', 'SCRIPT', 'Fetched script', 'fc2d75812a85e24e2458.js');
+
+    writeFileSync('scripts/b8e48b2963e8a8322bad.js', code3);
+
+    logger('success', 'SCRIPT', 'Fetched script', 'b8e48b2963e8a8322bad.js');
 
     let diff1;
     let diff1Text = '';
@@ -152,6 +175,41 @@ async function checkScripts() {
 
         writeFileSync('scripts/diff/fc2d75812a85e24e2458.diff', diff2Text);
         logger('success', 'SCRIPT', 'Generated diff', 'fc2d75812a85e24e2458.diff');
+    };
+
+    let diff3;
+    let diff3Text = '';
+
+    if (code3Old !== '') {
+        diff3 = diffChars(code3Old, code3);
+
+        let last = [];
+        let added = false;
+        let removed = false;
+
+        for (let part of diff3) {
+            if (part.added) {
+                diff3Text += `${(!added && !removed && last.length > 0) ? '\n\n...\n\n' : ''}${(!added && !removed) ? last.map(line => line).join('\n') : ''}${!added ? '<added>' : ''}${part.value}`;
+                added = true;
+            } else if (part.removed) {
+                diff3Text += `${(!added && !removed && last.length > 0) ? '\n\n...\n\n' : ''}${(!added && !removed) ? last.map(line => line).join('\n') : ''}${!removed ? '<removed>' : ''}${part.value}`;
+                removed = true;
+            } else {
+                last = part.value.split('\n').slice(-15);
+
+                if (added) {
+                    diff3Text += '</added>';
+                    added = false;
+                };
+                if (removed) {
+                    diff3Text += '</removed>';
+                    removed = false;
+                };
+            };
+        };
+
+        writeFileSync('scripts/diff/b8e48b2963e8a8322bad.js', diff2Text);
+        logger('success', 'SCRIPT', 'Generated diff', 'b8e48b2963e8a8322bad.js');
     };
 
     const extraStuffWebhook = new WebhookClient({
