@@ -560,6 +560,58 @@ async function checkScripts() {
             };
         };
     };
+
+    response = null;
+
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    if (diff2Text !== '') try {
+        response = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
+            model: 'gpt-3.5-turbo-16k',
+            messages: [
+                {
+                    role: 'system',
+                    content: 'You are Dataminer. You will analyze the given script and report any changes. Our system will give you last 15 lines of the script before the changes. Codes have special tags for highlighting changes. <added>Added codes</added> and <removed>Removed codes</removed>. You can use these tags to highlight changes in your report.\n\nYou have to respond with DIFF format using this template:\n\n```diff\n+ Added line\n- Removed line\n```'
+                },
+                {
+                    role: 'system',
+                    content: 'Your current job is catching color changes. You have to report any color changes in the script. Here is an example of color codes:\n```\nBATTLENET: "#009ae5",\nBG_GRADIENT_AURORA_1: "#062053",\n...\n```\n\nBut be careful, some things may like these codes but may not an error code. You have to respond with JSON format using this template:\n\n```json\n{\t"colorsChanged": true, // Whether audit log types changed or not\n\t"changes": "- REMOVED_COLOR_NAME: #ffffff\n+ ADDED_COLOR_NAME: #00ff00\n}\n```'
+                },
+                {
+                    role: 'user',
+                    content: diff2Text
+                }
+            ]
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${process.env.PURGPT_API_KEY}`
+            }
+        });
+    } catch (error) {
+        return logger('error', 'SCRIPT', 'Error while generating response for', 'fc2d75812a85e24e2458.diff', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4));
+    };
+    if (diff2Text !== '') if (response) {
+        let jsonRegex = /```json\n([\s\S]+?)\n```/g;
+        let jsonMatch = jsonRegex.exec(response.data.choices[0].message.content);
+
+        if (jsonMatch) {
+            let json = JSON.parse(jsonMatch[1]);
+
+            if (json.colorsChanged) {
+                const embed = new EmbedMaker(client)
+                    .setTitle('Colors')
+                    .setDescription(`\`\`\`diff\n${json.changes}\n\`\`\``)
+
+                embed.data.footer.text = 'Powered by purgpt.xyz';
+
+                otherChangesWebhook.send({
+                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.types}>`,
+                    embeds: [embed]
+                });
+            };
+        };
+    };
 };
 
 client.on('ready', () => {
