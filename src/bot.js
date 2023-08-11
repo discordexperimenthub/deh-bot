@@ -41,7 +41,7 @@ async function checkScripts() {
     let code1;
 
     try {
-        code1 = await axios.get('https://raw.githubusercontent.com/xHyroM/discord-datamining/master/data/client/channels/canary/scripts/main.js');
+        code1 = await axios.get('https://raw.githubusercontent.com/Discord-Datamining/Discord-Datamining/master/current.js');
     } catch (error) {
         return logger('error', 'SCRIPT', 'Error while fetching script', 'current.js', `${error.response.status} ${error.response.statusText}\n`, JSON.stringify(error.response.data, null, 4));
     };
@@ -124,16 +124,16 @@ async function checkScripts() {
             }
         });
     } catch (error) {
-        return logger('error', 'SCRIPT', 'Error while generating response for', '324c8a951a18de9ee5fb.diff', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4));
+        return logger('error', 'SCRIPT', 'Error while generating response for', 'current.diff', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4));
     };
     if (response1) {
-        logger('success', 'SCRIPT', 'Generated response for', '324c8a951a18de9ee5fb.diff');
+        logger('success', 'SCRIPT', 'Generated response for', 'current.diff');
 
         const embed = new EmbedMaker(client)
             .setTitle('Code Changes')
             .setDescription(response1.data.choices[0].message.content);
 
-        embed.data.footer.text = 'Powered by purgpt.xyz & xHyroM/discord-datamining';
+        embed.data.footer.text = 'Powered by Discord-Datamining/Discord-Datamining & purgpt.xyz';
 
         extraStuffWebhook.send({
             content: `<@&${roleIds.extraStuff}> <@&${roleIds.codeChanges}>`,
