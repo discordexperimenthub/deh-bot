@@ -31,80 +31,37 @@ for (const file of commandFiles) {
 
 async function checkScripts() {
     let code1Old = '';
-    let code2Old = '';
-    let code3Old = '';
 
     try {
-        code1Old = readFileSync('scripts/324c8a951a18de9ee5fb.js').toString();
+        code1Old = readFileSync('scripts/current.js').toString();
     } catch (error) {
-        logger('error', 'SCRIPT', 'Error while reading script', '324c8a951a18de9ee5fb.js', `${error.code}\n`, JSON.stringify(error, null, 4));
-    };
-
-    try {
-        code2Old = readFileSync('scripts/fc2d75812a85e24e2458.js').toString();
-    } catch (error) {
-        logger('error', 'SCRIPT', 'Error while reading script', 'fc2d75812a85e24e2458.js', `${error.code}\n`, JSON.stringify(error, null, 4));
-    };
-
-    try {
-        code3Old = readFileSync('scripts/6e3b497b3cddbf409f27.js').toString();
-    } catch (error) {
-        logger('error', 'SCRIPT', 'Error while reading script', '6e3b497b3cddbf409f27.js', `${error.code}\n`, JSON.stringify(error, null, 4));
+        logger('error', 'SCRIPT', 'Error while reading script', 'current.js', `${error.code}\n`, JSON.stringify(error, null, 4));
     };
 
     let code1;
-    let code2;
-    let code3;
 
     try {
-        code1 = await axios.get('https://canary.discord.com/assets/324c8a951a18de9ee5fb.js');
+        code1 = await axios.get('https://raw.githubusercontent.com/xHyroM/discord-datamining/master/data/client/channels/canary/scripts/main.js');
     } catch (error) {
-        return logger('error', 'SCRIPT', 'Error while fetching script', '324c8a951a18de9ee5fb.js', `${error.response.status} ${error.response.statusText}\n`, JSON.stringify(error.response.data, null, 4));
-    };
-
-    try {
-        code2 = await axios.get('https://canary.discord.com/assets/fc2d75812a85e24e2458.js');
-    } catch (error) {
-        return logger('error', 'SCRIPT', 'Error while fetching script', 'fc2d75812a85e24e2458.js', `${error.response.status} ${error.response.statusText}\n`, JSON.stringify(error.response.data, null, 4));
-    };
-
-    try {
-        code3 = await axios.get('https://canary.discord.com/assets/6e3b497b3cddbf409f27.js');
-    } catch (error) {
-        return logger('error', 'SCRIPT', 'Error while fetching script', '6e3b497b3cddbf409f27.js', `${error.response.status} ${error.response.statusText}\n`, JSON.stringify(error.response.data, null, 4));
+        return logger('error', 'SCRIPT', 'Error while fetching script', 'current.js', `${error.response.status} ${error.response.statusText}\n`, JSON.stringify(error.response.data, null, 4));
     };
 
     if (code1.status === 200) code1 = code1.data;
-    else return logger('error', 'SCRIPT', 'Error while fetching script', '324c8a951a18de9ee5fb.js', `${code1.status} ${code1.statusText}\n`, JSON.stringify(code1.data, null, 4));
+    else return logger('error', 'SCRIPT', 'Error while fetching script', 'current.js', `${code1.status} ${code1.statusText}\n`, JSON.stringify(code1.data, null, 4));
 
-    if (code2.status === 200) code2 = code2.data;
-    else return logger('error', 'SCRIPT', 'Error while fetching script', 'fc2d75812a85e24e2458.js', `${code1.status} ${code1.statusText}\n`, JSON.stringify(code1.data, null, 4));
+    writeFileSync('scripts/current.js', code1);
 
-    if (code3.status === 200) code3 = code3.data;
-    else return logger('error', 'SCRIPT', 'Error while fetching script', '6e3b497b3cddbf409f27.js', `${code1.status} ${code1.statusText}\n`, JSON.stringify(code1.data, null, 4));
-
-    writeFileSync('scripts/324c8a951a18de9ee5fb.js', code1);
-    writeFileSync('scripts/fc2d75812a85e24e2458.js', code2);
-    writeFileSync('scripts/6e3b497b3cddbf409f27.js', code3);
-
+    /*
     let options = {
         maxBuffer: 1024 * 1024 * 1000
     };
 
-    code1 = execSync('beautifier ./scripts/324c8a951a18de9ee5fb.js', options).toString();
+    code1 = execSync('beautifier ./scripts/current.js', options).toString();
 
-    writeFileSync('scripts/324c8a951a18de9ee5fb.js', code1);
-    logger('success', 'SCRIPT', 'Fetched script', '324c8a951a18de9ee5fb.js');
+    writeFileSync('scripts/current.js', code1);
+    */
 
-    code2 = execSync('beautifier ./scripts/fc2d75812a85e24e2458.js', options).toString();
-
-    writeFileSync('scripts/fc2d75812a85e24e2458.js', code2);
-    logger('success', 'SCRIPT', 'Fetched script', 'fc2d75812a85e24e2458.js');
-
-    code3 = execSync('beautifier ./scripts/6e3b497b3cddbf409f27.js', options).toString();
-
-    writeFileSync('scripts/6e3b497b3cddbf409f27.js', code3);
-    logger('success', 'SCRIPT', 'Fetched script', '6e3b497b3cddbf409f27.js');
+    logger('success', 'SCRIPT', 'Fetched script', 'current.js');
 
     let diff1;
     let diff1Text = '';
@@ -137,85 +94,12 @@ async function checkScripts() {
             };
         };
 
-        writeFileSync('scripts/diff/324c8a951a18de9ee5fb.diff', diff1Text);
-        logger('success', 'SCRIPT', 'Generated diff', '324c8a951a18de9ee5fb.diff');
-    };
-
-    let diff2;
-    let diff2Text = '';
-
-    if (code2Old !== '') {
-        diff2 = diffChars(code2Old, code2);
-
-        let last = [];
-        let added = false;
-        let removed = false;
-
-        for (let part of diff2) {
-            if (part.added) {
-                diff2Text += `${(!added && !removed && last.length > 0) ? '\n\n...\n\n' : ''}${(!added && !removed) ? last.map(line => line).join('\n') : ''}${!added ? '<added>' : ''}${part.value}`;
-                added = true;
-            } else if (part.removed) {
-                diff2Text += `${(!added && !removed && last.length > 0) ? '\n\n...\n\n' : ''}${(!added && !removed) ? last.map(line => line).join('\n') : ''}${!removed ? '<removed>' : ''}${part.value}`;
-                removed = true;
-            } else {
-                last = part.value.split('\n').slice(-15);
-
-                if (added) {
-                    diff2Text += '</added>';
-                    added = false;
-                };
-                if (removed) {
-                    diff2Text += '</removed>';
-                    removed = false;
-                };
-            };
-        };
-
-        writeFileSync('scripts/diff/fc2d75812a85e24e2458.diff', diff2Text);
-        logger('success', 'SCRIPT', 'Generated diff', 'fc2d75812a85e24e2458.diff');
-    };
-
-    let diff3;
-    let diff3Text = '';
-
-    if (code3Old !== '') {
-        diff3 = diffChars(code3Old, code3);
-
-        let last = [];
-        let added = false;
-        let removed = false;
-
-        for (let part of diff3) {
-            if (part.added) {
-                diff3Text += `${(!added && !removed && last.length > 0) ? '\n\n...\n\n' : ''}${(!added && !removed) ? last.map(line => line).join('\n') : ''}${!added ? '<added>' : ''}${part.value}`;
-                added = true;
-            } else if (part.removed) {
-                diff3Text += `${(!added && !removed && last.length > 0) ? '\n\n...\n\n' : ''}${(!added && !removed) ? last.map(line => line).join('\n') : ''}${!removed ? '<removed>' : ''}${part.value}`;
-                removed = true;
-            } else {
-                last = part.value.split('\n').slice(-15);
-
-                if (added) {
-                    diff3Text += '</added>';
-                    added = false;
-                };
-                if (removed) {
-                    diff3Text += '</removed>';
-                    removed = false;
-                };
-            };
-        };
-
-        writeFileSync('scripts/diff/6e3b497b3cddbf409f27.js', diff2Text);
-        logger('success', 'SCRIPT', 'Generated diff', '6e3b497b3cddbf409f27.js');
+        writeFileSync('scripts/diff/current.diff', diff1Text);
+        logger('success', 'SCRIPT', 'Generated diff', 'current.diff');
     };
 
     const extraStuffWebhook = new WebhookClient({
         url: process.env.EXTRA_STUFF_WEBHOOK
-    });
-    const otherChangesWebhook = new WebhookClient({
-        url: process.env.OTHER_CHANGES_WEBHOOK
     });
 
     let response1;
@@ -242,432 +126,19 @@ async function checkScripts() {
     } catch (error) {
         return logger('error', 'SCRIPT', 'Error while generating response for', '324c8a951a18de9ee5fb.diff', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4));
     };
-
     if (response1) {
         logger('success', 'SCRIPT', 'Generated response for', '324c8a951a18de9ee5fb.diff');
 
         const embed = new EmbedMaker(client)
             .setTitle('Code Changes')
-            .setDescription(response1.data.choices[0].message.content)
-            .addFields({
-                name: 'Script',
-                value: '324c8a951a18de9ee5fb.js'
-            });
+            .setDescription(response1.data.choices[0].message.content);
 
-        embed.data.footer.text = 'Powered by purgpt.xyz';
+        embed.data.footer.text = 'Powered by purgpt.xyz & xHyroM/discord-datamining';
 
         extraStuffWebhook.send({
             content: `<@&${roleIds.extraStuff}> <@&${roleIds.codeChanges}>`,
             embeds: [embed]
         });
-    };
-
-    if (diff2Text !== '') try {
-        response1 = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
-            model: 'gpt-3.5-turbo-16k',
-            messages: [
-                {
-                    role: 'system',
-                    content: 'You are Dataminer. You will analyze the given script and report any changes. Our system will give you last 15 lines of the script before the changes. Codes have special tags for highlighting changes. <added>Added codes</added> and <removed>Removed codes</removed>. You can use these tags to highlight changes in your report.\n\nYou have to respond with DIFF format using this template:\n\n```diff\n+ Added line\n- Removed line\n```'
-                },
-                {
-                    role: 'user',
-                    content: diff2Text
-                }
-            ]
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${process.env.PURGPT_API_KEY}`
-            }
-        });
-    } catch (error) {
-        return logger('error', 'SCRIPT', 'Error while generating response for', 'fc2d75812a85e24e2458.diff', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4));
-    };
-
-    if (response1) {
-        logger('success', 'SCRIPT', 'Generated response for', 'fc2d75812a85e24e2458.diff');
-
-        const embed = new EmbedMaker(client)
-            .setTitle('Code Changes')
-            .setDescription(response1.data.choices[0].message.content)
-            .addFields({
-                name: 'Script',
-                value: 'fc2d75812a85e24e2458.js'
-            });
-
-        embed.data.footer.text = 'Powered by purgpt.xyz';
-
-        extraStuffWebhook.send({
-            content: `<@&${roleIds.extraStuff}> <@&${roleIds.codeChanges}>`,
-            embeds: [embed]
-        });
-    };
-
-    // Wait for 5 seconds
-
-    await new Promise(resolve => setTimeout(resolve, 5000));
-
-    let response;
-
-    if (diff2Text.includes('707801')) try {
-        response = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
-            model: 'gpt-3.5-turbo-16k',
-            messages: [
-                {
-                    role: 'system',
-                    content: 'You are Dataminer. You will analyze the given script and report any changes. Our system will give you last 15 lines of the script before the changes. Codes have special tags for highlighting changes. <added>Added codes</added> and <removed>Removed codes</removed>. You can use these tags to highlight changes in your report.\n\nYou have to respond with DIFF format using this template:\n\n```diff\n+ Added line\n- Removed line\n```'
-                },
-                {
-                    role: 'system',
-                    content: 'Your current job is catching font changes. You have to report any font changes in the script. Here is an example of font codes:\n```\nvar r = {\n\t".ggsans-400-normal.woff2": [166551, 66551],\n\t...\n}\n```\n\nYou have to respond with JSON format using this template:\n\n```json\n{\t"fontsChanged": true, // Whether fonts changed or not\n\t"changes": "- Removed font\n+ Added font\n+ Added font 2"\n}\n```'
-                },
-                {
-                    role: 'user',
-                    content: diff2Text
-                }
-            ]
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${process.env.PURGPT_API_KEY}`
-            }
-        });
-    } catch (error) {
-        return logger('error', 'SCRIPT', 'Error while generating response for', 'fc2d75812a85e24e2458.diff', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4));
-    };
-    if (response) {
-        let jsonRegex = /```json\n([\s\S]+?)\n```/g;
-        let jsonMatch = jsonRegex.exec(response.data.choices[0].message.content);
-
-        if (jsonMatch) {
-            let json = JSON.parse(jsonMatch[1]);
-
-            if (json.fontsChanged) {
-                const embed = new EmbedMaker(client)
-                    .setTitle('Fonts')
-                    .setDescription(`\`\`\`diff\n${json.changes}\n\`\`\``)
-
-                embed.data.footer.text = 'Powered by purgpt.xyz';
-
-                otherChangesWebhook.send({
-                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.assets}>`,
-                    embeds: [embed]
-                });
-            };
-        };
-    };
-
-    response = null;
-
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    if (diff2Text !== '') try {
-        response = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
-            model: 'gpt-3.5-turbo-16k',
-            messages: [
-                {
-                    role: 'system',
-                    content: 'You are Dataminer. You will analyze the given script and report any changes. Our system will give you last 15 lines of the script before the changes. Codes have special tags for highlighting changes. <added>Added codes</added> and <removed>Removed codes</removed>. You can use these tags to highlight changes in your report.\n\nYou have to respond with DIFF format using this template:\n\n```diff\n+ Added line\n- Removed line\n```'
-                },
-                {
-                    role: 'system',
-                    content: 'Your current job is catching en-Us string changes. You have to report any en-US string changes in the script. Here is an example of string codes:\n```\ne.GUILD_CREATE_INVITE_SUGGESTION = "Guild Create Invite Suggestion";\n```\nor\n```\nEMBEDDED_ACTIVITIES_ALT_WUMPUS_ROCKET: "Wumpus riding a rocket",\n```\nor\n```\nt(n, "EMBEDDED_ACTIVITIES_EMBED_START", "Start a new one?")\n```\n\n\nYou have to respond with JSON format using this template:\n\n```json\n{\t"stringsChanged": true, // Whether strings changed or not\n\t"changes": "- REMOVED_STRING_KEY: Removed string value\n+ ADDED_STRING_KEY: Added string value\n+ ADDED_STRING_KEY_2: Added string value 2"\n}\n```'
-                },
-                {
-                    role: 'user',
-                    content: diff2Text
-                }
-            ]
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${process.env.PURGPT_API_KEY}`
-            }
-        });
-    } catch (error) {
-        return logger('error', 'SCRIPT', 'Error while generating response for', 'fc2d75812a85e24e2458.diff', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4));
-    };
-    if (response) {
-        let jsonRegex = /```json\n([\s\S]+?)\n```/g;
-        let jsonMatch = jsonRegex.exec(response.data.choices[0].message.content);
-
-        if (jsonMatch) {
-            let json = JSON.parse(jsonMatch[1]);
-
-            if (json.fontsChanged) {
-                const embed = new EmbedMaker(client)
-                    .setTitle('Strings')
-                    .setDescription(`\`\`\`diff\n${json.changes}\n\`\`\``)
-
-                embed.data.footer.text = 'Powered by purgpt.xyz';
-
-                otherChangesWebhook.send({
-                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.assets}>`,
-                    embeds: [embed]
-                });
-            };
-        };
-    };
-
-    response = null;
-
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    if (diff2Text !== '') try {
-        response = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
-            model: 'gpt-3.5-turbo-16k',
-            messages: [
-                {
-                    role: 'system',
-                    content: 'You are Dataminer. You will analyze the given script and report any changes. Our system will give you last 15 lines of the script before the changes. Codes have special tags for highlighting changes. <added>Added codes</added> and <removed>Removed codes</removed>. You can use these tags to highlight changes in your report.\n\nYou have to respond with DIFF format using this template:\n\n```diff\n+ Added line\n- Removed line\n```'
-                },
-                {
-                    role: 'system',
-                    content: 'Your current job is catching asset changes. You have to report any asset changes in the script. Here is an example of asset codes:\n```\n755383: (e, t, n) = > {\n\te.exports = n.p + "f71e975b91ac8ecddbb1a68c6c96e63b.png"\n},\n...\n```\n\nYou have to respond with JSON format using this template:\n\n```json\n{\t"assetsChanged": true, // Whether assets changed or not\n\t"changes": "- https://canary.discord.com/removed_asset.png\n+ https://canary.discord.com/added_asset.png\n+ https://canary.discord.com/added_asset_2.png"\n}\n```'
-                },
-                {
-                    role: 'user',
-                    content: diff2Text
-                }
-            ]
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${process.env.PURGPT_API_KEY}`
-            }
-        });
-    } catch (error) {
-        return logger('error', 'SCRIPT', 'Error while generating response for', 'fc2d75812a85e24e2458.diff', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4));
-    };
-    if (response) {
-        let jsonRegex = /```json\n([\s\S]+?)\n```/g;
-        let jsonMatch = jsonRegex.exec(response.data.choices[0].message.content);
-
-        if (jsonMatch) {
-            let json = JSON.parse(jsonMatch[1]);
-
-            if (json.assetsChanged) {
-                const embed = new EmbedMaker(client)
-                    .setTitle('Desktop Assets')
-                    .setDescription(`\`\`\`diff\n${json.changes}\n\`\`\``)
-
-                embed.data.footer.text = 'Powered by purgpt.xyz';
-
-                otherChangesWebhook.send({
-                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.assets}>`,
-                    embeds: [embed]
-                });
-            };
-        };
-    };
-
-    response = null;
-
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    if (diff2Text !== '') try {
-        response = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
-            model: 'gpt-3.5-turbo-16k',
-            messages: [
-                {
-                    role: 'system',
-                    content: 'You are Dataminer. You will analyze the given script and report any changes. Our system will give you last 15 lines of the script before the changes. Codes have special tags for highlighting changes. <added>Added codes</added> and <removed>Removed codes</removed>. You can use these tags to highlight changes in your report.\n\nYou have to respond with DIFF format using this template:\n\n```diff\n+ Added line\n- Removed line\n```'
-                },
-                {
-                    role: 'system',
-                    content: 'Your current job is catching endpoint changes. You have to report any endpoint changes in the script. Here is an example of endpoint codes:\n```\nCHANNEL_FOLLOWER_STATS: function(e) {\n\treturn "/channels/".concat(e, "/follower-stats")\n},\nFRIEND_FINDER: "/friend-finder/find-friends",\n...\n\n```\n\nYou have to respond with JSON format using this template:\n\n```json\n{\t"endpointsChanged": true, // Whether endpoints changed or not\n\t"changes": "- REMOVED_ENDPOINT_KEY: /removed/:parameter1/endpoint\n+ ADDED_ENDPOINT_KEY: /added/:parameter1\n..."\n}\n```'
-                },
-                {
-                    role: 'user',
-                    content: diff2Text
-                }
-            ]
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${process.env.PURGPT_API_KEY}`
-            }
-        });
-    } catch (error) {
-        return logger('error', 'SCRIPT', 'Error while generating response for', 'fc2d75812a85e24e2458.diff', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4));
-    };
-    if (response) {
-        let jsonRegex = /```json\n([\s\S]+?)\n```/g;
-        let jsonMatch = jsonRegex.exec(response.data.choices[0].message.content);
-
-        if (jsonMatch) {
-            let json = JSON.parse(jsonMatch[1]);
-
-            if (json.endpointsChanged) {
-                const embed = new EmbedMaker(client)
-                    .setTitle('Endpoints')
-                    .setDescription(`\`\`\`diff\n${json.changes}\n\`\`\``)
-
-                embed.data.footer.text = 'Powered by purgpt.xyz';
-
-                otherChangesWebhook.send({
-                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
-                    embeds: [embed]
-                });
-            };
-        };
-    };
-
-    response = null;
-
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    if (diff2Text !== '') try {
-        response = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
-            model: 'gpt-3.5-turbo-16k',
-            messages: [
-                {
-                    role: 'system',
-                    content: 'You are Dataminer. You will analyze the given script and report any changes. Our system will give you last 15 lines of the script before the changes. Codes have special tags for highlighting changes. <added>Added codes</added> and <removed>Removed codes</removed>. You can use these tags to highlight changes in your report.\n\nYou have to respond with DIFF format using this template:\n\n```diff\n+ Added line\n- Removed line\n```'
-                },
-                {
-                    role: 'system',
-                    content: 'Your current job is catching error code changes. You have to report any error codes changes in the script. Here is an example of error code codes:\n```\ne[e.UNKNOWN_ERROR = 1e3] = "UNKNOWN_ERROR";\n...\n```\n\nBut be careful, some things may like these codes but may not an error code. You have to respond with JSON format using this template:\n\n```json\n{\t"errorCodesChanged": true, // Whether error codes changed or not\n\t"changes": "- REMOVED_ERROR_NAME: 1003\n+ ADDED_ERROR_NAME: 1035\n}\n```'
-                },
-                {
-                    role: 'user',
-                    content: diff2Text
-                }
-            ]
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${process.env.PURGPT_API_KEY}`
-            }
-        });
-    } catch (error) {
-        return logger('error', 'SCRIPT', 'Error while generating response for', 'fc2d75812a85e24e2458.diff', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4));
-    };
-    if (response) {
-        let jsonRegex = /```json\n([\s\S]+?)\n```/g;
-        let jsonMatch = jsonRegex.exec(response.data.choices[0].message.content);
-
-        if (jsonMatch) {
-            let json = JSON.parse(jsonMatch[1]);
-
-            if (json.errorCodesChanged) {
-                const embed = new EmbedMaker(client)
-                    .setTitle('Error Codes')
-                    .setDescription(`\`\`\`diff\n${json.changes}\n\`\`\``)
-
-                embed.data.footer.text = 'Powered by purgpt.xyz';
-
-                otherChangesWebhook.send({
-                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.types}>`,
-                    embeds: [embed]
-                });
-            };
-        };
-    };
-
-    response = null;
-
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    if (diff2Text !== '') try {
-        response = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
-            model: 'gpt-3.5-turbo-16k',
-            messages: [
-                {
-                    role: 'system',
-                    content: 'You are Dataminer. You will analyze the given script and report any changes. Our system will give you last 15 lines of the script before the changes. Codes have special tags for highlighting changes. <added>Added codes</added> and <removed>Removed codes</removed>. You can use these tags to highlight changes in your report.\n\nYou have to respond with DIFF format using this template:\n\n```diff\n+ Added line\n- Removed line\n```'
-                },
-                {
-                    role: 'system',
-                    content: 'Your current job is catching audit log type changes. You have to report any audit log type changes in the script. Here is an example of audit log type codes:\n```\nCHANNEL_CREATE: 10,\n...\n```\n\nBut be careful, some things may like these codes but may not an error code. You have to respond with JSON format using this template:\n\n```json\n{\t"auditLogTypesChanged": true, // Whether audit log types changed or not\n\t"changes": "- REMOVED_LOG_TYPE_NAME: 11\n+ ADDED_LOG_TYPE_NAME: 15\n}\n```'
-                },
-                {
-                    role: 'user',
-                    content: diff2Text
-                }
-            ]
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${process.env.PURGPT_API_KEY}`
-            }
-        });
-    } catch (error) {
-        return logger('error', 'SCRIPT', 'Error while generating response for', 'fc2d75812a85e24e2458.diff', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4));
-    };
-    if (diff2Text !== '') if (response) {
-        let jsonRegex = /```json\n([\s\S]+?)\n```/g;
-        let jsonMatch = jsonRegex.exec(response.data.choices[0].message.content);
-
-        if (jsonMatch) {
-            let json = JSON.parse(jsonMatch[1]);
-
-            if (json.auditLogTypesChanged) {
-                const embed = new EmbedMaker(client)
-                    .setTitle('Audit Log Types')
-                    .setDescription(`\`\`\`diff\n${json.changes}\n\`\`\``)
-
-                embed.data.footer.text = 'Powered by purgpt.xyz';
-
-                otherChangesWebhook.send({
-                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.types}>`,
-                    embeds: [embed]
-                });
-            };
-        };
-    };
-
-    response = null;
-
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    if (diff2Text !== '') try {
-        response = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
-            model: 'gpt-3.5-turbo-16k',
-            messages: [
-                {
-                    role: 'system',
-                    content: 'You are Dataminer. You will analyze the given script and report any changes. Our system will give you last 15 lines of the script before the changes. Codes have special tags for highlighting changes. <added>Added codes</added> and <removed>Removed codes</removed>. You can use these tags to highlight changes in your report.\n\nYou have to respond with DIFF format using this template:\n\n```diff\n+ Added line\n- Removed line\n```'
-                },
-                {
-                    role: 'system',
-                    content: 'Your current job is catching color changes. You have to report any color changes in the script. Here is an example of color codes:\n```\nBATTLENET: "#009ae5",\nBG_GRADIENT_AURORA_1: "#062053",\n...\n```\n\nBut be careful, some things may like these codes but may not an error code. You have to respond with JSON format using this template:\n\n```json\n{\t"colorsChanged": true, // Whether audit log types changed or not\n\t"changes": "- REMOVED_COLOR_NAME: #ffffff\n+ ADDED_COLOR_NAME: #00ff00\n}\n```'
-                },
-                {
-                    role: 'user',
-                    content: diff2Text
-                }
-            ]
-        }, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${process.env.PURGPT_API_KEY}`
-            }
-        });
-    } catch (error) {
-        return logger('error', 'SCRIPT', 'Error while generating response for', 'fc2d75812a85e24e2458.diff', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4));
-    };
-    if (diff2Text !== '') if (response) {
-        let jsonRegex = /```json\n([\s\S]+?)\n```/g;
-        let jsonMatch = jsonRegex.exec(response.data.choices[0].message.content);
-
-        if (jsonMatch) {
-            let json = JSON.parse(jsonMatch[1]);
-
-            if (json.colorsChanged) {
-                const embed = new EmbedMaker(client)
-                    .setTitle('Colors')
-                    .setDescription(`\`\`\`diff\n${json.changes}\n\`\`\``)
-
-                embed.data.footer.text = 'Powered by purgpt.xyz';
-
-                otherChangesWebhook.send({
-                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.types}>`,
-                    embeds: [embed]
-                });
-            };
-        };
     };
 };
 
