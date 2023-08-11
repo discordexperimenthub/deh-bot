@@ -36,11 +36,13 @@ async function checkScripts() {
     try {
         code1Old = readFileSync('scripts/324c8a951a18de9ee5fb.js').toString();
     } catch (error) {
+        logger('error', 'SCRIPT', 'Error while reading script', '324c8a951a18de9ee5fb.js', `${error.code}\n`, JSON.stringify(error, null, 4));
     };
 
     try {
         code2Old = readFileSync('scripts/fc2d75812a85e24e2458.js').toString();
     } catch (error) {
+        logger('error', 'SCRIPT', 'Error while reading script', 'fc2d75812a85e24e2458.js', `${error.code}\n`, JSON.stringify(error, null, 4));
     };
 
     let code1;
