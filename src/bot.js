@@ -99,6 +99,10 @@ async function checkScripts() {
 
     code2 = execSync('beautifier ./scripts/fc2d75812a85e24e2458.js', options).toString();
 
+    logger('success', 'SCRIPT', 'Fetched script', '324c8a951a18de9ee5fb.js');
+
+    code2 = execSync('beautifier ./scripts/b8e48b2963e8a8322bad.js', options).toString();
+
     writeFileSync('scripts/fc2d75812a85e24e2458.js', code2);
 
     logger('success', 'SCRIPT', 'Fetched script', 'fc2d75812a85e24e2458.js');
