@@ -1,4 +1,4 @@
-const { color, write, useColor } = require("@tolga1452/logchu");
+const { write, useColor } = require("@tolga1452/logchu");
 
 const LogType = {
     Info: 'info',
