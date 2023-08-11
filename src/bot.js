@@ -94,21 +94,12 @@ async function checkScripts() {
     code1 = execSync('beautifier ./scripts/324c8a951a18de9ee5fb.js', options).toString();
 
     writeFileSync('scripts/324c8a951a18de9ee5fb.js', code1);
-
     logger('success', 'SCRIPT', 'Fetched script', '324c8a951a18de9ee5fb.js');
 
     code2 = execSync('beautifier ./scripts/fc2d75812a85e24e2458.js', options).toString();
-
-    logger('success', 'SCRIPT', 'Fetched script', '324c8a951a18de9ee5fb.js');
-
-    code2 = execSync('beautifier ./scripts/b8e48b2963e8a8322bad.js', options).toString();
-
-    writeFileSync('scripts/fc2d75812a85e24e2458.js', code2);
-
     logger('success', 'SCRIPT', 'Fetched script', 'fc2d75812a85e24e2458.js');
 
-    writeFileSync('scripts/b8e48b2963e8a8322bad.js', code3);
-
+    code3 = execSync('beautifier ./scripts/b8e48b2963e8a8322bad.js', options).toString();
     logger('success', 'SCRIPT', 'Fetched script', 'b8e48b2963e8a8322bad.js');
 
     let diff1;
