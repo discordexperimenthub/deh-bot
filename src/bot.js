@@ -67,7 +67,7 @@ async function checkScripts() {
         return logger('error', 'SCRIPT', 'Error while fetching script', 'strings.js', `${error.response.status} ${error.response.statusText}\n`, JSON.stringify(error.response.data, null, 4));
     };
 
-    if (strings.status === 200) strings = JSON.parse(strings.data);
+    if (strings.status === 200) strings = strings.data;
     else return logger('error', 'SCRIPT', 'Error while fetching script', 'strings.js', `${strings.status} ${strings.statusText}\n`, JSON.stringify(strings.data, null, 4));
 
     writeFileSync('scripts/strings.js', strings);

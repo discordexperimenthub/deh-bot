@@ -1,6 +1,6 @@
-const { write, useColor } = require("@tolga1452/logchu");
+const { write, useColor, LogType } = require("@tolga1452/logchu");
 
-const LogType = {
+const LogType2 = {
     Info: 'info',
     Success: 'success',
     Warning: 'warning',
@@ -19,7 +19,7 @@ function color(c) {
 };
 
 /**
- * @param {LogType} level 
+ * @param {LogType2} level 
  * @param {string} type 
  * @param  {...string} messages 
  * @returns {void}
@@ -39,7 +39,7 @@ module.exports = (level, type, ...messages) => {
         } else if (at === 1) {
             text.push({
                 text: `${message} `,
-                color: level === LogType.Info ? color('infoItem') : level === LogType.Success ? color('successItem') : level === LogType.Warning ? color('warningItem') : level === LogType.Error ? color('errorItem') : level === LogType.Debug ? color('debugItem') : color('infoItem'),
+                color: level === LogType2.Info ? color('infoItem') : level === LogType2.Success ? color('successItem') : level === LogType2.Warning ? color('warningItem') : level === LogType2.Error ? color('errorItem') : level === LogType2.Debug ? color('debugItem') : color('infoItem'),
                 bold: true
             });
 
@@ -49,13 +49,13 @@ module.exports = (level, type, ...messages) => {
 
     write(
         {
-            type: type,
-            color: level === LogType.Info ? color('info') : level === LogType.Success ? color('success') : level === LogType.Warning ? color('warning') : level === LogType.Error ? color('error') : level === LogType.Debug ? color('debug') : color('info'),
-            italic: type === LogType.Debug
+            type: type === LogType2.Debug ? LogType.Debug : type === LogType2.Error ? LogType.Error : type === LogType2.Info ? LogType.Info : type === LogType2.Warning ? LogType.Warning : LogType.Normal,
+            color: level === LogType2.Info ? color('info') : level === LogType2.Success ? color('success') : level === LogType2.Warning ? color('warning') : level === LogType2.Error ? color('error') : level === LogType2.Debug ? color('debug') : color('info'),
+            italic: type === LogType2.Debug
         },
         {
             text: ` ${type} `,
-            color: level === LogType.Info ? color('infoBackground') : level === LogType.Success ? color('successBackground') : level === LogType.Warning ? color('warningBackground') : level === LogType.Error ? color('errorBackground') : level === LogType.Debug ? color('debugBackground') : color('infoBackground'),
+            color: level === LogType2.Info ? color('infoBackground') : level === LogType2.Success ? color('successBackground') : level === LogType2.Warning ? color('warningBackground') : level === LogType2.Error ? color('errorBackground') : level === LogType2.Debug ? color('debugBackground') : color('infoBackground'),
             bold: true
         },
         {
