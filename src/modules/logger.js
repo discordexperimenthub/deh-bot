@@ -1,4 +1,4 @@
-const { useColor, write } = require("@tolga1452/logchu");
+const { color, write, useColor } = require("@tolga1452/logchu");
 
 const LogType = {
     Info: 'info',
@@ -6,6 +6,16 @@ const LogType = {
     Warning: 'warning',
     Error: 'error',
     Debug: 'debug'
+};
+
+function color(c) {
+    try {
+        return useColor(c);
+    } catch (error) {
+        let config = require('../../logchu.config');
+
+        return config.customColorPresets[c];
+    };
 };
 
 /**
@@ -29,7 +39,7 @@ module.exports = (level, type, ...messages) => {
         } else if (at === 1) {
             text.push({
                 text: `${message} `,
-                color: level === LogType.Info ? useColor('infoItem') : level === LogType.Success ? useColor('successItem') : level === LogType.Warning ? useColor('warningItem') : level === LogType.Error ? useColor('errorItem') : level === LogType.Debug ? useColor('debugItem') : useColor('infoItem'),
+                color: level === LogType.Info ? color('infoItem') : level === LogType.Success ? color('successItem') : level === LogType.Warning ? color('warningItem') : level === LogType.Error ? color('errorItem') : level === LogType.Debug ? color('debugItem') : color('infoItem'),
                 bold: true
             });
 
@@ -40,12 +50,12 @@ module.exports = (level, type, ...messages) => {
     write(
         {
             type: type,
-            color: level === LogType.Info ? useColor('info') : level === LogType.Success ? useColor('success') : level === LogType.Warning ? useColor('warning') : level === LogType.Error ? useColor('error') : level === LogType.Debug ? useColor('debug') : useColor('info'),
+            color: level === LogType.Info ? color('info') : level === LogType.Success ? color('success') : level === LogType.Warning ? color('warning') : level === LogType.Error ? color('error') : level === LogType.Debug ? color('debug') : color('info'),
             italic: type === LogType.Debug
         },
         {
             text: ` ${type} `,
-            color: level === LogType.Info ? useColor('infoBackground') : level === LogType.Success ? useColor('successBackground') : level === LogType.Warning ? useColor('warningBackground') : level === LogType.Error ? useColor('errorBackground') : level === LogType.Debug ? useColor('debugBackground') : useColor('infoBackground'),
+            color: level === LogType.Info ? color('infoBackground') : level === LogType.Success ? color('successBackground') : level === LogType.Warning ? color('warningBackground') : level === LogType.Error ? color('errorBackground') : level === LogType.Debug ? color('debugBackground') : color('infoBackground'),
             bold: true
         },
         {
