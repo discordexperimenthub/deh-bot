@@ -155,9 +155,13 @@ async function checkScripts() {
     if (response1) {
         logger('success', 'SCRIPT', 'Generated response for', 'current.diff');
 
+        response1 = response1.data.choices[0].message.content;
+
+        if (response1.length > 3500) response1 = `${response1.slice(0, 3500)}...`;
+
         const embed = new EmbedMaker(client)
             .setTitle('Code Changes')
-            .setDescription(response1.data.choices[0].message.content);
+            .setDescription(response1);
 
         embed.data.footer.text = 'Powered by Discord-Datamining/Discord-Datamining & purgpt.xyz';
 
