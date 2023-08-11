@@ -29,6 +29,12 @@ for (const file of commandFiles) {
     logger('success', 'COMMAND', 'Loaded command', command.data.name);
 };
 
+function splitString(str, maxLength) {
+    let regex = new RegExp(`.{1,${maxLength}}`, 'gs');
+
+    return str.match(regex);
+};
+
 async function checkScripts() {
     let currentOld = '';
     let stringsOld = '';
@@ -132,10 +138,10 @@ async function checkScripts() {
                     role: 'system',
                     content: 'You are Dataminer. You will analyze the given script and report any changes. Our system will give you last 15 lines of the script before the changes. Codes have special tags for highlighting changes. <added>Added codes</added> and <removed>Removed codes</removed>. You can use these tags to highlight changes in your report.\n\nYou have to respond with DIFF format using this template:\n\n```diff\n+ Added line\n- Removed line\n```'
                 },
-                {
+                ...(splitString(diffCurrentText, 3500).map(part => ({
                     role: 'user',
-                    content: diffCurrentText
-                }
+                    content: part
+                })))
             ]
         }, {
             headers: {
@@ -261,11 +267,6 @@ client.on('interactionCreate', async interaction => {
             switch (interaction.customId) {
                 default: {
                     logger('warning', 'COMMAND', 'Message component', interaction.customId, 'not found');
-
-                    return interaction.reply({
-                        content: localize(interaction.locale, 'NOT_FOUND', 'Message component'),
-                        ephemeral: true
-                    });
                 }
             };
         } catch (error) {
