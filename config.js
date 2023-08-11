@@ -5,6 +5,8 @@ module.exports = {
     developerIds: [], // Your developers' discord user ids
     roleIds: {
         extraStuff: '1103744839012597780',
-        codeChanges: '1120782668796276897'
+        codeChanges: '1120782668796276897',
+        otherChanges: '1090694332199206934',
+        assets: '1106861405203857419'
     }
 };
