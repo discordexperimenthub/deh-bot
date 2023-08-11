@@ -2,7 +2,7 @@ module.exports = {
     HELP_MENU_TITLE: 'Hilfe-Menü',
     COMMAND_CATEGORY_GENERAL: 'Allgemeine Befehle',
     COMMAND_CATEGORY_DEVELOPER: 'Entwicklerbefehle',
-    COMMAND_CATEGORY_OWNER: Eigentümerbefehle',
+    COMMAND_CATEGORY_OWNER: 'Eigentümerbefehle',
     LOCALIZATION_PERCENTAGE: '**Sprachunterstützung für {{0}}:** {{1}}%',
     NOT_FOUND: '{{0}} nicht gefunden!',
     COMMAND_ERROR: '**Fehler beim Ausführen {{0}}:** {{1}}',
