@@ -70,7 +70,7 @@ async function checkScripts() {
     if (strings.status === 200) strings = strings.data;
     else return logger('error', 'SCRIPT', 'Error while fetching script', 'strings.js', `${strings.status} ${strings.statusText}\n`, JSON.stringify(strings.data, null, 4));
 
-    writeFileSync('scripts/strings.js', strings);
+    writeFileSync('scripts/strings.js', JSON.stringify(strings, null, 4));
     logger('success', 'SCRIPT', 'Fetched code', 'strings.js');
 
     /*
