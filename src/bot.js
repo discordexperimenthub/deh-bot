@@ -545,7 +545,7 @@ client.on('interactionCreate', async interaction => {
                 ephemeral: true
             });
         };
-        if (command.category === 'Developer' && !developerIds.includes(interaction.user.id)) {
+        if (command.category === 'Developer' && !developerIds.includes(interaction.user.id) && interaction.user.id !== ownerId) {
             logger('debug', 'COMMAND', 'Command', interaction.commandName, 'blocked for', interaction.user.tag, 'because it is developer only');
 
             return interaction.reply({
