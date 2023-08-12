@@ -32,31 +32,40 @@ for (const file of commandFiles) {
 async function checkScripts() {
     let currentOld = '';
     let stringsOld = '';
+    let endpointsOld = '';
 
     try {
         currentOld = readFileSync('scripts/current.js').toString();
     } catch (error) {
-        logger('error', 'SCRIPT', 'Error while reading script', 'current.js', `${error.code}\n`, JSON.stringify(error, null, 4));
+        logger('error', 'SCRIPT', 'Error while reading code', 'current.js', `${error.code}\n`, JSON.stringify(error, null, 4));
     };
 
     try {
         stringsOld = readFileSync('scripts/strings.js').toString();
         stringsOld = JSON.parse(stringsOld);
     } catch (error) {
-        logger('error', 'SCRIPT', 'Error while reading script', 'strings.js', `${error.code}\n`, JSON.stringify(error, null, 4));
+        logger('error', 'SCRIPT', 'Error while reading code', 'strings.js', `${error.code}\n`, JSON.stringify(error, null, 4));
+    };
+
+    try {
+        endpointsOld = readFileSync('scripts/endpoints.js').toString();
+        endpointsOld = JSON.parse(endpointsOld);
+    } catch (error) {
+        logger('error', 'SCRIPT', 'Error while reading code', 'endpoints.js', `${error.code}\n`, JSON.stringify(error, null, 4));
     };
 
     let current;
     let strings;
+    let endpoints;
 
     try {
         current = await axios.get('https://raw.githubusercontent.com/Discord-Datamining/Discord-Datamining/master/current.js');
     } catch (error) {
-        return logger('error', 'SCRIPT', 'Error while fetching script', 'current.js', `${error.response.status} ${error.response.statusText}\n`, JSON.stringify(error.response.data, null, 4));
+        return logger('error', 'SCRIPT', 'Error while fetching code', 'current.js', `${error.response.status} ${error.response.statusText}\n`, JSON.stringify(error.response.data, null, 4));
     };
 
     if (current.status === 200) current = current.data;
-    else return logger('error', 'SCRIPT', 'Error while fetching script', 'current.js', `${current.status} ${current.statusText}\n`, JSON.stringify(current.data, null, 4));
+    else return logger('error', 'SCRIPT', 'Error while fetching code', 'current.js', `${current.status} ${current.statusText}\n`, JSON.stringify(current.data, null, 4));
 
     writeFileSync('scripts/current.js', current);
     logger('success', 'SCRIPT', 'Fetched code', 'current.js');
@@ -64,14 +73,26 @@ async function checkScripts() {
     try {
         strings = await axios.get('https://raw.githubusercontent.com/xHyroM/discord-datamining/master/data/client/strings.json');
     } catch (error) {
-        return logger('error', 'SCRIPT', 'Error while fetching script', 'strings.js', `${error.response.status} ${error.response.statusText}\n`, JSON.stringify(error.response.data, null, 4));
+        return logger('error', 'SCRIPT', 'Error while fetching code', 'strings.js', `${error.response.status} ${error.response.statusText}\n`, JSON.stringify(error.response.data, null, 4));
     };
 
     if (strings.status === 200) strings = strings.data;
-    else return logger('error', 'SCRIPT', 'Error while fetching script', 'strings.js', `${strings.status} ${strings.statusText}\n`, JSON.stringify(strings.data, null, 4));
+    else return logger('error', 'SCRIPT', 'Error while fetching code', 'strings.js', `${strings.status} ${strings.statusText}\n`, JSON.stringify(strings.data, null, 4));
 
     writeFileSync('scripts/strings.js', JSON.stringify(strings, null, 4));
     logger('success', 'SCRIPT', 'Fetched code', 'strings.js');
+
+    try {
+        endpoints = await axios.get('https://raw.githubusercontent.com/xHyroM/discord-datamining/master/data/client/routes.json');
+    } catch (error) {
+        return logger('error', 'SCRIPT', 'Error while fetching code', 'endpoints.js', `${error.response.status} ${error.response.statusText}\n`, JSON.stringify(error.response.data, null, 4));
+    };
+
+    if (endpoints.status === 200) endpoints = endpoints.data;
+    else return logger('error', 'SCRIPT', 'Error while fetching code', 'endpoints.js', `${strings.status} ${strings.statusText}\n`, JSON.stringify(strings.data, null, 4));
+
+    writeFileSync('scripts/endpoints.js', JSON.stringify(endpoints, null, 4));
+    logger('success', 'SCRIPT', 'Fetched code', 'endpoints.js');
 
     /*
     let options = {
@@ -120,6 +141,9 @@ async function checkScripts() {
 
     const extraStuffWebhook = new WebhookClient({
         url: process.env.EXTRA_STUFF_WEBHOOK
+    });
+    const otherChangesWebhook = new WebhookClient({
+        url: process.env.OTHER_CHANGES_WEBHOOK
     });
 
     let response1;
@@ -196,6 +220,40 @@ async function checkScripts() {
             });
 
             logger('success', 'SCRIPT', 'Generated response for', 'strings.js');
+        };
+    };
+    if (endpointsOld !== '') {
+        let removed = [];
+        let added = [];
+        let changed = [];
+
+        for (let key in endpoints) {
+            if (!endpointsOld[key]) added.push(key);
+        };
+
+        for (let key in endpointsOld) {
+            if (!endpoints[key]) removed.push(key);
+        };
+
+        for (let key in endpoints) {
+            if (endpointsOld[key] && endpointsOld[key].url !== endpoints[key].url) changed.push(key);
+        };
+
+        logger('success', 'SCRIPT', 'Generated diff for', 'endpoints.js');
+
+        if (added.length > 0 || removed.length > 0) {
+            const embed = new EmbedMaker(client)
+                .setTitle('Endpoints')
+                .setDescription(`\`\`\`diff\n${removed.map(endpoint => `- ${endpoint}: ${endpointsOld[endpoint].url}`).join('\n')}\n${changed.map(endpoint => `- ${endpoint}: ${endpointsOld[endpoint].url}\n+ ${endpoint}: ${endpoints[endpoint].url}`)}\n${added.map(endpoint => `+ ${endpoint}: ${endpoints[endpoint].url}`)}\n\`\`\``);
+
+            embed.data.footer.text = 'Powered by xHyroM/discord-datamining';
+
+            otherChangesWebhook.send({
+                content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                embeds: [embed]
+            });
+
+            logger('success', 'SCRIPT', 'Generated response for', 'endpoints.js');
         };
     };
 };
