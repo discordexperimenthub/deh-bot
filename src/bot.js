@@ -210,7 +210,7 @@ async function checkScripts() {
         if (added.length > 0 || removed.length > 0) {
             const embed = new EmbedMaker(client)
                 .setTitle('Strings')
-                .setDescription(`\`\`\`diff\n${removed.map(s => `- ${s}: ${stringsOld[s]}`).join('\n')}\n${changed.map(s => `- ${s}: ${stringsOld[s]}\n+ ${s}: ${strings[s]}`)}\n${added.map(s => `+ ${s}: ${strings[s]}`)}\n\`\`\``);
+                .setDescription(`\`\`\`diff\n${removed.map(s => `- ${s}: ${stringsOld[s]}`).join('\n')}\n${changed.map(s => `- ${s}: ${stringsOld[s]}\n+ ${s}: ${strings[s]}`).join('\n')}\n${added.map(s => `+ ${s}: ${strings[s]}`).join('\n')}\n\`\`\``);
 
             embed.data.footer.text = 'Powered by xHyroM/discord-datamining';
 
@@ -244,7 +244,7 @@ async function checkScripts() {
         if (added.length > 0 || removed.length > 0) {
             const embed = new EmbedMaker(client)
                 .setTitle('Endpoints')
-                .setDescription(`\`\`\`diff\n${removed.map(endpoint => `- ${endpoint}: ${endpointsOld[endpoint].url}`).join('\n')}\n${changed.map(endpoint => `- ${endpoint}: ${endpointsOld[endpoint].url}\n+ ${endpoint}: ${endpoints[endpoint].url}`)}\n${added.map(endpoint => `+ ${endpoint}: ${endpoints[endpoint].url}`)}\n\`\`\``);
+                .setDescription(`\`\`\`diff\n${removed.map(endpoint => `- ${endpoint}: ${endpointsOld[endpoint].url}`).join('\n')}\n${changed.map(endpoint => `- ${endpoint}: ${endpointsOld[endpoint].url}\n+ ${endpoint}: ${endpoints[endpoint].url}`).join('\n')}\n${added.map(endpoint => `+ ${endpoint}: ${endpoints[endpoint].url}`).join('\n')}\n\`\`\``);
 
             embed.data.footer.text = 'Powered by xHyroM/discord-datamining';
 
