@@ -4,8 +4,7 @@ const { default: axios } = require('axios');
 const logger = require('./modules/logger');
 const { localize } = require('./modules/localization');
 const { ownerId, developerIds, roleIds, colors } = require('../config');
-const { execSync } = require('node:child_process');
-const { diffChars } = require('diff');
+const { diffLines } = require('diff');
 const EmbedMaker = require('./modules/embed');
 
 const client = new Client({
@@ -281,6 +280,19 @@ async function checkArticles() {
         writeFileSync('articles/supportSections.json', JSON.stringify(supportSections, null, 4), 'utf-8');
         logger('success', 'SCRIPT', 'Fetched support sections');
 
+        let oldSupportArticles = '';
+
+        try {
+            oldSupportArticles = readFileSync('articles/supportArticles.json', 'utf-8');
+        } catch (error) {
+            logger('error', 'SCRIPT', 'Error while reading', 'articles/supportArticles.json', error);
+        };
+
+        let supportArticles = (await axios.get('https://hammerandchisel.zendesk.com/api/v2/help_center/en-us/articles')).data?.articles;
+
+        writeFileSync('articles/supportArticles.json', JSON.stringify(supportArticles, null, 4), 'utf-8');
+        logger('success', 'SCRIPT', 'Fetched support articles');
+
         if (oldSupportSections !== '') {
             oldSupportSections = JSON.parse(oldSupportSections);
 
@@ -483,6 +495,276 @@ async function checkArticles() {
                             {
                                 name: 'Theme Template',
                                 value: data.theme_template,
+                                inline: true
+                            }
+                        )
+
+                    otherChangesWebhook.send({
+                        content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                        embeds: [embed]
+                    });
+
+                    // Wait 3 seconds to prevent ratelimit
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                };
+
+                logger('success', 'SCRIPT', 'Generated response for', 'supportSections.js');
+            };
+        };
+        if (oldSupportArticles !== '') {
+            oldSupportArticles = JSON.parse(oldSupportArticles);
+
+            let removed = [];
+            let added = [];
+            let changed = [];
+
+            for (let data of supportArticles) {
+                if (!oldSupportArticles.filter(s => s.id === data.id)[0]) added.push(data);
+            };
+
+            for (let data of oldSupportArticles) {
+                if (!supportArticles.filter(s => s.id === data.id)[0]) removed.push(data);
+            };
+
+            for (let data of supportArticles) {
+                if (oldSupportArticles.filter(s => s.id === data.id)[0] && (oldSupportArticles.filter(s => s.id === data.id)[0].name !== data.name || oldSupportArticles.filter(s => s.id === data.id)[0].body !== data.body || oldSupportArticles.filter(s => s.id === data.id)[0].title !== data.title)) changed.push(data);
+            };
+
+            logger('success', 'SCRIPT', 'Generated diff for', 'supportSections.js');
+
+            if (added.length > 0 || removed.length > 0 || changed.length > 0) {
+                for (let data of added) {
+                    const embed = new EmbedMaker(client)
+                        .setColor(colors.green)
+                        .setTitle('Added Support Article')
+                        .setFields(
+                            {
+                                name: 'Link',
+                                value: data.html_url,
+                                inline: false
+                            },
+                            {
+                                name: 'Id',
+                                value: data.id.toString(),
+                                inline: true
+                            },
+                            {
+                                name: 'Author Id',
+                                value: data.author_id.toString(),
+                                inline: true
+                            },
+                            {
+                                name: 'Comments Enabled',
+                                value: data.comments_disabled ? '❌' : '✅',
+                                inline: true
+                            },
+                            {
+                                name: 'Draft',
+                                value: data.draft ? '✅' : '❌',
+                                inline: true
+                            },
+                            {
+                                name: 'Section Id',
+                                value: data.section_id.toString(),
+                                inline: true
+                            },
+                            {
+                                name: 'Created At',
+                                value: `<t:${Math.floor(new Date(data.created_at).getTime() / 1000)}:R>`,
+                                inline: true
+                            },
+                            {
+                                name: 'Name',
+                                value: data.name,
+                                inline: true
+                            },
+                            {
+                                name: 'Title',
+                                value: data.title,
+                                inline: true
+                            },
+                            {
+                                name: 'Outdated',
+                                value: data.outdated ? '✅' : '❌',
+                                inline: true
+                            },
+                            {
+                                name: 'Outdated Locales',
+                                value: data.outdated_locales.length > 0 ? data.outdated_locales.join(', ') : 'None',
+                                inline: true
+                            },
+                            {
+                                name: 'Tags',
+                                value: data.label_names.length > 0 ? data.label_names.join(', ') : 'None',
+                                inline: true
+                            }
+                        );
+
+                    otherChangesWebhook.send({
+                        content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                        embeds: [embed]
+                    });
+
+                    // Wait 3 seconds to prevent ratelimit
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                };
+
+                for (let data of changed) {
+                    let diffSupportArticleText = '';
+                    let diffSupportArticle = diffLines(oldSupportArticles.filter(s => s.id === data.id)[0].body, data.body).filter(l => l.added || l.removed);
+
+                    diffSupportArticleText = diffSupportArticle.map(article => `${article.added ? '+' : '-'} ${article.value}`).join('\n');
+
+                    const embed = new EmbedMaker(client)
+                        .setColor(colors.yellow)
+                        .setTitle('Updated Support Article')
+                        .setFields(
+                            {
+                                name: 'Link',
+                                value: data.html_url,
+                                inline: false
+                            },
+                            {
+                                name: 'Id',
+                                value: data.id.toString(),
+                                inline: true
+                            },
+                            {
+                                name: 'Author Id',
+                                value: data.author_id.toString(),
+                                inline: true
+                            },
+                            {
+                                name: 'Comments Enabled',
+                                value: data.comments_disabled ? '❌' : '✅',
+                                inline: true
+                            },
+                            {
+                                name: 'Draft',
+                                value: data.draft ? '✅' : '❌',
+                                inline: true
+                            },
+                            {
+                                name: 'Section Id',
+                                value: data.section_id.toString(),
+                                inline: true
+                            },
+                            {
+                                name: 'Created At',
+                                value: `<t:${Math.floor(new Date(data.created_at).getTime() / 1000)}:R>`,
+                                inline: true
+                            },
+                            {
+                                name: 'Updated At',
+                                value: `<t:${Math.floor(new Date(data.updated_at).getTime() / 1000)}:R>`,
+                                inline: true
+                            },
+                            {
+                                name: 'Name',
+                                value: data.name,
+                                inline: true
+                            },
+                            {
+                                name: 'Title',
+                                value: data.title,
+                                inline: true
+                            },
+                            {
+                                name: 'Outdated',
+                                value: data.outdated ? '✅' : '❌',
+                                inline: true
+                            },
+                            {
+                                name: 'Outdated Locales',
+                                value: data.outdated_locales.length > 0 ? data.outdated_locales.join(', ') : 'None',
+                                inline: true
+                            },
+                            {
+                                name: 'Tags',
+                                value: data.label_names.length > 0 ? data.label_names.join(', ') : 'None',
+                                inline: true
+                            }
+                        );
+
+                    if (diffSupportArticleText !== '') embed.setDescription(`\`\`\`diff\n${diffSupportArticleText.length > 3500 ? `${diffSupportArticleText.slice(0, 3500)}...` : diffSupportArticleText}\`\`\``);
+
+                    otherChangesWebhook.send({
+                        content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                        embeds: [embed]
+                    });
+
+                    // Wait 3 seconds to prevent ratelimit
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                };
+
+                for (let data of removed) {
+                    const embed = new EmbedMaker(client)
+                        .setColor(colors.red)
+                        .setTitle('Removed Support Article')
+                        .setFields(
+                            {
+                                name: 'Link',
+                                value: data.html_url,
+                                inline: false
+                            },
+                            {
+                                name: 'Id',
+                                value: data.id.toString(),
+                                inline: true
+                            },
+                            {
+                                name: 'Author Id',
+                                value: data.author_id.toString(),
+                                inline: true
+                            },
+                            {
+                                name: 'Comments Enabled',
+                                value: data.comments_disabled ? '❌' : '✅',
+                                inline: true
+                            },
+                            {
+                                name: 'Draft',
+                                value: data.draft ? '✅' : '❌',
+                                inline: true
+                            },
+                            {
+                                name: 'Section Id',
+                                value: data.section_id.toString(),
+                                inline: true
+                            },
+                            {
+                                name: 'Created At',
+                                value: `<t:${Math.floor(new Date(data.created_at).getTime() / 1000)}:R>`,
+                                inline: true
+                            },
+                            {
+                                name: 'Updated At',
+                                value: `<t:${Math.floor(new Date(data.updated_at).getTime() / 1000)}:R>`,
+                                inline: true
+                            },
+                            {
+                                name: 'Name',
+                                value: data.name,
+                                inline: true
+                            },
+                            {
+                                name: 'Title',
+                                value: data.title,
+                                inline: true
+                            },
+                            {
+                                name: 'Outdated',
+                                value: data.outdated ? '✅' : '❌',
+                                inline: true
+                            },
+                            {
+                                name: 'Outdated Locales',
+                                value: data.outdated_locales.length > 0 ? data.outdated_locales.join(', ') : 'None',
+                                inline: true
+                            },
+                            {
+                                name: 'Tags',
+                                value: data.label_names.length > 0 ? data.label_names.join(', ') : 'None',
                                 inline: true
                             }
                         )
