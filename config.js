@@ -11,5 +11,11 @@ module.exports = {
         urlStuff: '1110125695180484678',
         types: '1110126070700703754',
         stringChanges: '1120782897419407440'
+    },
+    colors: {
+        blurple: '5865F2',
+        green: '57F287',
+        yellow: 'FEE75C',
+        red: 'ED4245'
     }
 };
