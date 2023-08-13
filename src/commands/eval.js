@@ -32,9 +32,9 @@ module.exports = {
 
             if (typeof code !== 'string') code = await require('util').inspect(code, { depth: 0 });
 
-            interaction.editReply(`${emoji(interaction, emojis.done.discord)} **${localize(interaction.locale, 'OUTPUT')}:**\n\`\`\`js\n${code}\n\`\`\``);
+            interaction.editReply(`**${localize(interaction.locale, 'OUTPUT')}:**\n\`\`\`js\n${code}\n\`\`\``);
         } catch (error) {
-            interaction.editReply(`${emoji(interaction, emojis.error.discord)} **${localize(interaction.locale, 'ERROR')}:**\n\`\`\`js\n${error.stack ?? error}\n\`\`\``);
+            interaction.editReply(`**${localize(interaction.locale, 'ERROR')}:**\n\`\`\`js\n${error.stack ?? error}\n\`\`\``);
         };
     }
 };
