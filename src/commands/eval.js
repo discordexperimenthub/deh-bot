@@ -27,7 +27,7 @@ module.exports = {
         await interaction.deferReply({ ephemeral: true });
 
         try {
-            let input = interaction.options.getString('kod');
+            let input = interaction.options.getString('code');
             let code = await eval(input);
 
             if (typeof code !== 'string') code = await require('util').inspect(code, { depth: 0 });
