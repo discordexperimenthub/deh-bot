@@ -5,8 +5,8 @@ const EmbedMaker = require('../modules/embed');
 module.exports = {
     category: 'General',
     data: new SlashCommandBuilder()
-        .setName('article')
-        .setDescription('Shows an article')
+        .setName('support-article')
+        .setDescription('Shows an support article')
         .setDescriptionLocalizations({
             tr: 'Bir makale gösterir'
         })
