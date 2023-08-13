@@ -247,7 +247,7 @@ async function fetchSupportArticles(file, title, url) {
                 let diffSupportArticleText = '';
                 let diffSupportArticle = diffLines(oldSupportArticles.filter(s => s.id === data.id)[0].body, data.body).filter(l => l.added || l.removed);
 
-                diffSupportArticleText = diffSupportArticle.map(article => `${article.added ? '+' : '-'} ${article.value}`).join('\n');
+                diffSupportArticleText = diffSupportArticle.map(line => line.added ? '+ ' + line.value.split('\n').filter(l => l !== '').join('\n+ ') : '- ' + line.value.split('\n').filter(l => l !== '').join('\n- ')).join('\n');
 
                 const embed = new EmbedMaker(client)
                     .setColor(colors.yellow)
@@ -673,6 +673,205 @@ async function checkArticles() {
     };
 };
 
+async function checkBlogPosts() {
+    let oldBlogPosts = '';
+
+    try {
+        oldBlogPosts = readFileSync('blog/posts.json', 'utf-8');
+    } catch (error) {
+        try {
+            writeFileSync('blog/posts.json', '[]');
+
+            oldBlogPosts = readFileSync('blog/posts.json', 'utf-8');
+            oldBlogPosts = JSON.parse(oldBlogPosts);
+        } catch (error) {
+            try {
+                mkdirSync('blog');
+                writeFileSync('blog/posts.json', '[]');
+
+                oldBlogPosts = readFileSync('blog/posts.json', 'utf-8');
+                oldBlogPosts = JSON.parse(oldBlogPosts);
+            } catch (error) {
+                return logger('error', 'BLOG', 'Error checking blog posts', '\n', error);
+            };
+        };
+    };
+
+    let blogPosts = (await axios.get('https://raw.githubusercontent.com/xHyroM/discord-datamining/master/data/blog/posts.json')).data;
+
+    writeFileSync('blog/posts.json', JSON.stringify(blogPosts, null, 4));
+
+    if (typeof oldBlogPosts === 'string') oldBlogPosts = JSON.parse(oldBlogPosts);
+    if (oldBlogPosts.length === 0) return logger('success', 'BLOG', 'No blog posts found');
+
+    logger('info', 'BLOG', 'Found', blogPosts.length, 'blog posts');
+
+    let removed = [];
+    let added = [];
+    let changed = [];
+
+    for (let data of blogPosts) {
+        if (!oldBlogPosts.filter(s => s.id === data.id)[0]) added.push(data);
+    };
+
+    for (let data of oldBlogPosts) {
+        if (!blogPosts.filter(s => s.id === data.id)[0]) removed.push(data);
+    };
+
+    for (let data of blogPosts) {
+        if (oldBlogPosts.filter(s => s.id === data.id)[0] && (oldBlogPosts.filter(s => s.id === data.id)[0].title !== data.title || oldBlogPosts.filter(s => s.id === data.id)[0].description !== data.description || oldBlogPosts.filter(s => s.id === data.id)[0].body !== data.body)) changed.push(data);
+    };
+
+    logger('success', 'BLOG', 'Generated diff for', 'posts.json');
+
+    if (added.length > 0 || removed.length > 0 || changed.length > 0) {
+        for (let data of added) {
+            try {
+                const embed = new EmbedMaker(client)
+                    .setColor(colors.green)
+                    .setTitle('Added Blog Post')
+                    .setFields(
+                        {
+                            name: 'Link',
+                            value: data.link.toString(),
+                            inline: false
+                        },
+                        {
+                            name: 'Id',
+                            value: data.id.toString(),
+                            inline: true
+                        },
+                        {
+                            name: 'Title',
+                            value: data.title.toString(),
+                            inline: true
+                        },
+                        {
+                            name: 'Description',
+                            value: data.description.toString(),
+                            inline: false
+                        },
+                        {
+                            name: 'Published At',
+                            value: `<t:${Math.floor(new Date(data.pubDate).getTime() / 1000)}:R>`,
+                            inline: true
+                        }
+                    )
+                    .setImage(data['media:thumbnail']);
+
+                webhooks.otherChanges.send({
+                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                    embeds: [embed]
+                });
+            } catch (error) {
+                logger('error', 'BLOG', 'Error sending webhook', '\n', error, JSON.stringify(data, null, 4));
+            };
+
+            // Wait 3 seconds to prevent ratelimit
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        };
+
+        for (let data of changed) {
+            let diffBlogPostText = '';
+            let diffBlogPost = diffLines(oldBlogPosts.filter(s => s.id === data.id)[0].body, data.body).filter(l => l.added || l.removed);
+
+            diffBlogPostText = diffBlogPost.map(line => line.added ? '+ ' + line.value.split('\n').filter(l => l !== '').join('\n+ ') : '- ' + line.value.split('\n').filter(l => l !== '').join('\n- ')).join('\n');
+
+            const embed = new EmbedMaker(client)
+                .setColor(colors.yellow)
+                .setTitle('Updated Blog Post')
+                .setFields(
+                    {
+                        name: 'Link',
+                        value: data.link.toString(),
+                        inline: false
+                    },
+                    {
+                        name: 'Id',
+                        value: data.id.toString(),
+                        inline: true
+                    },
+                    {
+                        name: 'Title',
+                        value: data.title.toString(),
+                        inline: true
+                    },
+                    {
+                        name: 'Description',
+                        value: data.description.toString(),
+                        inline: false
+                    },
+                    {
+                        name: 'Published At',
+                        value: `<t:${Math.floor(new Date(data.pubDate).getTime() / 1000)}:R>`,
+                        inline: true
+                    }
+                )
+                .setImage(data['media:thumbnail']);
+
+            if (diffBlogPost !== '') embed.setDescription(`\`\`\`diff\n${diffBlogPostText}\`\`\``);
+
+            webhooks.otherChanges.send({
+                content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                embeds: [embed]
+            });
+
+            // Wait 3 seconds to prevent ratelimit
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        };
+
+        for (let data of removed) {
+            const embed = new EmbedMaker(client)
+                .setColor(colors.red)
+                .setTitle('Removed Blog Post')
+                .setFields(
+                    {
+                        name: 'Link',
+                        value: data.link.toString(),
+                        inline: false
+                    },
+                    {
+                        name: 'Id',
+                        value: data.id.toString(),
+                        inline: true
+                    },
+                    {
+                        name: 'Title',
+                        value: data.title.toString(),
+                        inline: true
+                    },
+                    {
+                        name: 'Description',
+                        value: data.description.toString(),
+                        inline: false
+                    },
+                    {
+                        name: 'Published At',
+                        value: `<t:${Math.floor(new Date(data.pubDate).getTime() / 1000)}:R>`,
+                        inline: true
+                    }
+                )
+                .setImage(data['media:thumbnail']);
+
+            webhooks.otherChanges.send({
+                content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                embeds: [embed]
+            });
+
+            // Wait 3 seconds to prevent ratelimit
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        };
+
+        logger('success', 'ARTICLE', 'Generated response for', `posts.json`);
+    };
+};
+
+async function check() {
+    await checkScripts();
+    await checkArticles();
+    await checkBlogPosts();
+};
+
 client.on('ready', async () => {
     logger('info', 'BOT', 'Logged in as', client.user.tag);
     logger('info', 'COMMAND', 'Registering commands');
@@ -684,12 +883,10 @@ client.on('ready', async () => {
         }
     }).then(() => logger('success', 'COMMAND', 'Registered commands')).catch(error => logger('error', 'COMMAND', 'Error while registering commands', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4)));
 
-    await checkScripts();
-    await checkArticles();
+    await check();
 
     setInterval(async () => {
-        await checkScripts();
-        await checkArticles();
+        await check();
     }, 1000 * 60 * 3);
 });
 
