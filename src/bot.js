@@ -990,7 +990,7 @@ client.on('interactionCreate', async interaction => {
                 ephemeral: true
             }).catch(() => interaction.editReply({
                 content: localize(interaction.locale, 'COMMAND_ERROR', 'command', error.message)
-            }));
+            }).catch(() => logger('error', 'COMMAND', 'Error while sending error message', '\n', error)));
         };
     } else if (interaction.isMessageComponent()) {
         logger('debug', 'COMMAND', 'Received message component', `${interaction.customId} (${interaction.componentType})`, 'from', interaction.guild ? `${interaction.guild.name} (${interaction.guild.id})` : 'DMs', 'by', `${interaction.user.tag} (${interaction.user.id})`);

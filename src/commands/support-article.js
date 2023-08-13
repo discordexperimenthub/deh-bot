@@ -6,6 +6,9 @@ module.exports = {
     category: 'General',
     data: new SlashCommandBuilder()
         .setName('support-article')
+        .setNameLocalizations({
+            tr: 'destek-makalesi'
+        })
         .setDescription('Shows an support article')
         .setDescriptionLocalizations({
             tr: 'Bir makale gösterir'
@@ -56,7 +59,7 @@ module.exports = {
         let type = interaction.options.getString('type');
         let articleId = parseInt(interaction.options.getString('article'));
         let articles = JSON.parse(readFileSync(`articles/${type === 'support' ? 'support' : type === 'creator' ? 'creatorSupport' : 'developerSupport'}Articles.json`, 'utf-8'));
-        let article = articles.filter(article => article.id === articleId)[0];
+        let article = articles.filter(a => a.id === articleId)[0];
 
         await interaction.editReply({
             embeds: [
