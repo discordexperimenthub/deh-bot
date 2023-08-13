@@ -1035,6 +1035,18 @@ client.on('interactionCreate', async interaction => {
                 content: localize(interaction.locale, 'COMMAND_ERROR', 'modal', error.message)
             }));
         };
+    } else if (interaction.isAutocomplete()) {
+        logger('debug', 'COMMAND', 'Received autocomplete of', `${interaction.commandName} (${interaction.commandId})`, 'from', interaction.guild ? `${interaction.guild.name} (${interaction.guild.id})` : 'DMs', 'by', `${interaction.user.tag} (${interaction.user.id})`);
+
+        const command = client.commands.get(interaction.commandName);
+
+        if (!command) return logger('warning', 'COMMAND', 'Command', interaction.commandName, 'not found');
+
+        try {
+            await command.autocomplete(interaction);
+        } catch (error) {
+            logger('error', 'COMMAND', 'Error while executing autocomplete:', `${error.message}\n`, error.stack);
+        };
     };
 });
 
