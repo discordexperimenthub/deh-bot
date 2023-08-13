@@ -14,4 +14,13 @@ module.exports = class EmbedMaker extends EmbedBuilder {
             iconURL: useServerIconForFooter ? client.guilds.cache.get(serverId).iconURL({ forceStatic: true }) : client.user.displayAvatarURL({ forceStatic: true })
         });
     };
+
+    /**
+     * @param {string} text 
+     */
+    setFooterText(text) {
+        this.data.footer.text = text;
+
+        return this;
+    };
 };

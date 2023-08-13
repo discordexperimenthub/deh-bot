@@ -872,10 +872,63 @@ async function checkBlogPosts() {
     };
 };
 
+async function checkSubdomains() {
+    try {
+        let oldSubdomains = '';
+
+        try {
+            oldSubdomains = JSON.parse(readFileSync('domain/subdomains.json'));
+        } catch (error) {
+            try {
+                writeFileSync('domain/subdomains.json', '[]');
+
+                oldSubdomains = JSON.parse(readFileSync('domain/subdomains.json'));
+            } catch (error) {
+                try {
+                    mkdirSync('domain');
+                    writeFileSync('domain/subdomains.json', '[]');
+
+                    oldSubdomains = JSON.parse(readFileSync('domain/subdomains.json'));
+                } catch (error) {
+                    logger('error', 'SUBDOMAIN', 'Error while checking subdomains', '\n', error);
+                };
+            };
+        };
+
+        let subdomains = (await axios.get('https://raw.githubusercontent.com/xHyroM/discord-datamining/master/data/domains/discord.com.json')).data?.subdomains;
+
+        writeFileSync('domain/subdomains.json', JSON.stringify(subdomains, null, 4));
+
+        if (oldSubdomains === '') return logger('error', 'SUBDOMAIN', 'Subdomains empty');
+
+        let added = subdomains.filter(s => !oldSubdomains.includes(s));
+        let removed = oldSubdomains.filter(s => !subdomains.includes(s));
+
+        if (added.length === 0 && removed.length === 0) return logger('warning', 'SUBDOMAIN', 'No subdomain changes');
+
+        logger('info', 'SUBDOMAIN', 'Subdomain changes', `${added.length} added, ${removed.length} removed`);
+
+        webhooks.otherChanges.send({
+            content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+            embeds: [
+                new EmbedMaker(client)
+                    .setTitle('Subdomains')
+                    .setDescription(`\`\`\`diff\n${removed.map(s => `- https://${s}.discord.com`).join('\n')}\n${added.map(s => `+ https://${s}.discord.com`).join('\n')}\n\`\`\``)
+                    .setFooterText('Powered by xHyroM/discord-datamining')
+            ]
+        }).catch(error => logger('error', 'SUBDOMAIN', 'Error while sending webhook', '\n', error));
+
+        logger('success', 'SUBDOMAIN', 'Generated response for', 'subdomains.json');
+    } catch (error) {
+        logger('error', 'SUBDOMAIN', 'Error while checking subdomains', '\n', error?.rawError);
+    };
+};
+
 async function check() {
-    await checkScripts();
-    await checkArticles();
-    await checkBlogPosts();
+    checkScripts();
+    checkArticles();
+    checkBlogPosts();
+    checkSubdomains();
 };
 
 client.on('ready', async () => {
