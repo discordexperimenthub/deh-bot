@@ -759,6 +759,8 @@ async function checkBlogPosts() {
                     )
                     .setImage(data['media:thumbnail']);
 
+                embed.data.footer.text = 'Powered by xHyroM/discord-datamining';
+
                 webhooks.otherChanges.send({
                     content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
                     embeds: [embed]
@@ -809,6 +811,8 @@ async function checkBlogPosts() {
                 )
                 .setImage(data['media:thumbnail']);
 
+            embed.data.footer.text = 'Powered by xHyroM/discord-datamining';
+
             if (diffBlogPost !== '') embed.setDescription(`\`\`\`diff\n${diffBlogPostText}\`\`\``);
 
             webhooks.otherChanges.send({
@@ -852,6 +856,8 @@ async function checkBlogPosts() {
                     }
                 )
                 .setImage(data['media:thumbnail']);
+
+            embed.data.footer.text = 'Powered by xHyroM/discord-datamining';
 
             webhooks.otherChanges.send({
                 content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
