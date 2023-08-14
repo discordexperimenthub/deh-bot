@@ -19,8 +19,8 @@ module.exports = {
     async execute(interaction) {
         await interaction.deferReply();
 
-        let allCommands = (await interaction.client.application.commands.fetch()).filter(c => c.type === ApplicationCommandType.ChatInput);
-        let commands = interaction.client.commands.toJSON().filter(c => c.type === ApplicationCommandType.ChatInput);
+        let allCommands = await interaction.client.application.commands.fetch();
+        let commands = interaction.client.commands.toJSON()
         let locale = interaction.locale;
         let commandCategories = {};
 
