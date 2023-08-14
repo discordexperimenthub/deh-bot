@@ -133,7 +133,7 @@ async function checkScripts() {
     logger('info', 'SCRIPT', 'Found', scripts.length.toString(), 'scripts');
 
     for (let i = 0; i < scripts.length; i++) {
-        await checkScript(scripts[i], i, 'extraStuff', [roleIds.extraStuff, roleIds.codeChanges]);
+        if (i !== 3) await checkScript(scripts[i], i, 'extraStuff', [roleIds.extraStuff, roleIds.codeChanges]);
     };
 };
 
