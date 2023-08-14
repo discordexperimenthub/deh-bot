@@ -1,16 +1,21 @@
-const { Client, Collection, WebhookClient } = require('discord.js');
+const { Client, Collection, WebhookClient, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, ChannelSelectMenuBuilder } = require('discord.js');
 const { readdirSync, writeFileSync, readFileSync, mkdirSync, writeFile } = require('node:fs');
 const { default: axios } = require('axios');
 const logger = require('./modules/logger');
 const { localize } = require('./modules/localization');
-const { ownerId, developerIds, roleIds, colors } = require('../config');
+const { ownerId, developerIds, roleIds, colors, emojis } = require('../config');
 const { diffLines } = require('diff');
 const EmbedMaker = require('./modules/embed');
 const { execSync } = require('node:child_process');
+const { QuickDB } = require('quick.db');
+const cron = require('./modules/cron');
 
 const client = new Client({
     intents: [
-        'Guilds'
+        'Guilds',
+        'GuildMessages',
+        'MessageContent',
+        'GuildMessageReactions'
     ]
 });
 const webhooks = {
@@ -21,6 +26,7 @@ const webhooks = {
         url: process.env.OTHER_CHANGES_WEBHOOK
     })
 };
+const db = new QuickDB();
 
 client.commands = new Collection();
 
@@ -76,7 +82,7 @@ async function checkScript(script, i, webhook, pings) {
 
     logger('success', 'SCRIPT', 'Script fetched', script);
 
-    let diff = diffLines(oldScript, newScript);
+    let diff = diffLines(oldScript, newScript).filter(line => line.added || line.removed);
     let diffText = '';
     let writing = false;
 
@@ -127,7 +133,7 @@ async function checkScripts() {
     logger('info', 'SCRIPT', 'Found', scripts.length.toString(), 'scripts');
 
     for (let i = 0; i < scripts.length; i++) {
-        await checkScript(scripts[i], i, 'otherChanges', [roleIds.extraStuff, roleIds.codeChanges]);
+        await checkScript(scripts[i], i, 'extraStuff', [roleIds.extraStuff, roleIds.codeChanges]);
     };
 };
 
@@ -925,10 +931,10 @@ async function checkSubdomains() {
 };
 
 async function check() {
-    checkScripts();
-    checkArticles();
-    checkBlogPosts();
-    checkSubdomains();
+    await checkScripts();
+    await checkArticles();
+    await checkBlogPosts();
+    await checkSubdomains();
 };
 
 client.on('ready', async () => {
@@ -942,11 +948,8 @@ client.on('ready', async () => {
         }
     }).then(() => logger('success', 'COMMAND', 'Registered commands')).catch(error => logger('error', 'COMMAND', 'Error while registering commands', `${error?.response?.status} ${error?.response?.statusText}\n`, JSON.stringify(error?.response?.data ?? error, null, 4)));
 
-    await check();
-
-    setInterval(async () => {
-        await check();
-    }, 1000 * 60 * 3);
+    check();
+    setInterval(check, 1000 * 60 * 5);
 });
 
 client.on('interactionCreate', async interaction => {
@@ -996,10 +999,163 @@ client.on('interactionCreate', async interaction => {
         logger('debug', 'COMMAND', 'Received message component', `${interaction.customId} (${interaction.componentType})`, 'from', interaction.guild ? `${interaction.guild.name} (${interaction.guild.id})` : 'DMs', 'by', `${interaction.user.tag} (${interaction.user.id})`);
 
         try {
-            switch (interaction.customId) {
-                default: {
+            let [userId, customId] = interaction.customId.split(':');
+
+            if (userId !== interaction.user.id) return interaction.reply({
+                content: localize(interaction.locale, 'COMPONENT_NOT_YOURS'),
+                ephemeral: true
+            });
+
+            let guildId = interaction.guildId;
+            let guild = (await db.get(`guilds.${guildId}`)) ?? {};
+            let locale = interaction.locale;
+
+            switch (customId) {
+                case 'settings':
+                    switch (interaction.values[0]) {
+                        case 'home':
+                            interaction.update({
+                                embeds: [
+                                    new EmbedMaker(client)
+                                        .setColor(guild.home ? guild.home.enabled ? colors.green : colors.red : colors.yellow)
+                                        .setTitle(`${emojis.home} ${localize(locale, 'HOME')}`)
+                                        .setFields(
+                                            {
+                                                name: localize(locale, 'STATUS'),
+                                                value: guild.home?.enabled ? `${emojis.enabled} ${localize(locale, 'ENABLED')}` : `${emojis.disabled} ${localize(locale, 'DISABLED')}`,
+                                                inline: true
+                                            },
+                                            {
+                                                name: localize(locale, 'CHANNEL'),
+                                                value: guild.home?.channel ? `<#${guild.home.channel}>` : localize(locale, 'NOT_SET'),
+                                                inline: true
+                                            }
+                                        )
+                                ],
+                                components: [
+                                    new ActionRowBuilder()
+                                        .setComponents(
+                                            ...(!guild.home ? [
+                                                new ButtonBuilder()
+                                                    .setCustomId(`${interaction.user.id}:home_setup`)
+                                                    .setLabel(localize(locale, 'QUICK_SETUP'))
+                                                    .setStyle(ButtonStyle.Success)
+                                            ] : []),
+                                            new ButtonBuilder()
+                                                .setCustomId(`${interaction.user.id}:home_${guild.home?.enabled ? 'disable' : 'enable'}`)
+                                                .setLabel(localize(locale, guild.home?.enabled ? 'DISABLE' : 'ENABLE'))
+                                                .setStyle(guild.home?.enabled ? ButtonStyle.Danger : ButtonStyle.Success),
+                                            new ButtonBuilder()
+                                                .setCustomId(`${interaction.user.id}:home_channel`)
+                                                .setLabel(localize(locale, 'SET_CHANNEL'))
+                                                .setStyle(ButtonStyle.Primary),
+                                            ...(guild.home ? [
+                                                new ButtonBuilder()
+                                                    .setCustomId(`${interaction.user.id}:home_reset`)
+                                                    .setLabel(localize(locale, 'RESET_DATA'))
+                                                    .setStyle(ButtonStyle.Danger)
+                                            ] : [])
+                                        )
+                                ]
+                            });
+                            break;
+                    };
+                    break;
+                case 'home_setup':
+                    if (!interaction.appPermissions.has('ManageChannels') || !interaction.appPermissions.has('ManageWebhooks') || !interaction.appPermissions.has('ManageMessages')) return interaction.reply({
+                        content: localize(interaction.locale, 'BOT_MISSING_PERMISSIONS', 'Manage Channels, Manage Webhooks, Manage Messages'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        content: 'Setting up home...',
+                        embeds: [],
+                        components: []
+                    });
+
+                    let channel = await interaction.guild.channels.create({
+                        type: ChannelType.GuildText,
+                        name: 'home',
+                        permissionOverwrites: [
+                            {
+                                id: interaction.guildId,
+                                deny: PermissionFlagsBits.SendMessages
+                            }
+                        ]
+                    });
+                    let webhook = await channel.createWebhook({ name: 'Home' });
+
+                    channel.send('**There are no Highlights to show you yet!**\nBut you could write some!').catch(() => { });
+
+                    await db.set(`guilds.${interaction.guildId}.home`, {
+                        enabled: true,
+                        channel: channel.id,
+                        webhook: webhook.url
+                    });
+
+                    interaction.editReply({
+                        content: localize(locale, 'HOME_SETUP_SUCCESS', `<#${channel.id}>`)
+                    });
+                    break;
+                case 'home_enable':
+                    await interaction.deferUpdate();
+                    await db.set(`guilds.${interaction.guildId}.home.enabled`, true);
+
+                    interaction.update({
+                        content: localize(locale, 'SETTING_ENABLE_SUCCESS', localize(locale, 'HOME')),
+                        embeds: [],
+                        components: []
+                    });
+                    break;
+                case 'home_disable':
+                    await interaction.deferUpdate();
+                    await db.set(`guilds.${interaction.guildId}.home.enabled`, false);
+
+                    interaction.update({
+                        content: localize(locale, 'SETTING_DISABLE_SUCCESS', localize(locale, 'HOME')),
+                        embeds: [],
+                        components: []
+                    });
+                    break;
+                case 'home_channel':
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new ChannelSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:home_channel_select`)
+                                        .setPlaceholder(localize(locale, 'CHANNEL_SELECT'))
+                                        .setChannelTypes(ChannelType.GuildText)
+                                )
+                        ]
+                    });
+                    break;
+                case 'home_channel_select':
+                    await interaction.deferUpdate();
+
+                    let channelId = interaction.values[0];
+
+                    await db.set(`guilds.${interaction.guildId}.home.channel`, channelId);
+
+                    interaction.editReply({
+                        content: localize(locale, 'SETTING_CHANNEL_SUCCESS', localize(locale, 'HOME'), `<#${channelId}>`),
+                        embeds: [],
+                        components: []
+                    });
+                    break;
+                case 'home_reset':
+                    await interaction.deferUpdate();
+
+                    await db.delete(`guilds.${interaction.guildId}.home`);
+
+                    interaction.editReply({
+                        content: localize(locale, 'SETTING_RESET_SUCCESS', localize(locale, 'HOME')),
+                        embeds: [],
+                        components: []
+                    });
+                default:
                     logger('warning', 'COMMAND', 'Message component', interaction.customId, 'not found');
-                }
             };
         } catch (error) {
             logger('error', 'COMMAND', 'Error while executing message component:', `${error.message}\n`, error.stack);
@@ -1016,14 +1172,13 @@ client.on('interactionCreate', async interaction => {
 
         try {
             switch (interaction.customId) {
-                default: {
+                default:
                     logger('warning', 'COMMAND', 'Modal', interaction.customId, 'not found');
 
                     return interaction.reply({
                         content: localize(interaction.locale, 'NOT_FOUND', 'Modal'),
                         ephemeral: true
                     });
-                }
             };
         } catch (error) {
             logger('error', 'COMMAND', 'Error while executing modal:', `${error.message}\n`, error.stack);
@@ -1046,6 +1201,146 @@ client.on('interactionCreate', async interaction => {
             await command.autocomplete(interaction);
         } catch (error) {
             logger('error', 'COMMAND', 'Error while executing autocomplete:', `${error.message}\n`, error.stack);
+        };
+    };
+});
+
+client.on('messageCreate', async message => {
+    let guildId = message.guildId;
+
+    if (!guildId) return;
+
+    let guild = (await db.get(`guilds.${guildId}`)) ?? {};
+
+    if (guild.home?.enabled && guild.home.channel && guild.home.webhook && message.reference?.messageId) {
+        let msg = (await db.get(`messages.${message.reference.messageId}`)) ?? { replies: 0 };
+        let homeMessages = (await db.get(`guilds.${guildId}.home.messages`)) ?? [];
+
+        if (!msg.replies) msg.replies = 0;
+
+        msg.replies++;
+
+        logger('debug', 'HOME', 'Received message', message.id, 'from', message.guild ? `${message.guild.name} (${message.guild.id})` : 'DMs', 'by', `${message.author.tag} (${message.author.id})`, 'in', message.channel.name, 'with', msg.replies, 'replies');
+
+        if (msg.replies >= 3) {
+            if (!homeMessages.includes(message.reference.messageId)) {
+                let webhook = new WebhookClient({
+                    url: guild.home.webhook
+                });
+                let homeMessage = await message.channel.messages.fetch(message.reference.messageId);
+
+                const post = await webhook.send({
+                    avatarURL: homeMessage.author.displayAvatarURL({ forceStatic: true }),
+                    username: homeMessage.member.displayName,
+                    content: homeMessage.content,
+                    embeds: homeMessage.embeds,
+                    files: homeMessage.attachments.map(a => a.url)
+                });
+                const postMessage = await client.channels.cache.get(guild.home.channel).messages.fetch(post.id);
+
+                let added = [];
+
+                for (let reaction of homeMessage.reactions.cache.toJSON()) {
+                    if (added.includes(reaction.emoji.id ?? reaction.emoji.name)) continue;
+
+                    postMessage.react({
+                        id: reaction.emoji.id,
+                        name: reaction.emoji.name
+                    }).catch(() => { });
+                    added.push(reaction.emoji.id ?? reaction.emoji.name);
+
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                };
+
+                await db.delete(`messages.${message.reference.messageId}`);
+
+                homeMessages.push(message.reference.messageId);
+
+                await db.set(`guilds.${guildId}.home.messages`, homeMessages);
+
+                cron(43200000 * 2, async () => {
+                    let homeMessagesNew = (await db.get(`guilds.${guildId}.home.messages`)) ?? [];
+
+                    homeMessagesNew = homeMessagesNew.filter(m => m !== message.reference.messageId);
+
+                    await db.set(`guilds.${guildId}.home.messages`, homeMessagesNew);
+                    await postMessage.delete();
+                });
+            };
+        } else {
+            await db.set(`messages.${message.reference.messageId}.replies`, msg.replies);
+
+            cron(43200000, async () => await db.delete(`messages.${message.reference.messageId}`));
+        };;
+    };
+});
+
+client.on('messageReactionAdd', async (reaction, user) => {
+    let guildId = reaction.message.guildId;
+
+    if (!guildId) return;
+
+    let guild = (await db.get(`guilds.${guildId}`)) ?? {};
+
+    if (guild.home?.enabled && guild.home.channel && guild.home.webhook) {
+        let msg = (await db.get(`messages.${reaction.message.id}`)) ?? { reactions: 0 };
+        let homeMessages = (await db.get(`guilds.${guildId}.home.messages`)) ?? [];
+
+        if (!msg.reactions) msg.reactions = 0;
+
+        msg.reactions++;
+
+        logger('debug', 'HOME', 'Received reaction', reaction.emoji.name, 'from', reaction.message.guild ? `${reaction.message.guild.name} (${reaction.message.guild.id})` : 'DMs', 'by', `${reaction.message.author.tag} (${reaction.message.author.id})`, 'in', reaction.message.channel.name, 'with', msg.reactions, 'reactions');
+
+        if (msg.reactions >= 3) {
+            if (!homeMessages.includes(reaction.message.id)) {
+                let webhook = new WebhookClient({
+                    url: guild.home.webhook
+                });
+                let homeMessage = reaction.message;
+
+                const post = await webhook.send({
+                    avatarURL: homeMessage.author.displayAvatarURL({ forceStatic: true }),
+                    username: homeMessage.member.displayName,
+                    content: homeMessage.content,
+                    embeds: homeMessage.embeds,
+                    files: homeMessage.attachments.map(a => a.url)
+                });
+                const postMessage = await client.channels.cache.get(guild.home.channel).messages.fetch(post.id);
+
+                let added = [];
+
+                for (let r of homeMessage.reactions.cache.toJSON()) {
+                    if (added.includes(r.emoji.id ?? r.emoji.name)) continue;
+
+                    postMessage.react({
+                        id: r.emoji.id,
+                        name: r.emoji.name
+                    }).catch(() => { });
+                    added.push(r.emoji.id ?? r.emoji.name);
+
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                };
+
+                await db.delete(`messages.${reaction.message.id}`);
+
+                homeMessages.push(reaction.message.id);
+
+                await db.set(`guilds.${guildId}.home.messages`, homeMessages);
+
+                cron(43200000 * 2, async () => {
+                    let homeMessagesNew = (await db.get(`guilds.${guildId}.home.messages`)) ?? [];
+
+                    homeMessagesNew = homeMessagesNew.filter(m => m !== reaction.message.id);
+
+                    await db.set(`guilds.${guildId}.home.messages`, homeMessagesNew);
+                    await postMessage.delete();
+                });
+            };
+        } else {
+            await db.set(`messages.${reaction.message.id}.reactions`, msg.reactions);
+
+            cron(43200000, async () => await db.delete(`messages.${reaction.message.id}`));
         };
     };
 });

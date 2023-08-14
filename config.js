@@ -17,5 +17,16 @@ module.exports = {
         green: '57F287',
         yellow: 'FEE75C',
         red: 'ED4245'
-    }
+    },
+    beta: {
+        home: true
+    },
+    emojis: {
+        beta: '<:beta1:1071445535510249493><:beta2:1071445584038334504><:beta3:1071445631786303498>',
+        enabled: '<:checked:1062424010652123229>',
+        disabled: '<:unchecked:1078022830828048485>',
+        home: '<:home:1077611466716348437>',
+        featuredMessage: '<:highlight:1077611464317218907>'
+    },
+    features: ['home']
 };

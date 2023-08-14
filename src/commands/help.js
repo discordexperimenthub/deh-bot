@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ChatInputCommandInteraction } = require("discord.js");
+const { SlashCommandBuilder, ChatInputCommandInteraction, ApplicationCommandType } = require("discord.js");
 const { localize, getPercentage } = require("../modules/localization");
 const EmbedMaker = require("../modules/embed");
 
@@ -19,8 +19,8 @@ module.exports = {
     async execute(interaction) {
         await interaction.deferReply();
 
-        let allCommands = await interaction.client.application.commands.fetch();
-        let commands = interaction.client.commands.toJSON();
+        let allCommands = (await interaction.client.application.commands.fetch()).filter(c => c.type === ApplicationCommandType.ChatInput);
+        let commands = interaction.client.commands.toJSON().filter(c => c.type === ApplicationCommandType.ChatInput);
         let locale = interaction.locale;
         let commandCategories = {};
 
