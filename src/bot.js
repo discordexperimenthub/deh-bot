@@ -1212,7 +1212,7 @@ client.on('messageCreate', async message => {
 
     let guild = (await db.get(`guilds.${guildId}`)) ?? {};
 
-    if (guild.home?.enabled && guild.home.channel && guild.home.webhook && message.reference?.messageId) {
+    if (guild.home?.enabled && guild.home.channel && guild.home.webhook && message.reference?.messageId && message.channelId !== guild.home.channel) {
         let msg = (await db.get(`messages.${message.reference.messageId}`)) ?? { replies: 0 };
         let homeMessages = (await db.get(`guilds.${guildId}.home.messages`)) ?? [];
 
@@ -1282,7 +1282,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
 
     let guild = (await db.get(`guilds.${guildId}`)) ?? {};
 
-    if (guild.home?.enabled && guild.home.channel && guild.home.webhook) {
+    if (guild.home?.enabled && guild.home.channel && guild.home.webhook && reaction.message.channelId !== guild.home.channel) {
         let msg = (await db.get(`messages.${reaction.message.id}`)) ?? { reactions: 0 };
         let homeMessages = (await db.get(`guilds.${guildId}.home.messages`)) ?? [];
 
