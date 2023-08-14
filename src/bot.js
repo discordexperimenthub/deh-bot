@@ -1231,7 +1231,7 @@ client.on('messageCreate', async message => {
 
                 const post = await webhook.send({
                     avatarURL: homeMessage.author.displayAvatarURL({ forceStatic: true }),
-                    username: homeMessage.member.displayName,
+                    username: homeMessage.member.displayName || homeMessage.author.displayName,
                     content: homeMessage.content,
                     embeds: homeMessage.embeds,
                     files: homeMessage.attachments.map(a => a.url),
@@ -1304,7 +1304,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
 
                 const post = await webhook.send({
                     avatarURL: homeMessage.author.displayAvatarURL({ forceStatic: true }),
-                    username: homeMessage.member.displayName,
+                    username: homeMessage.member?.displayName ?? homeMessage.author.displayName,
                     content: homeMessage.content,
                     embeds: homeMessage.embeds,
                     files: homeMessage.attachments.map(a => a.url),
