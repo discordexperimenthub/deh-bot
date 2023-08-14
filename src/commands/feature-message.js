@@ -74,7 +74,10 @@ module.exports = {
                     username: homeMessage.member?.displayName ?? homeMessage.author.displayName,
                     content: `${emojis.featuredMessage} **Featured Message**\n${homeMessage.content}`,
                     embeds: homeMessage.embeds,
-                    files: homeMessage.attachments.map(a => a.url)
+                    files: homeMessage.attachments.map(a => a.url),
+                    allowedMentions: {
+                        parse: []
+                    }
                 });
                 const postMessage = await interaction.client.channels.cache.get(guild.home.channel).messages.fetch(post.id);
 

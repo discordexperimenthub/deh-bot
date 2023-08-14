@@ -1234,7 +1234,10 @@ client.on('messageCreate', async message => {
                     username: homeMessage.member.displayName,
                     content: homeMessage.content,
                     embeds: homeMessage.embeds,
-                    files: homeMessage.attachments.map(a => a.url)
+                    files: homeMessage.attachments.map(a => a.url),
+                    allowedMentions: {
+                        parse: []
+                    }
                 });
                 const postMessage = await client.channels.cache.get(guild.home.channel).messages.fetch(post.id);
 
@@ -1304,7 +1307,10 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     username: homeMessage.member.displayName,
                     content: homeMessage.content,
                     embeds: homeMessage.embeds,
-                    files: homeMessage.attachments.map(a => a.url)
+                    files: homeMessage.attachments.map(a => a.url),
+                    allowedMentions: {
+                        parse: []
+                    }
                 });
                 const postMessage = await client.channels.cache.get(guild.home.channel).messages.fetch(post.id);
 
