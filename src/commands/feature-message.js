@@ -71,7 +71,7 @@ module.exports = {
 
                 const post = await webhook.send({
                     avatarURL: homeMessage.author.displayAvatarURL({ forceStatic: true }),
-                    username: homeMessage.member.displayName,
+                    username: homeMessage.member?.displayName ?? homeMessage.author.displayName,
                     content: `${emojis.featuredMessage} **Featured Message**\n${homeMessage.content}`,
                     embeds: homeMessage.embeds,
                     files: homeMessage.attachments.map(a => a.url)
