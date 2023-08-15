@@ -10,7 +10,7 @@ module.exports = class EmbedMaker extends EmbedBuilder {
 
         this.setColor(colors.blurple);
         this.setFooter({
-            text: `Made with ❤️ by Discord Experiment Hub (discord.gg/experiments)`,
+            text: `Made with ❤️ by discord.gg/experiments`,
             iconURL: useServerIconForFooter ? client.guilds.cache.get(serverId).iconURL({ forceStatic: true }) : client.user.displayAvatarURL({ forceStatic: true })
         });
     };

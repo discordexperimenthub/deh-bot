@@ -99,7 +99,41 @@ async function checkScript(script, i, webhook, pings) {
 
     logger('success', 'SCRIPT', 'Generated diff for script', script);
 
-    
+    let response;
+
+    try {
+        response = (await axios.post('https://beta.purgpt.xyz/openai/chat/completions',
+            {
+                personality: 'programmer-ai',
+                messages: [
+                    {
+                        role: 'user',
+                        content: `You have to respond in a code block with diff format. Please show me the useful changes, not the entire script. If you don't know what to do, just say "skip" without a code block.\n\n\`\`\`diff\n${diffText.length > 3700 ? diffText.slice(0, 3700) + '...' : diffText}\n\`\`\``
+                    }
+                ]
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${process.env.PURGPT_API_KEY}`
+                }
+            }
+        )).data;
+    } catch (error) {
+        return logger('error', 'SCRIPT', 'Error while sending to AI', `\n${error}`);
+    };
+
+    let content = response?.choices?.[0]?.message?.content;
+
+    if (content) {
+        if (content === 'skip') return logger('warning', 'SCRIPT', 'AI skipped script', script);
+        else {
+            let codeBlockRegex = /```diff\n([\s\S]+?)\n```/g;
+            let codeBlock = codeBlockRegex.exec(content);
+
+            if (codeBlock) diffText = codeBlock[1];
+        };
+    };
 
     const embed = new EmbedMaker(client)
         .setTitle('Code Changes')
@@ -117,7 +151,7 @@ async function checkScript(script, i, webhook, pings) {
             }
         );
 
-    embed.data.footer.text = 'Powered by Discord-Datamining/Discord-Datamining';
+    embed.data.footer.text = 'Powered by Discord-Datamining/Discord-Datamining & purgpt.xyz';
 
     webhooks[webhook].send({
         content: pings.map(id => `<@&${id}>`).join(' '),
@@ -1108,7 +1142,7 @@ client.on('interactionCreate', async interaction => {
                         webhook: webhook.url
                     });
 
-                    interaction.editReply({
+                    interaction.followUp({
                         content: localize(locale, 'HOME_SETUP_SUCCESS', `<#${channel.id}>`)
                     });
                     break;
