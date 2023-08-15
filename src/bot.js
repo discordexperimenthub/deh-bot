@@ -108,7 +108,7 @@ async function checkScript(script, i, webhook, pings) {
                 messages: [
                     {
                         role: 'user',
-                        content: `You have to respond in a code block with diff format. Please show me the useful changes, not the entire script. If you don't know what to do, just say "skip" without a code block.\n\n\`\`\`diff\n${diffText.length > 15700 ? diffText.slice(0, 15700) + '...' : diffText}\n\`\`\``
+                        content: `You have to respond in a code block with diff format. Please show me the useful changes, not the entire script. Also please don't show license comments and changes related to build numbers. If you don't see any useful changes, just say "skip" without a code block.\n\n\`\`\`diff\n${diffText.length > 15700 ? diffText.slice(0, 15700) + '...' : diffText}\n\`\`\``
                     }
                 ]
             },
@@ -134,6 +134,8 @@ async function checkScript(script, i, webhook, pings) {
             if (codeBlock) diffText = codeBlock[1];
         };
     };
+
+    logger('success', 'SCRIPT', 'AI responded to script', script);
 
     const embed = new EmbedMaker(client)
         .setTitle('Code Changes')
