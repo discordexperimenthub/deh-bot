@@ -49,7 +49,7 @@ module.exports = class Home {
     };
 
     async save() {
-        await db.set(`guilds.${this.guild.id}.home`, this.data);
+        await db.set(`guilds.${this.guild}.home`, this.data);
     };
 
     async setChannel(channelId) {
