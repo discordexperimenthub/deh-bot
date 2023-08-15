@@ -93,11 +93,12 @@ module.exports = class Home {
         const homeMessage = await channel.messages.fetch(message.message);
 
         let messageLink = `<https://canary.discord.com/channels/${channel.guildId}/${channel.id}/${message.message}>`;
+        let m = `${emojis.featuredMessage} ${featured ? `**[Featured Post](${messageLink})**` : `**[Original Message](${messageLink})**`}\n${homeMessage.content}\n${message.data.replies.slice(0, 3).map((reply, index) => `${(message.data.replies.length - 1) > index ? emojis.replyContinuing : emojis.reply} **<@${reply.author}>:** ${reply.content}`).join('\n')}`;
 
         const post = await webhook.send({
             avatarURL: homeMessage.author.displayAvatarURL({ forceStatic: true }),
             username: homeMessage.member.displayName || homeMessage.author.displayName,
-            content: `${emojis.featuredMessage} ${featured ? `**[Featured Post](${messageLink})**` : `**[Original Message](${messageLink})**`}\n${homeMessage.content}\n${message.data.replies.slice(0, 3).map((reply, index) => `${(message.data.replies.length - 1) > index ? emojis.replyContinuing : emojis.reply} **<@${reply.author}>:** ${reply.content}`).join('\n')}`,
+            content: m.length > 4000 ? `${m.slice(0, 4000 - 3)}...` : m,
             embeds: homeMessage.embeds,
             files: homeMessage.attachments.map(a => a.url),
             allowedMentions: {
