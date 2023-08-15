@@ -3,6 +3,7 @@ const { QuickDB } = require("quick.db");
 const { localize } = require("../modules/localization");
 const EmbedMaker = require("../modules/embed");
 const { beta, emojis, features } = require("../../config");
+const Home = require("../modules/home");
 
 const db = new QuickDB();
 
@@ -27,22 +28,15 @@ module.exports = {
 
         let guildId = interaction.guild.id;
         let locale = interaction.locale;
-
-        if (!(await db.has(`guilds.${guildId}`))) await db.set(`guilds.${guildId}`, {});
-
-        let guild = await db.get(`guilds.${guildId}`);
         let guildFeatures = {
-            home: guild.home ?? {
-                channel: null,
-                enabled: false
-            }
+            home: await new Home(guildId).setup()
         };
 
         interaction.editReply({
             embeds: [
                 new EmbedMaker(interaction.client)
                     .setTitle(localize(locale, 'SERVER_SETTINGS'))
-                    .setDescription(features.map(feature => `${guildFeatures[feature]?.enabled ? emojis.enabled : emojis.disabled} ${localize(locale, feature.toUpperCase())}${beta[feature] ? ` ${emojis.beta}` : ''}`).join('\n'))
+                    .setDescription(features.map(feature => `${guildFeatures[feature]?.data?.enabled ? emojis.enabled : emojis.disabled} ${localize(locale, feature.toUpperCase())}${beta[feature] ? ` ${emojis.beta}` : ''}`).join('\n'))
             ],
             components: [
                 new ActionRowBuilder()
