@@ -1151,7 +1151,7 @@ client.on('interactionCreate', async interaction => {
 
                     await home.toggle();
 
-                    interaction.update({
+                    interaction.followUp({
                         content: localize(locale, 'SETTING_ENABLE_SUCCESS', localize(locale, 'HOME')),
                         embeds: [],
                         components: []
@@ -1162,7 +1162,7 @@ client.on('interactionCreate', async interaction => {
 
                     await home.toggle();
 
-                    interaction.update({
+                    interaction.followUp({
                         content: localize(locale, 'SETTING_DISABLE_SUCCESS', localize(locale, 'HOME')),
                         embeds: [],
                         components: []
