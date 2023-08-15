@@ -98,7 +98,7 @@ module.exports = class Home {
         const post = await webhook.send({
             avatarURL: homeMessage.author.displayAvatarURL({ forceStatic: true }),
             username: homeMessage.member?.displayName || homeMessage.author?.displayName,
-            content: m.length > 4000 ? `${m.slice(0, 4000 - 3)}...` : m,
+            content: m.length > 2000 ? `${m.slice(0, 2000 - 3)}...` : m,
             embeds: homeMessage.embeds,
             files: homeMessage.attachments.map(a => a.url),
             allowedMentions: {
