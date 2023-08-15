@@ -3,6 +3,7 @@ const { QuickDB } = require('quick.db');
 const DBMessage = require('./message');
 const cron = require('./cron');
 const { emojis } = require('../../config');
+const logger = require('./logger');
 
 const db = new QuickDB();
 
@@ -94,17 +95,23 @@ module.exports = class Home {
 
         let messageLink = `<https://canary.discord.com/channels/${channel.guildId}/${channel.id}/${message.message}>`;
         let m = `${emojis.featuredMessage} ${featured ? `**[Featured Post](${messageLink})**` : `**[Original Message](${messageLink})**`}\n${homeMessage.content}\n${message.data.replies.slice(0, 3).map((reply, index) => `${(message.data.replies.length - 1) > index ? emojis.replyContinuing : emojis.reply} **<@${reply.author}>:** ${reply.content}`).join('\n')}`;
+        let post;
 
-        const post = await webhook.send({
-            avatarURL: homeMessage.author.displayAvatarURL({ forceStatic: true }),
-            username: homeMessage.member?.displayName || homeMessage.author?.displayName,
-            content: m.length > 2000 ? `${m.slice(0, 2000 - 3)}...` : m,
-            embeds: homeMessage.embeds,
-            files: homeMessage.attachments.map(a => a.url),
-            allowedMentions: {
-                parse: []
-            }
-        });
+        try {
+            post = await webhook.send({
+                avatarURL: homeMessage.author.displayAvatarURL({ forceStatic: true }),
+                username: homeMessage.member?.displayName || homeMessage.author?.displayName,
+                content: m.length > 2000 ? `${m.slice(0, 2000 - 3)}...` : m,
+                embeds: homeMessage.embeds,
+                files: homeMessage.attachments.map(a => a.url),
+                allowedMentions: {
+                    parse: []
+                }
+            })
+        } catch (error) {
+            if (error?.status === 404) return this.setWebhook(null);
+            else return logger('error', 'HOME', 'Error sending message to home channel:', error);
+        };
         const postMessage = await channel.client.channels.cache.get(this.data.channel).messages.fetch(post.id);
 
         for (let reaction of message.data.reactions) {
@@ -147,6 +154,8 @@ module.exports = class Home {
                  */
                 let [message] = args;
 
+                if (message.channelId === this.data.channel) return;
+
                 msg = await new DBMessage(message.reference.messageId).setup();
                 channel = message.channel;
 
@@ -161,6 +170,8 @@ module.exports = class Home {
                  * @type {[MessageReaction, User]}
                  */
                 let [reaction, user] = args;
+
+                if (reaction.message.channelId === this.data.channel) return;
 
                 msg = await new DBMessage(reaction.message.id).setup();
                 channel = reaction.message.channel;
