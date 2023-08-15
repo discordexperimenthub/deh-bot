@@ -9,7 +9,7 @@ module.exports = class DBMessage {
      */
     message;
     /** 
-     * @type {{ replyCount: number, reactionCount: number, replies: string[], reactions: string[] } | null}
+     * @type {{ replyCount: number, reactionCount: number, replies: string[], reactions: string[], interacted: import('discord.js').Snowflake[] } | null}
      */
     data;
 
@@ -25,8 +25,15 @@ module.exports = class DBMessage {
             replyCount: 0,
             reactionCount: 0,
             replies: [],
-            reactions: []
+            reactions: [],
+            interacted: []
         };
+
+        if (!this.data.replyCount) this.data.replyCount = 0;
+        if (!this.data.reactionCount) this.data.reactionCount = 0;
+        if (!this.data.replies) this.data.replies = [];
+        if (!this.data.reactions) this.data.reactions = [];
+        if (!this.data.interacted) this.data.interacted = [];
 
         return this;
     };
@@ -48,6 +55,12 @@ module.exports = class DBMessage {
         this.data.reactionCount++;
 
         if (!this.data.reactions.includes(reaction)) this.data.reactions.push(reaction);
+
+        this.save();
+    };
+
+    addInteraction(userId) {
+        if (!this.data.interacted.includes(userId)) this.data.interacted.push(userId);
 
         this.save();
     };

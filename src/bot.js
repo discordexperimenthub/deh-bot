@@ -1,4 +1,4 @@
-const { Client, Collection, WebhookClient, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, ChannelSelectMenuBuilder } = require('discord.js');
+const { Client, Collection, WebhookClient, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, ChannelSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 const { readdirSync, writeFileSync, readFileSync, mkdirSync, writeFile } = require('node:fs');
 const { default: axios } = require('axios');
 const logger = require('./modules/logger');
@@ -1000,15 +1000,15 @@ client.on('interactionCreate', async interaction => {
         logger('debug', 'COMMAND', 'Received message component', `${interaction.customId} (${interaction.componentType})`, 'from', interaction.guild ? `${interaction.guild.name} (${interaction.guild.id})` : 'DMs', 'by', `${interaction.user.tag} (${interaction.user.id})`);
 
         try {
-            let [userId, customId] = interaction.customId.split(':');
+            let [userId, customId, ...args] = interaction.customId.split(':');
+            let locale = interaction.locale;
 
             if (userId !== interaction.user.id) return interaction.reply({
-                content: localize(interaction.locale, 'COMPONENT_NOT_YOURS'),
+                content: localize(locale, 'COMPONENT_NOT_YOURS'),
                 ephemeral: true
             });
 
             let guildId = interaction.guildId;
-            let locale = interaction.locale;
 
             const home = await new Home(guildId).setup();
 
@@ -1033,6 +1033,11 @@ client.on('interactionCreate', async interaction => {
                                                 name: localize(locale, 'CHANNEL'),
                                                 value: home.data?.channel ? `<#${home.data.channel}>` : localize(locale, 'NOT_SET'),
                                                 inline: true
+                                            },
+                                            {
+                                                name: localize(locale, 'MIN_INTERACTIONS'),
+                                                value: home.data.minInteractions.toString(),
+                                                inline: true
                                             }
                                         )
                                 ],
@@ -1052,6 +1057,10 @@ client.on('interactionCreate', async interaction => {
                                             new ButtonBuilder()
                                                 .setCustomId(`${interaction.user.id}:home_channel`)
                                                 .setLabel(localize(locale, 'SET_CHANNEL'))
+                                                .setStyle(ButtonStyle.Primary),
+                                            new ButtonBuilder()
+                                                .setCustomId(`${interaction.user.id}:home_min_interactions`)
+                                                .setLabel(localize(locale, 'SET_MIN_INTERACTIONS'))
                                                 .setStyle(ButtonStyle.Primary),
                                             ...(home.set ? [
                                                 new ButtonBuilder()
@@ -1159,6 +1168,28 @@ client.on('interactionCreate', async interaction => {
                         embeds: [],
                         components: []
                     });
+                    break;
+                case 'home_min_interactions':
+                    interaction.showModal(
+                        new ModalBuilder()
+                            .setCustomId(`home_min_interactions_modal:${guildId}`)
+                            .setTitle(localize(locale, 'SET_MIN_INTERACTIONS'))
+                            .setComponents(
+                                new ActionRowBuilder()
+                                    .setComponents(
+                                        new TextInputBuilder()
+                                            .setCustomId('count')
+                                            .setLabel(localize(locale, 'MIN_INTERACTIONS'))
+                                            .setPlaceholder('5')
+                                            .setValue(home.data.minInteractions.toString())
+                                            .setRequired(true)
+                                            .setMinLength(1)
+                                            .setMaxLength(2)
+                                            .setStyle(TextInputStyle.Short)
+                                    )
+                            )
+                    );
+                    break;
                 default:
                     logger('warning', 'COMMAND', 'Message component', interaction.customId, 'not found');
             };
@@ -1176,7 +1207,23 @@ client.on('interactionCreate', async interaction => {
         logger('debug', 'COMMAND', 'Received modal submit', interaction.customId, 'from', interaction.guild ? `${interaction.guild.name} (${interaction.guild.id})` : 'DMs', 'by', `${interaction.user.tag} (${interaction.user.id})`);
 
         try {
-            switch (interaction.customId) {
+            let [customId, ...args] = interaction.customId.split(':');
+            let locale = interaction.locale;
+
+            switch (customId) {
+                case 'home_min_interactions_modal':
+                    await interaction.deferReply();
+
+                    const home = await new Home(args[0]).setup();
+
+                    let minInteractions = parseInt(interaction.fields.getTextInputValue('count'));
+
+                    if (isNaN(minInteractions)) return interaction.editReply(localize(interaction.locale, 'INVALID_NUMBER'));
+
+                    await home.setMinInteractions(minInteractions);
+
+                    interaction.editReply(localize(locale, 'SETTING_MIN_INTERACTIONS_SUCCESS', minInteractions));
+                    break;
                 default:
                     logger('warning', 'COMMAND', 'Modal', interaction.customId, 'not found');
 
@@ -1224,7 +1271,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
 
     const home = await new Home(reaction.message.guildId).setup();
 
-    home.check('reaction', reaction);
+    home.check('reaction', reaction, user);
 });
 
 client.login(process.env.DISCORD_TOKEN);

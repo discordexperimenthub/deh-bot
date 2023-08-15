@@ -38,5 +38,9 @@ module.exports = {
     FOR_7_DAYS: 'For 7 Days',
     FEATURE_MESSAGE_SUCCESS: 'Message has been featured successfully!',
     RESET_DATA: 'Reset Data',
-    SETTING_RESET_SUCCESS: '{{0}} data has been reset successfully!'
+    SETTING_RESET_SUCCESS: '{{0}} data has been reset successfully!',
+    MIN_INTERACTIONS: 'Minimum Required Interactions',
+    SET_MIN_INTERACTIONS: 'Set Minimum Interactions',
+    INVALID_NUMBER: 'Invalid number! Please enter a valid number.',
+    SETTING_MIN_INTERACTIONS_SUCCESS: 'Minimum interactions has been set as {{0}} successfully!'
 };

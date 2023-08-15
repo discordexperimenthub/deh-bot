@@ -36,5 +36,9 @@ module.exports = {
     FOR_7_DAYS: '7 Gün Boyunca',
     FEATURE_MESSAGE_SUCCESS: 'Mesaj başarıyla öne çıkartıldı!',
     RESET_DATA: 'Verileri Sıfırla',
-    SETTING_RESET_SUCCESS: '{{0}} verileri başarıyla sıfırlandı!'
+    SETTING_RESET_SUCCESS: '{{0}} verileri başarıyla sıfırlandı!',
+    MIN_INTERACTIONS: 'Gerekli Minimum Etkileşim',
+    SET_MIN_INTERACTIONS: 'Minimum Etkileşimi Ayarla',
+    INVALID_NUMBER: 'Geçersiz sayı! Lütfen geçerli bir sayı gir.',
+    SETTING_MIN_INTERACTIONS_SUCCESS: 'Minimum gerekli etkileşim başarıyla {{1}} olarak ayarlandı!',
 };

@@ -1,4 +1,4 @@
-const { Message, MessageReaction, WebhookClient, Client, TextChannel } = require('discord.js');
+const { Message, MessageReaction, WebhookClient, Client, TextChannel, User } = require('discord.js');
 const { QuickDB } = require('quick.db');
 const DBMessage = require('./message');
 const cron = require('./cron');
@@ -16,7 +16,7 @@ module.exports = class Home {
      */
     usable;
     /**
-     * @type {{ channel: import('discord.js').Snowflake, webhook: string, enabled: boolean, messages: import('discord.js').Snowflake[] } | null}
+     * @type {{ channel: import('discord.js').Snowflake, webhook: string, enabled: boolean, messages: import('discord.js').Snowflake[], minInteractions: number } | null}
      */
     data;
     /**
@@ -37,10 +37,12 @@ module.exports = class Home {
             channel: null,
             webhook: null,
             enabled: false,
-            messages: []
+            messages: [],
+            minInteractions: 5
         };
 
         if (!this.data.messages) this.data.messages = [];
+        if (!this.data.minInteractions) this.data.minInteractions = 5;
 
         this.usable = (this.data.enabled && this.data.channel && this.data.webhook) ? true : false;
         this.set = (this.data.channel && this.data.webhook) ? true : false;
@@ -66,6 +68,12 @@ module.exports = class Home {
 
     async toggle() {
         this.data.enabled = !this.data.enabled;
+
+        await this.save();
+    };
+
+    async setMinInteractions(count) {
+        this.data.minInteractions = count;
 
         await this.save();
     };
@@ -145,21 +153,23 @@ module.exports = class Home {
                     author: message.author.id,
                     content: message.content
                 });
+                msg.addInteraction(message.author.id);
                 break;
             case 'reaction':
                 /**
-                 * @type {[MessageReaction]}
+                 * @type {[MessageReaction, User]}
                  */
-                let [reaction] = args;
+                let [reaction, user] = args;
 
                 msg = await new DBMessage(reaction.message.id).setup();
                 channel = reaction.message.channel;
 
                 msg.addReaction(reaction.emoji.id ?? reaction.emoji.name);
+                msg.addInteraction(user.id);
                 break;
         };
 
-        if ((msg.data.reactionCount + msg.data.replyCount) >= 5) this.send(false, channel, msg);
+        if (msg.data.interacted.length >= this.data.minInteractions) this.send(false, channel, msg);
     };
 
     async delete() {
