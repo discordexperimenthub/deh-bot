@@ -25,8 +25,10 @@ module.exports = {
         beta: '<:beta1:1071445535510249493><:beta2:1071445584038334504><:beta3:1071445631786303498>',
         enabled: '<:checked:1062424010652123229>',
         disabled: '<:unchecked:1078022830828048485>',
-        home: '<:home:1077611466716348437>',
-        featuredMessage: '<:highlight:1077611464317218907>'
+        home: '<:home:1140909364669055019>',
+        featuredMessage: '<:highlight:1077611464317218907>',
+        reply: '<:reply:1140967497345007657>',
+        replyContinuing: '<:reply_continuing:1140968153099280394>'
     },
     features: ['home']
 };

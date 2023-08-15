@@ -83,10 +83,13 @@ module.exports = class Home {
             url: this.data.webhook
         });
         const homeMessage = await channel.messages.fetch(message.message);
+
+        let messageLink = `<https://canary.discord.com/channels/${channel.guildId}/${channel.id}/${message.message}>`;
+
         const post = await webhook.send({
             avatarURL: homeMessage.author.displayAvatarURL({ forceStatic: true }),
             username: homeMessage.member.displayName || homeMessage.author.displayName,
-            content: `${featured ? `${emojis.featuredMessage} **Featured Message**\n` : ''}${homeMessage.content}`,
+            content: `${emojis.featuredMessage} ${featured ? `**[Featured Post](${messageLink})**` : `**[Original Message](${messageLink})**`}\n${homeMessage.content}\n${message.data.replies.slice(0, 3).map((reply, index) => `${(message.data.replies.length - 1) > index ? emojis.replyContinuing : emojis.reply} **<@${reply.author}>:** ${reply.content}`).join('\n')}`,
             embeds: homeMessage.embeds,
             files: homeMessage.attachments.map(a => a.url),
             allowedMentions: {
@@ -106,7 +109,7 @@ module.exports = class Home {
         this.data.messages.push(message.message);
 
         await this.save();
-        
+
         cron(time, async () => {
             this.data.messages = this.data.messages.filter(m => m !== message.message);
 
@@ -138,7 +141,10 @@ module.exports = class Home {
                 msg = await new DBMessage(message.reference.messageId).setup();
                 channel = message.channel;
 
-                msg.addReply(message.content);
+                msg.addReply({
+                    author: message.author.id,
+                    content: message.content
+                });
                 break;
             case 'reaction':
                 /**
