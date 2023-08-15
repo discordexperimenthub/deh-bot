@@ -120,7 +120,7 @@ async function checkScript(script, i, webhook, pings) {
             }
         )).data;
     } catch (error) {
-        return logger('error', 'SCRIPT', 'Error while sending to AI', `\n${error}`);
+        logger('error', 'SCRIPT', 'Error while sending to AI', `\n${error}`);
     };
 
     let content = response?.choices?.[0]?.message?.content;
