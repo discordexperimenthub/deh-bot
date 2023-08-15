@@ -83,7 +83,7 @@ async function checkScript(script, i, webhook, pings) {
 
     logger('success', 'SCRIPT', 'Script fetched', script);
 
-    let diff = diffLines(oldScript, newScript).filter(line => line.added || line.removed);
+    let diff = diffLines(oldScript, newScript);
     let diffText = '';
     let writing = false;
 
@@ -98,6 +98,8 @@ async function checkScript(script, i, webhook, pings) {
     };
 
     logger('success', 'SCRIPT', 'Generated diff for script', script);
+
+    
 
     const embed = new EmbedMaker(client)
         .setTitle('Code Changes')
