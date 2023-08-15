@@ -77,7 +77,7 @@ module.exports = class Home {
      * @param {number} time
      */
     async send(featured, channel, message, time = 43200000 * 2) {
-        if (!this.data.messages.includes(message.message)) return;
+        if (this.data.messages.includes(message.message)) return;
 
         const webhook = new WebhookClient({
             url: this.data.webhook
@@ -106,7 +106,7 @@ module.exports = class Home {
         this.data.messages.push(message.message);
 
         await this.save();
-        console.log(this.data);
+        
         cron(time, async () => {
             this.data.messages = this.data.messages.filter(m => m !== message.message);
 
