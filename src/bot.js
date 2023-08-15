@@ -108,7 +108,7 @@ async function checkScript(script, i, webhook, pings) {
                 messages: [
                     {
                         role: 'user',
-                        content: `You have to respond in a code block with diff format. Please show me the useful changes, not the entire script. If you don't know what to do, just say "skip" without a code block.\n\n\`\`\`diff\n${diffText.length > 3700 ? diffText.slice(0, 3700) + '...' : diffText}\n\`\`\``
+                        content: `You have to respond in a code block with diff format. Please show me the useful changes, not the entire script. If you don't know what to do, just say "skip" without a code block.\n\n\`\`\`diff\n${diffText.length > 15700 ? diffText.slice(0, 15700) + '...' : diffText}\n\`\`\``
                     }
                 ]
             },
