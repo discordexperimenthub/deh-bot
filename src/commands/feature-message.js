@@ -1,4 +1,4 @@
-const { ContextMenuCommandBuilder, ApplicationCommandType, PermissionFlagsBits, MessageContextMenuCommandInteraction, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, InteractionCollector, WebhookClient } = require("discord.js");
+const { ContextMenuCommandBuilder, ApplicationCommandType, PermissionFlagsBits, MessageContextMenuCommandInteraction, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, InteractionCollector, WebhookClient, ComponentType } = require("discord.js");
 const { localize } = require("../modules/localization");
 const { QuickDB } = require("quick.db");
 const timer = require("../modules/timer");
@@ -58,6 +58,7 @@ module.exports = {
 
         const collector = new InteractionCollector(interaction.client, {
             message: componentMessage,
+            componentType: ComponentType.StringSelect,
             time: 120000
         });
 

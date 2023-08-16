@@ -66,7 +66,7 @@ module.exports = {
         let posts = JSON.parse(readFileSync('blog/posts.json', 'utf-8'));
         let search = interaction.options.getFocused().toLowerCase();
 
-        interaction.respond(posts.filter(post => post.id.toLowerCase().includes(search) || post.title.toLowerCase().includes(search) || post.description.toLowerCase().includes(search)).slice(0, 25).map(article => ({
+        interaction.respond(posts.filter(post => post).filter(post => (post.id).toLowerCase().includes(search) || post.title.toLowerCase().includes(search) || post.description.toLowerCase().includes(search)).slice(0, 25).map(article => ({
             name: article.title,
             value: article.id
         })));
