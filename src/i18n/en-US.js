@@ -42,5 +42,14 @@ module.exports = {
     MIN_INTERACTIONS: 'Minimum Required Interactions',
     SET_MIN_INTERACTIONS: 'Set Minimum Interactions',
     INVALID_NUMBER: 'Invalid number! Please enter a valid number.',
-    SETTING_MIN_INTERACTIONS_SUCCESS: 'Minimum interactions has been set as {{0}} successfully!'
+    SETTING_MIN_INTERACTIONS_SUCCESS: 'Minimum interactions has been set as {{0}} successfully!',
+    REMINDER_TIME: 'Select a time for the reminder...',
+    IN_1_HOUR: 'in 1 hour',
+    IN_2_HOURS: 'in 2 hours',
+    IN_4_HOURS: 'in 4 hours',
+    IN_1_DAY: 'in 1 day',
+    IN_1_WEEK: 'in 1 week',
+    REMINDER_SET: 'Reminder has been set to {{0}} successfully! Be sure I can send messages to you!',
+    MESSAGE_REMINDERS: 'Message Reminders',
+    NO_MESSAGE_REMINDERS: 'You have no Reminders!\n**PROTIP:** You can mark any message as a Reminder to have it appear here.'
 };

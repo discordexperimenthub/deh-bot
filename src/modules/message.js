@@ -1,5 +1,5 @@
 const { QuickDB } = require('quick.db');
-const cron = require('./cron');
+const timer = require('./timer');
 
 const db = new QuickDB();
 
@@ -39,7 +39,15 @@ module.exports = class DBMessage {
     };
 
     async save() {
-        if (!(await db.has(`messages.${this.message}`))) cron(43200000, async () => await db.delete(`messages.${this.message}`));
+        if (!(await db.has(`messages.${this.message}`))) timer('custom', {
+            time: 43200000,
+            callback: async () => {
+                await db.delete(`messages.${c.messageId}`);
+            },
+            config: {
+                messageId: this.message
+            }
+        });
 
         await db.set(`messages.${this.message}`, this.data);
     };
