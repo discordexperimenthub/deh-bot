@@ -45,6 +45,7 @@ module.exports = {
                 .setDescriptionLocalizations({
                     tr: 'Mesaj hatırlatıcısının sırası'
                 })
+                .setRequired(true)
             )
         ),
     /**
@@ -68,12 +69,19 @@ module.exports = {
             }).catch(error => logger('error', 'REMINDER', 'Error while sending message reminder list', error));
         } else if (subcommand === 'cancel') {
             let index = interaction.options.getInteger('index') - 1;
+            let reminder = reminders[index];
 
-            if (isNaN(index) || !reminders[index]) return interaction.editReply(localize(locale, 'INVALID_NUMBER'));
+            if (isNaN(index) || !reminder) return interaction.editReply(localize(locale, 'INVALID_NUMBER'));
 
             reminders.splice(index, 1);
 
             await db.set(`users.${interaction.user.id}.reminders`, reminders);
+
+            let timers = await db.get('timers') ?? [];
+
+            timers = timers.filter(timer => timer.id !== reminder.id);
+
+            await db.set('timers', timers);
 
             interaction.editReply(localize(locale, 'MESSAGE_REMINDER_CANCELLED'));
         };

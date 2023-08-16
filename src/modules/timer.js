@@ -47,7 +47,7 @@ async function deleteMessage(channelId, messageId) {
  * - `channelId` - Channel id to delete message from
  * - `messageId` - Message id to delete
  * @param {'custom' | 'sendUserMessage' | 'deleteMessage'} type 
- * @param {{ time: number, callback?: Function, userId?: import("discord.js").Snowflake, message?: MessagePayload, config?: object, channelId?: import("discord.js").Snowflake, messageId?: import("discord.js").Snowflake }} settings 
+ * @param {{ time: number, callback?: Function, userId?: import("discord.js").Snowflake, message?: MessagePayload, config?: object, channelId?: import("discord.js").Snowflake, messageId?: import("discord.js").Snowflake, id?: string }} settings 
  */
 module.exports = async (type, settings) => {
     let now = Date.now();
@@ -61,6 +61,7 @@ module.exports = async (type, settings) => {
         userId: settings.userId,
         message: settings.message,
         config: settings.config,
+        id: settings.id
     });
 };
 

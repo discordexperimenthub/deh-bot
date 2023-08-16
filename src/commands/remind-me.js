@@ -63,6 +63,7 @@ module.exports = {
             int.deferUpdate();
 
             let time = parseInt(int.values[0]);
+            let id = crypto.randomBytes(32).toString('hex');
 
             timer('sendUserMessage', {
                 time,
@@ -79,6 +80,7 @@ module.exports = {
                     embeds: interaction.targetMessage.embeds.map(e => e.toJSON()),
                     attachments: interaction.targetMessage.attachments.map(a => a.toJSON())
                 },
+                id,
                 config: {
                     userId: interaction.user.id,
                     targetId: interaction.targetId
