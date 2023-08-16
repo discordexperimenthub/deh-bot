@@ -46,6 +46,7 @@ module.exports = {
                     tr: 'Mesaj hatırlatıcısının sırası'
                 })
                 .setRequired(true)
+                .setMinValue(1)
             )
         ),
     /**
