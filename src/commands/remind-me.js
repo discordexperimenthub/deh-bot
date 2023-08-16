@@ -3,6 +3,7 @@ const { localize } = require("../modules/localization");
 const timer = require("../modules/timer");
 const { QuickDB } = require("quick.db");
 const { default: axios } = require("axios");
+const crypto = require('node:crypto');
 
 const db = new QuickDB();
 
