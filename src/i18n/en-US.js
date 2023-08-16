@@ -51,5 +51,6 @@ module.exports = {
     IN_1_WEEK: 'in 1 week',
     REMINDER_SET: 'Reminder has been set to {{0}} successfully! Be sure I can send messages to you!',
     MESSAGE_REMINDERS: 'Message Reminders',
-    NO_MESSAGE_REMINDERS: 'You have no Reminders!\n**PROTIP:** You can mark any message as a Reminder to have it appear here.'
+    NO_MESSAGE_REMINDERS: 'You have no Reminders!\n**PROTIP:** You can mark any message as a Reminder to have it appear here.',
+    MESSAGE_REMINDER_CANCELLED: 'Message Reminder has been cancelled successfully!'
 };

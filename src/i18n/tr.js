@@ -49,5 +49,6 @@ module.exports = {
     IN_1_WEEK: '1 hafta içinde',
     REMINDER_SET_SUCCESS: 'Hatırlatıcı başarıyla {{0}} olarak ayarlandı! Sana mesaj gönderebileceğimden emin ol!',
     MESSAGE_REMINDERS: 'Mesaj Hatırlatıcıları',
-    NO_MESSAGE_REMINDERS: 'Hatırlatıcıların yok! **İPUCU:** Herhangi bir mesajı Hatırlatıcı olarak işaretleyerek burada çıkmalarını sağlayabilirsin.'
+    NO_MESSAGE_REMINDERS: 'Hatırlatıcıların yok! **İPUCU:** Herhangi bir mesajı Hatırlatıcı olarak işaretleyerek burada çıkmalarını sağlayabilirsin.',
+    MESSAGE_REMINDER_CANCELLED: 'Mesaj Hatırlatıcısı başarıyla iptal edildi!'
 };

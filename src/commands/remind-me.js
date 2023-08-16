@@ -94,7 +94,7 @@ module.exports = {
             });
 
             interaction.editReply({
-                content: localize(locale, 'REMINDER_SET', `<t:${Math.floor(Date.now() / 1000) + Math.floor(time / 1000)}:R>`),
+                content: localize(locale, 'REMINDER_SET', `<t:${Math.floor(Date.now() / 1000) + Math.floor(time / 1000)}>`),
                 components: []
             });
         });

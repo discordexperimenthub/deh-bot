@@ -13,25 +13,69 @@ module.exports = {
         .setNameLocalizations({
             tr: 'mesaj-hatırlatıcıları'
         })
-        .setDescription('Shows your message reminders')
+        .setDescription('Manages your message reminders')
         .setDescriptionLocalizations({
-            tr: 'Mesaj hatırlatıcılarını gösterir'
-        }),
+            tr: 'Mesaj hatırlatıcılarını yönetir'
+        })
+        .addSubcommand(subcommand => subcommand
+            .setName('list')
+            .setNameLocalizations({
+                tr: 'listele'
+            })
+            .setDescription('Lists your message reminders')
+            .setDescriptionLocalizations({
+                tr: 'Mesaj hatırlatıcılarını listeler'
+            })
+        )
+        .addSubcommand(subcommand => subcommand
+            .setName('cancel')
+            .setNameLocalizations({
+                tr: 'iptal-et'
+            })
+            .setDescription('Cancels your message reminder')
+            .setDescriptionLocalizations({
+                tr: 'Mesaj hatırlatıcını iptal eder'
+            })
+            .addIntegerOption(option => option
+                .setName('index')
+                .setNameLocalizations({
+                    tr: 'sıra'
+                })
+                .setDescription('Index of the message reminder. You can get the index by using the list subcommand')
+                .setDescriptionLocalizations({
+                    tr: 'Mesaj hatırlatıcısının sırası'
+                })
+            )
+        ),
     /**
      * @param {ChatInputCommandInteraction} interaction 
      */
     async execute(interaction) {
         await interaction.deferReply({ ephemeral: true });
 
+        let subcommand = interaction.options.getSubcommand();
         let reminders = await db.get(`users.${interaction.user.id}.reminders`) ?? [];
         let locale = interaction.locale;
 
-        interaction.editReply({
-            embeds: [
-                new EmbedMaker(interaction.client)
-                    .setTitle(localize(locale, 'MESSAGE_REMINDERS'))
-                    .setDescription(reminders.length > 0 ? `${reminders.slice(0, 20).map((reminder, index) => `${index + 1}. ${reminder.content.length > 100 ? `${reminder.content.slice(0, 100)}...` : reminder.content} **-** Ends in <t:${reminder.time}:R>`).join('\n')}${reminders.length > 10 ? `\n**(${reminders.length - 10} more)**` : ''}` : localize(locale, 'NO_MESSAGE_REMINDERS'))
-            ]
-        }).catch(error => logger('error', 'REMINDER', 'Error while sending message reminder list', error));
+        if (subcommand === 'list') {
+
+            interaction.editReply({
+                embeds: [
+                    new EmbedMaker(interaction.client)
+                        .setTitle(localize(locale, 'MESSAGE_REMINDERS'))
+                        .setDescription(reminders.length > 0 ? `${reminders.slice(0, 20).map((reminder, index) => `${index + 1}. ${reminder.content.length > 100 ? `${reminder.content.slice(0, 100)}...` : reminder.content} **-** Ends in <t:${reminder.time}:R>`).join('\n')}${reminders.length > 10 ? `\n**(${reminders.length - 10} more)**` : ''}` : localize(locale, 'NO_MESSAGE_REMINDERS'))
+                ]
+            }).catch(error => logger('error', 'REMINDER', 'Error while sending message reminder list', error));
+        } else if (subcommand === 'cancel') {
+            let index = interaction.options.getInteger('index') - 1;
+
+            if (isNaN(index) || !reminders[index]) return interaction.editReply(localize(locale, 'INVALID_NUMBER'));
+
+            reminders.splice(index, 1);
+
+            await db.set(`users.${interaction.user.id}.reminders`, reminders);
+
+            interaction.editReply(localize(locale, 'MESSAGE_REMINDER_CANCELLED'));
+        };
     }
 };
