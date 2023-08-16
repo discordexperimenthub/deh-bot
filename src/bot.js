@@ -8,7 +8,7 @@ const { diffLines } = require('diff');
 const EmbedMaker = require('./modules/embed');
 const { execSync } = require('node:child_process');
 const { QuickDB } = require('quick.db');
-const cron = require('./modules/cron');
+const timer = require('./modules/timer');
 const Home = require('./modules/home');
 
 const client = new Client({
@@ -16,7 +16,8 @@ const client = new Client({
         'Guilds',
         'GuildMessages',
         'MessageContent',
-        'GuildMessageReactions'
+        'GuildMessageReactions',
+        'DirectMessages'
     ]
 });
 const webhooks = {
@@ -108,7 +109,7 @@ async function checkScript(script, i, webhook, pings) {
                 messages: [
                     {
                         role: 'user',
-                        content: `You have to respond in a code block with diff format. Please show me the useful changes, not the entire script. Also please don't show license comments and changes related to build numbers. If you don't see any useful changes, just say "skip" without a code block.\n\n\`\`\`diff\n${diffText.length > 15700 ? diffText.slice(0, 15700) + '...' : diffText}\n\`\`\``
+                        content: `You have to respond in a code block with diff format. Please show me the useful changes, not the entire script. Also please don't show license comments, changes related to build numbers and source mapping comments. If you don't see any useful changes, just say "skip" without a code block.\n\n\`\`\`diff\n${diffText.length > 15700 ? diffText.slice(0, 15700) + '...' : diffText}\n\`\`\``
                     }
                 ]
             },
@@ -172,7 +173,7 @@ async function checkScripts() {
     logger('info', 'SCRIPT', 'Found', scripts.length.toString(), 'scripts');
 
     for (let i = 0; i < scripts.length; i++) {
-        if (i !== 3) await checkScript(scripts[i], i, 'extraStuff', [roleIds.extraStuff, roleIds.codeChanges]);
+        if (![0, 3].includes(i)) await checkScript(scripts[i], i, 'extraStuff', [roleIds.extraStuff, roleIds.codeChanges]);
     };
 };
 

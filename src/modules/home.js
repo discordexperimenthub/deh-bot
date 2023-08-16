@@ -1,7 +1,7 @@
 const { Message, MessageReaction, WebhookClient, Client, TextChannel, User } = require('discord.js');
 const { QuickDB } = require('quick.db');
 const DBMessage = require('./message');
-const cron = require('./cron');
+const timer = require('./timer');
 const { emojis } = require('../../config');
 const logger = require('./logger');
 
@@ -98,6 +98,10 @@ module.exports = class Home {
         let post;
 
         try {
+            this.data.messages.push(message.message);
+
+            await this.save();
+
             post = await webhook.send({
                 avatarURL: homeMessage.author.displayAvatarURL({ forceStatic: true }),
                 username: homeMessage.member?.displayName || homeMessage.author?.displayName,
@@ -107,7 +111,7 @@ module.exports = class Home {
                 allowedMentions: {
                     parse: []
                 }
-            })
+            });
         } catch (error) {
             if (error?.status === 404) return this.setWebhook(null);
             else return logger('error', 'HOME', 'Error sending message to home channel:', error);
@@ -122,15 +126,18 @@ module.exports = class Home {
 
         await message.delete();
 
-        this.data.messages.push(message.message);
+        timer('deleteMessage', {
+            time,
+            callback: async () => {
+                c.data.messages = c.data.messages.filter(m => m !== message.message);
 
-        await this.save();
-
-        cron(time, async () => {
-            this.data.messages = this.data.messages.filter(m => m !== message.message);
-
-            await this.save();
-            await postMessage.delete();
+                await db.set(`guilds.${this.guild}.home`, c.data);
+            },
+            config: {
+                data: this.data
+            },
+            channelId: this.data.channel,
+            messageId: post.id
         });
     };
 

@@ -1,7 +1,7 @@
 const { ContextMenuCommandBuilder, ApplicationCommandType, PermissionFlagsBits, MessageContextMenuCommandInteraction, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, InteractionCollector, WebhookClient } = require("discord.js");
 const { localize } = require("../modules/localization");
 const { QuickDB } = require("quick.db");
-const cron = require("../modules/cron");
+const timer = require("../modules/timer");
 const { emojis } = require("../../config");
 const Home = require("../modules/home");
 const DBMessage = require("../modules/message");

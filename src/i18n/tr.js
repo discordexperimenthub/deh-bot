@@ -41,4 +41,13 @@ module.exports = {
     SET_MIN_INTERACTIONS: 'Minimum Etkileşimi Ayarla',
     INVALID_NUMBER: 'Geçersiz sayı! Lütfen geçerli bir sayı gir.',
     SETTING_MIN_INTERACTIONS_SUCCESS: 'Minimum gerekli etkileşim başarıyla {{1}} olarak ayarlandı!',
+    REMINDER_TIME: 'Hatırlatıcı için bir zaman seç...',
+    IN_1_HOUR: '1 saat içinde',
+    IN_2_HOURS: '2 saat içinde',
+    IN_4_HOURS: '4 saat içinde',
+    IN_1_DAY: '1 gün içinde',
+    IN_1_WEEK: '1 hafta içinde',
+    REMINDER_SET_SUCCESS: 'Hatırlatıcı başarıyla {{0}} olarak ayarlandı! Sana mesaj gönderebileceğimden emin ol!',
+    MESSAGE_REMINDERS: 'Mesaj Hatırlatıcıları',
+    NO_MESSAGE_REMINDERS: 'Hatırlatıcıların yok! **İPUCU:** Herhangi bir mesajı Hatırlatıcı olarak işaretleyerek burada çıkmalarını sağlayabilirsin.'
 };
