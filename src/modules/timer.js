@@ -76,23 +76,27 @@ setInterval(async () => {
             let c = timers[i].config;
 
             if (timers[i].callback) {
-                let response = eval(`(${timers[i].callback})()`);
-
-                logger('debug', 'TIMER', 'Executed custom timer callback:', timers[i].callback, 'Response:', JSON.stringify(response))
+                try {
+                    await eval(`(${timers[i].callback})()`);
+                } catch (error) {
+                    logger('error', 'TIMER', 'Error while executing callback:', error);
+                };
             }
             if (timers[i].type === 'sendUserMessage') {
-                logger('debug', 'TIMER', 'Sending message to', timers[i].userId, 'with content:', timers[i].message.content);
-
-                let response = await sendUserMessage(timers[i].userId, timers[i].message);
-
-                logger('debug', 'TIMER', 'Message sent to', timers[i].userId, 'with content:', timers[i].message.content, 'Response:', JSON.stringify(response, null, 4));
+                try {
+                    await sendUserMessage(timers[i].userId, timers[i].message);
+                } catch (error) {
+                    logger('error', 'TIMER', 'Error while sending user message:', error);
+                };
             } else if (timers[i].type === 'deleteMessage') {
-                logger('debug', 'TIMER', 'Deleting message', timers[i].messageId, 'from channel', timers[i].channelId);
-
-                let response = await deleteMessage(timers[i].channelId, timers[i].messageId);
-
-                logger('debug', 'TIMER', 'Message deleted', timers[i].messageId, 'from channel', timers[i].channelId, 'Response:', JSON.stringify(response, null, 4));
+                try {
+                    await deleteMessage(timers[i].channelId, timers[i].messageId);
+                } catch (error) {
+                    logger('error', 'TIMER', 'Error while deleting message:', error);
+                };
             };
+
+            logger('debug', 'TIMER', `Timer ${timers[i].id ?? i} executed`);
 
             timers.splice(i, 1);
         };
