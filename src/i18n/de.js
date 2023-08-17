@@ -53,5 +53,7 @@ module.exports = {
     REMINDER_SET: 'Die Erinnerung wurde erfolgreich auf {{0}} gesetzt! Stelle sicher, dass ich dir Nachrichten schicken kann!',
     MESSAGE_REMINDERS: 'Nachrichten Erinnerungen',
     NO_MESSAGE_REMINDERS: 'Es gibt keine Erinnerungen!\n**PROTIP:** Es kann jede Nachricht als Erinnerung markiert werden, damit sie hier erscheint.',
-    MESSAGE_REMINDER_CANCELLED: 'Die Erinnerungsnachricht wurde erfolgreich gelöscht!'
+    MESSAGE_REMINDER_CANCELLED: 'Die Erinnerungsnachricht wurde erfolgreich gelöscht!',
+    NO_CONTENT: 'Kein Inhalt',
+    REMINDER_ATTACHMENTS_NOT_SUPPORTED: 'Derzeit werden Anhänge für Nachrichtenerinnerungen nicht unterstützt!'
 };
