@@ -18,7 +18,7 @@ module.exports = class AutoMod {
      */
     usable;
     /**
-     * @type {{ enabled: boolean; rules: string[] } | null}
+     * @type {{ enabled: boolean; rules: string[], bypassRoles: import('discord.js').Snowflake[], bypassChannels: import('discord.js').Snowflake[] } | null}
      */
     data;
     /**
@@ -37,7 +37,9 @@ module.exports = class AutoMod {
     async setup() {
         this.data = (await db.get(`guilds.${this.guild}.automod`)) ?? {
             enabled: false,
-            rules: []
+            rules: [],
+            bypassRoles: [],
+            bypassChannels: []
         };
 
         this.usable = (this.data.enabled && this.data.rules.length > 0) ? true : false;
@@ -137,6 +139,24 @@ module.exports = class AutoMod {
      */
     async removeRule(index) {
         this.data.rules.splice(index, 1);
+
+        await this.save();
+    };
+
+    /**
+     * @param {import('discord.js').Snowflake[]} roles
+     */
+    async setBypassRoles(roles) {
+        this.data.bypassRoles = roles;
+
+        await this.save();
+    };
+
+    /**
+     * @param {import('discord.js').Snowflake[]} channels
+     */
+    async setBypassChannels(channels) {
+        this.data.bypassChannels = channels;
 
         await this.save();
     };

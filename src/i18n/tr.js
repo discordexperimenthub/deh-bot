@@ -67,5 +67,12 @@ module.exports = {
     TEST_MESSAGE: 'Test Mesajı',
     AUTOMOD_RESPONSE: '**Otomatik Moderasyon yanıtı:**',
     SETTING_ADD_RULE_SUCCESS: 'Kural başarıyla eklendi: {{0}}',
-    SETTING_REMOVE_RULE_SUCCESS: 'Kural başarıyla kaldırıldı!'
+    SETTING_REMOVE_RULE_SUCCESS: 'Kural başarıyla kaldırıldı!',
+    SET_BYPASS_ROLES: 'Bypass Rollerini Ayarla',
+    BYPASS_ROLES: 'Bypass Rolleri',
+    SET_BYPASS_CHANNELS: 'Bypass Kanallarını Ayarla',
+    BYPASS_CHANNELS: 'Bypass Kanalları',
+    ROLES_SELECT: 'Rol seç...',
+    BYPASS_ROLES_SUCCESS: 'Bypass rolleri başarıyla {{0}} olarak ayarlandı!',
+    BYPASS_CHANNELS_SUCCESS: 'Bypass kanalları başarıyla {{0}} olarak ayarlandı!'
 };

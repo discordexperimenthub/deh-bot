@@ -70,5 +70,13 @@ module.exports = {
     TEST_MESSAGE: 'Test Message',
     AUTOMOD_RESPONSE: '**AutoMod response:**',
     SETTING_ADD_RULE_SUCCESS: 'Rule has been added successfully: {{0}}',
-    SETTING_REMOVE_RULE_SUCCESS: 'Rule has been removed successfully!'
+    SETTING_REMOVE_RULE_SUCCESS: 'Rule has been removed successfully!',
+    SET_BYPASS_ROLES: 'Set Bypass Roles',
+    BYPASS_ROLES: 'Bypass Roles',
+    SET_BYPASS_CHANNELS: 'Set Bypass Channels',
+    BYPASS_CHANNELS: 'Bypass Channels',
+    ROLES_SELECT: 'Select roles...',
+    CHANNELS_SELECT: 'Select channels...',
+    BYPASS_ROLES_SUCCESS: 'Bypass roles have been set as {{0}} successfully!',
+    BYPASS_CHANNELS_SUCCESS: 'Bypass channels have been set as {{0}} successfully!'
 };

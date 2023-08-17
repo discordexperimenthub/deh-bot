@@ -1,4 +1,4 @@
-const { Client, Collection, WebhookClient, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, ChannelSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { Client, Collection, WebhookClient, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, ChannelSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, RoleSelectMenuBuilder } = require('discord.js');
 const { readdirSync, writeFileSync, readFileSync, mkdirSync, writeFile } = require('node:fs');
 const { default: axios } = require('axios');
 const logger = require('./modules/logger');
@@ -1129,6 +1129,16 @@ client.on('interactionCreate', async interaction => {
                                                 name: localize(locale, 'STATUS'),
                                                 value: automod.data?.enabled ? `${emojis.enabled} ${localize(locale, 'ENABLED')}` : `${emojis.disabled} ${localize(locale, 'DISABLED')}`,
                                                 inline: true
+                                            },
+                                            {
+                                                name: localize(locale, 'BYPASS_ROLES'),
+                                                value: automod.data?.bypassRoles?.length > 0 ? automod.data?.bypassRoles.map(role => `<@&${role}>`).join(', ') : localize(locale, 'NONE'),
+                                                inline: false
+                                            },
+                                            {
+                                                name: localize(locale, 'BYPASS_CHANNELS'),
+                                                value: automod.data?.bypassChannels?.length > 0 ? automod.data?.bypassChannels.map(channel => `<#${channel}>`).join(', ') : localize(locale, 'NONE'),
+                                                inline: false
                                             }
                                         )
                                         .setDescription(`# ${localize(locale, 'RULES')}\n${automod && automod.data.rules.length > 0 ? automod.data?.rules?.map((rule, index) => `${index + 1}. ${rule}`).join('\n').slice(0, 3500) : localize(locale, 'NONE')} `)
@@ -1161,6 +1171,14 @@ client.on('interactionCreate', async interaction => {
                                         ),
                                     new ActionRowBuilder()
                                         .setComponents(
+                                            new ButtonBuilder()
+                                                .setCustomId(`${interaction.user.id}:automod_bypass_roles`)
+                                                .setLabel(localize(locale, 'SET_BYPASS_ROLES'))
+                                                .setStyle(ButtonStyle.Primary),
+                                            new ButtonBuilder()
+                                                .setCustomId(`${interaction.user.id}:automod_bypass_channels`)
+                                                .setLabel(localize(locale, 'SET_BYPASS_CHANNELS'))
+                                                .setStyle(ButtonStyle.Primary),
                                             new ButtonBuilder()
                                                 .setCustomId(`${interaction.user.id}:automod_test`)
                                                 .setLabel(localize(locale, 'TEST'))
@@ -1399,6 +1417,61 @@ client.on('interactionCreate', async interaction => {
                             )
                     );
                     break;
+                case 'automod_bypass_roles':
+                    interaction.reply({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new RoleSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_bypass_roles_select`)
+                                        .setPlaceholder(localize(locale, 'ROLES_SELECT'))
+                                        .setMaxValues(interaction.guild.roles.cache.size)
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_bypass_roles_select':
+                    await interaction.deferUpdate();
+
+                    let roleIds = interaction.values;
+
+                    await automod.setBypassRoles(roleIds);
+
+                    interaction.editReply({
+                        content: localize(locale, 'BYPASS_ROLES_SUCCESS', roleIds.map(id => `<@&${id}>`).join(', ')),
+                        embeds: [],
+                        components: []
+                    });
+                    break;
+                case 'automod_bypass_channels':
+                    interaction.reply({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new ChannelSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_bypass_channels_select`)
+                                        .setPlaceholder(localize(locale, 'CHANNELS_SELECT'))
+                                        .setMaxValues(interaction.guild.channels.cache.size)
+                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum)
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_bypass_channels_select':
+                    await interaction.deferUpdate();
+
+                    let channelIds = interaction.values;
+
+                    await automod.setBypassChannels(channelIds);
+
+                    interaction.editReply({
+                        content: localize(locale, 'BYPASS_CHANNELS_SUCCESS', channelIds.map(id => `<#${id}>`).join(', ')),
+                        embeds: [],
+                        components: []
+                    });
+                    break;
                 default:
                     logger('warning', 'COMMAND', 'Message component', interaction.customId, 'not found');
             };
@@ -1517,10 +1590,10 @@ client.on('messageCreate', async message => {
 
         home.check('reply', message);
     };
-    if (message.type === 0 && message.content !== '') {
+    if (message.type === 0 && message.content !== '' && !message.member.permissions.has('ManageMessages') && message.channel.type !== ChannelType.GuildAnnouncement) {
         const automod = await new AutoMod(message.guildId).setup();
 
-        if (automod.data.enabled && automod.usable) await automod.check(message);
+        if (automod.data.enabled && automod.usable && !automod.data.bypassChannels.includes(message.channelId) && !automod.data.bypassChannels.includes(message.channel.parentId) && !automod.data.bypassRoles.filter(role => message.member.roles.cache.get(role))[0]) await automod.check(message);
     };
 });
 
