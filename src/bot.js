@@ -3,13 +3,14 @@ const { readdirSync, writeFileSync, readFileSync, mkdirSync, writeFile } = requi
 const { default: axios } = require('axios');
 const logger = require('./modules/logger');
 const { localize } = require('./modules/localization');
-const { ownerId, developerIds, roleIds, colors, emojis } = require('../config');
+const { ownerId, developerIds, roleIds, colors, emojis, beta } = require('../config');
 const { diffLines } = require('diff');
 const EmbedMaker = require('./modules/embed');
 const { execSync } = require('node:child_process');
 const { QuickDB } = require('quick.db');
 const timer = require('./modules/timer');
 const Home = require('./modules/home');
+const AutoMod = require('./modules/automod');
 
 const client = new Client({
     intents: [
@@ -1050,6 +1051,7 @@ client.on('interactionCreate', async interaction => {
             let guildId = interaction.guildId;
 
             const home = await new Home(guildId).setup();
+            const automod = await new AutoMod(guildId).setup();
 
             switch (customId) {
                 case 'settings':
@@ -1059,7 +1061,7 @@ client.on('interactionCreate', async interaction => {
                                 embeds: [
                                     new EmbedMaker(client)
                                         .setColor(home.set ? home.data.enabled ? colors.green : colors.red : colors.yellow)
-                                        .setTitle(`${emojis.home} ${localize(locale, 'HOME')}`)
+                                        .setTitle(`${emojis.home} ${localize(locale, 'HOME')} ${beta.home ? emojis.beta : ''}`)
                                         .setFields(
                                             {
                                                 name: localize(locale, 'STATUS'),
@@ -1102,6 +1104,70 @@ client.on('interactionCreate', async interaction => {
                                             ...(home.set ? [
                                                 new ButtonBuilder()
                                                     .setCustomId(`${interaction.user.id}:home_reset`)
+                                                    .setLabel(localize(locale, 'RESET_DATA'))
+                                                    .setStyle(ButtonStyle.Danger)
+                                            ] : [])
+                                        )
+                                ]
+                            });
+                            break;
+                        case 'automod':
+                            if (!interaction.memberPermissions.has('ManageMessages') || !interaction.memberPermissions.has('ModerateMembers')) return interaction.update({
+                                content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Messages, Timeout Members')
+                            });
+                            if (!interaction.appPermissions.has('ManageMessages') || !interaction.appPermissions.has('ModerateMembers')) return interaction.update({
+                                content: localize(locale, 'BOT_MISSING_PERMISSIONS', 'Manage Messages, Timeout Members')
+                            });
+
+                            interaction.update({
+                                embeds: [
+                                    new EmbedMaker(client)
+                                        .setColor(automod.set ? automod.data.enabled ? colors.green : colors.red : colors.yellow)
+                                        .setTitle(`${emojis.automod} ${localize(locale, 'AUTOMOD')} ${beta.automod ? emojis.beta : ''}`)
+                                        .setFields(
+                                            {
+                                                name: localize(locale, 'STATUS'),
+                                                value: automod.data?.enabled ? `${emojis.enabled} ${localize(locale, 'ENABLED')}` : `${emojis.disabled} ${localize(locale, 'DISABLED')}`,
+                                                inline: true
+                                            }
+                                        )
+                                        .setDescription(`# ${localize(locale, 'RULES')}\n${automod && automod.data.rules.length > 0 ? automod.data?.rules?.map((rule, index) => `${index + 1}. ${rule}`).join('\n').slice(0, 3500) : localize(locale, 'NONE')} `)
+                                ],
+                                components: [
+                                    new ActionRowBuilder()
+                                        .setComponents(
+                                            ...(!automod.set ? [
+                                                new ButtonBuilder()
+                                                    .setCustomId(`${interaction.user.id}:automod_setup`)
+                                                    .setLabel(localize(locale, 'QUICK_SETUP'))
+                                                    .setStyle(ButtonStyle.Success)
+                                            ] : []),
+                                            new ButtonBuilder()
+                                                .setCustomId(`${interaction.user.id}:automod_toggle`)
+                                                .setLabel(localize(locale, automod.data?.enabled ? 'DISABLE' : 'ENABLE'))
+                                                .setStyle(automod.data?.enabled ? ButtonStyle.Danger : ButtonStyle.Success),
+                                            new ButtonBuilder()
+                                                .setCustomId(`${interaction.user.id}:automod_sync`)
+                                                .setLabel(localize(locale, 'SYNC_RULES'))
+                                                .setStyle(ButtonStyle.Primary),
+                                            new ButtonBuilder()
+                                                .setCustomId(`${interaction.user.id}:automod_add_rule`)
+                                                .setLabel(localize(locale, 'ADD_RULE'))
+                                                .setStyle(ButtonStyle.Primary),
+                                            new ButtonBuilder()
+                                                .setCustomId(`${interaction.user.id}:automod_remove_rule`)
+                                                .setLabel(localize(locale, 'REMOVE_RULE'))
+                                                .setStyle(ButtonStyle.Primary)
+                                        ),
+                                    new ActionRowBuilder()
+                                        .setComponents(
+                                            new ButtonBuilder()
+                                                .setCustomId(`${interaction.user.id}:automod_test`)
+                                                .setLabel(localize(locale, 'TEST'))
+                                                .setStyle(ButtonStyle.Primary),
+                                            ...(automod.set ? [
+                                                new ButtonBuilder()
+                                                    .setCustomId(`${interaction.user.id}:automod_reset`)
                                                     .setLabel(localize(locale, 'RESET_DATA'))
                                                     .setStyle(ButtonStyle.Danger)
                                             ] : [])
@@ -1229,6 +1295,110 @@ client.on('interactionCreate', async interaction => {
                             )
                     );
                     break;
+                case 'automod_setup':
+                    await interaction.deferUpdate();
+
+                    let rulesChannel = interaction.guild.rulesChannel;
+                    let messages = await rulesChannel.messages.fetch({ limit: 50 });
+
+                    await automod.sync(messages.toJSON().map(m => m.content));
+                    await automod.toggle();
+
+                    interaction.editReply({
+                        content: localize(locale, 'AUTOMOD_SETUP_SUCCESS'),
+                        embeds: [],
+                        components: []
+                    });
+                    break;
+                case 'automod_sync':
+                    await interaction.deferUpdate();
+
+                    let rulesChannel2 = interaction.guild.rulesChannel;
+                    let messages2 = await rulesChannel2.messages.fetch({ limit: 50 });
+
+                    await automod.sync(messages2.toJSON().map(m => m.content));
+
+                    interaction.editReply({
+                        content: localize(locale, 'SYNC_RULES_SUCCESS'),
+                        embeds: [],
+                        components: []
+                    });
+                    break;
+                case 'automod_toggle':
+                    await interaction.deferUpdate();
+                    await automod.toggle();
+
+                    interaction.editReply({
+                        content: localize(locale, 'SETTING_TOGGLE_SUCCESS', localize(locale, 'AUTOMOD')),
+                        embeds: [],
+                        components: []
+                    });
+                    break;
+                case 'automod_reset':
+                    await interaction.deferUpdate();
+                    await automod.delete();
+
+                    interaction.editReply({
+                        content: localize(locale, 'SETTING_RESET_SUCCESS', localize(locale, 'AUTOMOD')),
+                        embeds: [],
+                        components: []
+                    });
+                    break;
+                case 'automod_test':
+                    interaction.showModal(
+                        new ModalBuilder()
+                            .setCustomId('automod_test_modal')
+                            .setTitle(localize(locale, 'TEST'))
+                            .setComponents(
+                                new ActionRowBuilder()
+                                    .setComponents(
+                                        new TextInputBuilder()
+                                            .setCustomId('message')
+                                            .setLabel(localize(locale, 'TEST_MESSAGE'))
+                                            .setStyle(TextInputStyle.Paragraph)
+                                            .setRequired(true)
+                                    )
+                            )
+                    );
+                    break;
+                case 'automod_add_rule':
+                    interaction.showModal(
+                        new ModalBuilder()
+                            .setCustomId('automod_add_rule_modal')
+                            .setTitle(localize(locale, 'ADD_RULE'))
+                            .setComponents(
+                                new ActionRowBuilder()
+                                    .setComponents(
+                                        new TextInputBuilder()
+                                            .setCustomId('rule')
+                                            .setLabel(localize(locale, 'RULE'))
+                                            .setPlaceholder('No swearing allowed.')
+                                            .setRequired(true)
+                                            .setStyle(TextInputStyle.Paragraph)
+                                    )
+                            )
+                    );
+                    break;
+                case 'automod_remove_rule':
+                    interaction.showModal(
+                        new ModalBuilder()
+                            .setCustomId('automod_remove_rule_modal')
+                            .setTitle(localize(locale, 'REMOVE_RULE'))
+                            .setComponents(
+                                new ActionRowBuilder()
+                                    .setComponents(
+                                        new TextInputBuilder()
+                                            .setCustomId('rule')
+                                            .setLabel(localize(locale, 'RULE_INDEX'))
+                                            .setPlaceholder('1')
+                                            .setRequired(true)
+                                            .setMinLength(1)
+                                            .setMaxLength(2)
+                                            .setStyle(TextInputStyle.Short)
+                                    )
+                            )
+                    );
+                    break;
                 default:
                     logger('warning', 'COMMAND', 'Message component', interaction.customId, 'not found');
             };
@@ -1249,11 +1419,12 @@ client.on('interactionCreate', async interaction => {
             let [customId, ...args] = interaction.customId.split(':');
             let locale = interaction.locale;
 
+            const home = await new Home(interaction.guildId).setup();
+            const automod = await new AutoMod(interaction.guildId).setup();
+
             switch (customId) {
                 case 'home_min_interactions_modal':
                     await interaction.deferUpdate();
-
-                    const home = await new Home(args[0]).setup();
 
                     let minInteractions = parseInt(interaction.fields.getTextInputValue('count'));
 
@@ -1263,6 +1434,45 @@ client.on('interactionCreate', async interaction => {
 
                     interaction.editReply({
                         content: localize(locale, 'SETTING_MIN_INTERACTIONS_SUCCESS', minInteractions),
+                        embeds: [],
+                        components: []
+                    });
+                    break;
+                case 'automod_test_modal':
+                    await interaction.deferReply({ ephemeral: true });
+
+                    let message = interaction.fields.getTextInputValue('message');
+                    let result = await automod.check({
+                        content: message,
+                        author: interaction.user
+                    }, true);
+
+                    interaction.editReply(`${localize(locale, 'AUTOMOD_RESPONSE')}\n${result}`);
+                    break;
+                case 'automod_add_rule_modal':
+                    await interaction.deferUpdate();
+
+                    let rule = interaction.fields.getTextInputValue('rule');
+
+                    await automod.addRule(rule);
+
+                    interaction.editReply({
+                        content: localize(locale, 'SETTING_ADD_RULE_SUCCESS', rule),
+                        embeds: [],
+                        components: []
+                    });
+                    break;
+                case 'automod_remove_rule_modal':
+                    await interaction.deferUpdate();
+
+                    let index = parseInt(interaction.fields.getTextInputValue('rule'));
+
+                    if (isNaN(index)) return interaction.editReply(localize(interaction.locale, 'INVALID_NUMBER'));
+
+                    await automod.removeRule(index - 1);
+
+                    interaction.editReply({
+                        content: localize(locale, 'SETTING_REMOVE_RULE_SUCCESS'),
                         embeds: [],
                         components: []
                     });
@@ -1306,6 +1516,11 @@ client.on('messageCreate', async message => {
         const home = await new Home(message.guildId).setup();
 
         home.check('reply', message);
+    };
+    if (message.type === 0 && message.content !== '') {
+        const automod = await new AutoMod(message.guildId).setup();
+
+        if (automod.data.enabled && automod.usable) await automod.check(message);
     };
 });
 

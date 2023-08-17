@@ -26,6 +26,7 @@ module.exports = {
     BOT_MISSING_PERMISSIONS: 'I need the following permissions to perform this action: {{0}}',
     USER_MISSING_PERMISSIONS: 'You need the following permissions to perform this action: {{0}}',
     HOME_SETUP_SUCCESS: 'Home has been set up successfully! Channel: {{0}}',
+    AUTOMOD_SETUP_SUCCESS: 'AutoMod has been set up successfully!',
     SET_CHANNEL: 'Set Channel',
     CHANNEL_SELECT: 'Select a channel...',
     SETTING_DISABLE_SUCCESS: '{{0}} has been disabled successfully!',
@@ -55,5 +56,19 @@ module.exports = {
     NO_MESSAGE_REMINDERS: 'You have no Reminders!\n**PROTIP:** You can mark any message as a Reminder to have it appear here.',
     MESSAGE_REMINDER_CANCELLED: 'Message Reminder has been cancelled successfully!',
     NO_CONTENT: 'No content',
-    REMINDER_ATTACHMENTS_NOT_SUPPORTED: 'Currently, attachments are not supported for Message Reminders!'
+    REMINDER_ATTACHMENTS_NOT_SUPPORTED: 'Currently, attachments are not supported for Message Reminders!',
+    SYNC_RULES: 'Sync Server Rules',
+    SYNC_RULES_SUCCESS: 'Rules have been synced successfully!',
+    AUTOMOD: 'AutoMod',
+    RULES: 'Rules',
+    RULE: 'Rule',
+    RULE_INDEX: 'Rule index',
+    ADD_RULE: 'Add Rule',
+    REMOVE_RULE: 'Remove Rule',
+    NONE: 'None',
+    TEST: 'Test',
+    TEST_MESSAGE: 'Test Message',
+    AUTOMOD_RESPONSE: '**AutoMod response:**',
+    SETTING_ADD_RULE_SUCCESS: 'Rule has been added successfully: {{0}}',
+    SETTING_REMOVE_RULE_SUCCESS: 'Rule has been removed successfully!'
 };

@@ -23,6 +23,7 @@ module.exports = {
     COMPONENT_NOT_YOURS: 'Bu mesaj komponenti sana ait değil!',
     BOT_MISSING_PERMISSIONS: 'Bu eylemi gerçekleştirmek için şu izinlere ihtiyacım var: {{0}}',
     HOME_SETUP_SUCCESS: 'Ana sayfa başarıyla kuruldu! Kanal: {{0}}',
+    AUTOMOD_SETUP_SUCCESS: 'Otomatik Moderasyon başarıyla kuruldu!',
     SET_CHANNEL: 'Kanal ayarla',
     CHANNEL_SELECT: 'Bir kanal seç...',
     SETTING_DISABLE_SUCCESS: '{{0}} başarıyla kapatıldı!',
@@ -52,5 +53,19 @@ module.exports = {
     NO_MESSAGE_REMINDERS: 'Hatırlatıcıların yok! **İPUCU:** Herhangi bir mesajı Hatırlatıcı olarak işaretleyerek burada çıkmalarını sağlayabilirsin.',
     MESSAGE_REMINDER_CANCELLED: 'Mesaj Hatırlatıcısı başarıyla iptal edildi!',
     NO_CONTENT: 'İçerik yok',
-    REMINDER_ATTACHMENTS_NOT_SUPPORTED: 'Şu anda, Mesaj Hatırlatıcıları için ekler desteklenmiyor.'
+    REMINDER_ATTACHMENTS_NOT_SUPPORTED: 'Şu anda, Mesaj Hatırlatıcıları için ekler desteklenmiyor.',
+    SYNC_RULES: 'Sunucu Kurallarını Senkronize Et',
+    SYNC_RULES_SUCCESS: 'Kurallar başarıyla senkronize edildi!',
+    AUTOMOD: 'Otomatik Moderasyon',
+    RULES: 'Kurallar',
+    RULE: 'Kural',
+    RULE_INDEX: 'Kural sırası',
+    ADD_RULE: 'Kural Ekle',
+    REMOVE_RULE: 'Kural Kaldır',
+    NONE: 'Ayarlanmamış',
+    TEST: 'Test Et',
+    TEST_MESSAGE: 'Test Mesajı',
+    AUTOMOD_RESPONSE: '**Otomatik Moderasyon yanıtı:**',
+    SETTING_ADD_RULE_SUCCESS: 'Kural başarıyla eklendi: {{0}}',
+    SETTING_REMOVE_RULE_SUCCESS: 'Kural başarıyla kaldırıldı!'
 };

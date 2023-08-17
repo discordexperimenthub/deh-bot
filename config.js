@@ -18,8 +18,10 @@ module.exports = {
         yellow: 'FEE75C',
         red: 'ED4245'
     },
+    features: ['home', 'automod'],
     beta: {
-        home: true
+        home: true,
+        automod: true
     },
     emojis: {
         beta: '<:beta1:1071445535510249493><:beta2:1071445584038334504><:beta3:1071445631786303498>',
@@ -28,7 +30,7 @@ module.exports = {
         home: '<:home:1140909364669055019>',
         featuredMessage: '<:highlight:1077611464317218907>',
         reply: '<:reply:1140967497345007657>',
-        replyContinuing: '<:reply_continuing:1140968153099280394>'
-    },
-    features: ['home']
+        replyContinuing: '<:reply_continuing:1140968153099280394>',
+        automod: '<:automod:1077245752297922591>'
+    }
 };
