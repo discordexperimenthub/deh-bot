@@ -80,7 +80,7 @@ module.exports = {
 
             let timers = await db.get('timers') ?? [];
 
-            timers = timers.filter(timer => timer.id !== reminder.id);
+            timers = timers.filter(timer => timer.id !== reminder.timerId);
 
             await db.set('timers', timers);
 

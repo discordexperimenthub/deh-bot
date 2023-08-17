@@ -93,7 +93,8 @@ module.exports = {
             await db.push(`users.${interaction.user.id}.reminders`, {
                 time: Math.floor(Date.now() / 1000) + Math.floor(time / 1000),
                 id: interaction.targetId,
-                content: interaction.targetMessage.content
+                content: interaction.targetMessage.content,
+                timerId: id
             });
 
             interaction.editReply({
