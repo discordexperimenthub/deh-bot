@@ -13,7 +13,7 @@ module.exports = {
     ERROR: 'Error',
     SERVER_SETTINGS: 'Server Settings',
     HOME: 'Home',
-    SETTINGS_MENU: 'Select a setting to set up...',
+    SETTINGS_MENU: 'Select a feature to manage...',
     ENABLED: 'Enabled',
     DISABLED: 'Disabled',
     NOT_SET: 'Not set',

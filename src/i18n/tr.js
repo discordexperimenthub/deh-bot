@@ -13,7 +13,7 @@ module.exports = {
     ERROR: 'Hata',
     SERVER_SETTINGS: 'Sunucu Ayarları',
     HOME: 'Ana Sayfa',
-    SETTINGS_MENU: 'Ayarlamak için bir ayar seç...',
+    SETTINGS_MENU: 'Yönetmek için bir özellik seç...',
     ENABLED: 'Açık',
     DISABLED: 'Kapalı',
     NOT_SET: 'Ayarlanmamış',

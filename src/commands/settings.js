@@ -28,16 +28,8 @@ module.exports = {
 
         let guildId = interaction.guild.id;
         let locale = interaction.locale;
-        let guildFeatures = {
-            home: await new Home(guildId).setup()
-        };
 
         interaction.editReply({
-            embeds: [
-                new EmbedMaker(interaction.client)
-                    .setTitle(localize(locale, 'SERVER_SETTINGS'))
-                    .setDescription(features.map(feature => `${guildFeatures[feature]?.data?.enabled ? emojis.enabled : emojis.disabled} ${localize(locale, feature.toUpperCase())}${beta[feature] ? ` ${emojis.beta}` : ''}`).join('\n'))
-            ],
             components: [
                 new ActionRowBuilder()
                     .setComponents(
