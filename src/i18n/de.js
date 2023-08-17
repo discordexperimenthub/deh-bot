@@ -13,7 +13,7 @@ module.exports = {
     ERROR: 'Fehler',
     SERVER_SETTINGS: 'Server Einstellungen',
     HOME: 'Startseite',
-    SETTINGS_MENU: 'Wähle eine Einstellung zum Verwaltung...',
+    SETTINGS_MENU: 'Wähle eine Einstellung zum Verwalten...',
     ENABLED: 'Aktiviert',
     DISABLED: 'Deaktiviert',
     NOT_SET: 'Nicht festgelegt',
