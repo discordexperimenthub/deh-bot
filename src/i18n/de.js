@@ -3,6 +3,7 @@ module.exports = {
     COMMAND_CATEGORY_GENERAL: 'Allgemeine Befehle',
     COMMAND_CATEGORY_DEVELOPER: 'Entwickler Befehle',
     COMMAND_CATEGORY_OWNER: 'Eigentümer Befehle',
+    COMMAND_CATEGORY_MODERATOR: 'Moderatoren Befehle',
     LOCALIZATION_PERCENTAGE: '**Sprachunterstützung für {{0}}:** {{1}}%',
     NOT_FOUND: '{{0}} nicht gefunden!',
     COMMAND_ERROR: '**Fehler beim Ausführen {{0}}:** {{1}}',
@@ -12,7 +13,7 @@ module.exports = {
     ERROR: 'Fehler',
     SERVER_SETTINGS: 'Server Einstellungen',
     HOME: 'Startseite',
-    SETTINGS_MENU: 'Wähle eine Einstellung zum Einrichten...',
+    SETTINGS_MENU: 'Wähle eine Einstellung zum Verwalten...',
     ENABLED: 'Aktiviert',
     DISABLED: 'Deaktiviert',
     NOT_SET: 'Nicht festgelegt',
@@ -23,6 +24,7 @@ module.exports = {
     ENABLE: 'Einschalten',
     DISABLE: 'Ausschalten',
     BOT_MISSING_PERMISSIONS: 'Ich benötige die folgenden Berechtigungen, um diese Aktion durchzuführen: {{0}}',
+    USER_MISSING_PERMISSIONS: 'Du benötigst die folgenden Berechtigungen, um diese Aktion durchzuführen: {{0}}',
     HOME_SETUP_SUCCESS: 'Die Startseite wurde erfolgreich eingerichtet! Kanal: {{0}}',
     SET_CHANNEL: 'Kanal einstellen',
     CHANNEL_SELECT: 'Wählen einen Kanal...',
@@ -51,5 +53,7 @@ module.exports = {
     REMINDER_SET: 'Die Erinnerung wurde erfolgreich auf {{0}} gesetzt! Stelle sicher, dass ich dir Nachrichten schicken kann!',
     MESSAGE_REMINDERS: 'Nachrichten Erinnerungen',
     NO_MESSAGE_REMINDERS: 'Es gibt keine Erinnerungen!\n**PROTIP:** Es kann jede Nachricht als Erinnerung markiert werden, damit sie hier erscheint.',
-    MESSAGE_REMINDER_CANCELLED: 'Die Erinnerungsnachricht wurde erfolgreich gelöscht!'
+    MESSAGE_REMINDER_CANCELLED: 'Die Erinnerungsnachricht wurde erfolgreich gelöscht!',
+    NO_CONTENT: 'Kein Inhalt',
+    REMINDER_ATTACHMENTS_NOT_SUPPORTED: 'Derzeit werden Anhänge für Nachrichtenerinnerungen nicht unterstützt!'
 };
