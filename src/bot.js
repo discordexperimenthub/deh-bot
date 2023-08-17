@@ -1593,7 +1593,7 @@ client.on('messageCreate', async message => {
 
         home.check('reply', message);
     };
-    if (message.type === 0 && message.content !== '' && !message.member.permissions.has('ManageMessages') && message.channel.type !== ChannelType.GuildAnnouncement) {
+    if (message.type === 0 && message.content !== '' && !message.author.bot && !message.member.permissions.has('ManageMessages') && message.channel.type !== ChannelType.GuildAnnouncement) {
         const automod = await new AutoMod(message.guildId).setup();
 
         if (automod.data.enabled && automod.usable && !automod.data.bypassChannels.includes(message.channelId) && !automod.data.bypassChannels.includes(message.channel.parentId) && !automod.data.bypassRoles.filter(role => message.member.roles.cache.get(role))[0]) await automod.check(message);
