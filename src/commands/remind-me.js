@@ -26,6 +26,8 @@ module.exports = {
 
         let locale = interaction.locale;
 
+        if (!interaction.targetMessage.content && interaction.targetMessage.embeds?.length === 0) return interaction.editReply(localize(locale, 'REMINDER_ATTACHMENTS_NOT_SUPPORTED'));
+
         interaction.editReply({
             components: [
                 new ActionRowBuilder()
@@ -77,9 +79,8 @@ module.exports = {
                 },
                 userId: interaction.user.id,
                 message: {
-                    content: interaction.targetMessage.content,
-                    embeds: interaction.targetMessage.embeds.map(e => e.toJSON()),
-                    attachments: interaction.targetMessage.attachments.map(a => a.toJSON())
+                    ...(interaction.targetMessage.content ? { content: interaction.targetMessage.content } : {}),
+                    embeds: interaction.targetMessage.embeds.map(e => e.toJSON())
                 },
                 id,
                 config: {

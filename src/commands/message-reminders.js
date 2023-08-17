@@ -60,12 +60,11 @@ module.exports = {
         let locale = interaction.locale;
 
         if (subcommand === 'list') {
-
             interaction.editReply({
                 embeds: [
                     new EmbedMaker(interaction.client)
                         .setTitle(localize(locale, 'MESSAGE_REMINDERS'))
-                        .setDescription(reminders.length > 0 ? `${reminders.slice(0, 20).map((reminder, index) => `${index + 1}. ${reminder.content.length > 100 ? `${reminder.content.slice(0, 100)}...` : reminder.content} **-** Ends in <t:${reminder.time}:R>`).join('\n')}${reminders.length > 10 ? `\n**(${reminders.length - 10} more)**` : ''}` : localize(locale, 'NO_MESSAGE_REMINDERS'))
+                        .setDescription(reminders.length > 0 ? `${reminders.slice(0, 340).map((reminder, index) => `${index + 1}. ${reminder.content === '' ? localize(locale, 'NO_CONTENT') : reminder.content.length > 100 ? `${reminder.content.slice(0, 100)}...` : reminder.content} **-** Ends in <t:${reminder.time}:R>`).join('\n')}${reminders.length > 340 ? `\n**(${reminders.length - 340} more)**` : ''}` : localize(locale, 'NO_MESSAGE_REMINDERS'))
                 ]
             }).catch(error => logger('error', 'REMINDER', 'Error while sending message reminder list', error));
         } else if (subcommand === 'cancel') {

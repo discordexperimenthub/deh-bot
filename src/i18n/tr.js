@@ -50,5 +50,7 @@ module.exports = {
     REMINDER_SET_SUCCESS: 'Hatırlatıcı başarıyla {{0}} olarak ayarlandı! Sana mesaj gönderebileceğimden emin ol!',
     MESSAGE_REMINDERS: 'Mesaj Hatırlatıcıları',
     NO_MESSAGE_REMINDERS: 'Hatırlatıcıların yok! **İPUCU:** Herhangi bir mesajı Hatırlatıcı olarak işaretleyerek burada çıkmalarını sağlayabilirsin.',
-    MESSAGE_REMINDER_CANCELLED: 'Mesaj Hatırlatıcısı başarıyla iptal edildi!'
+    MESSAGE_REMINDER_CANCELLED: 'Mesaj Hatırlatıcısı başarıyla iptal edildi!',
+    NO_CONTENT: 'İçerik yok',
+    REMINDER_ATTACHMENTS_NOT_SUPPORTED: 'Şu anda, Mesaj Hatırlatıcıları için ekler desteklenmiyor.'
 };

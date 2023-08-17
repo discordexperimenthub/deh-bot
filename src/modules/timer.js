@@ -13,9 +13,9 @@ async function sendUserMessage(userId, message) {
             'Content-Type': 'application/json',
             Authorization: `Bot ${process.env.DISCORD_TOKEN}`
         }
-    }).catch(error => logger('error', 'TIMER', 'Error while creating DM channel:', error.response.data)))?.data;
+    }).catch(error => error?.response ?? error))?.data;
 
-    if (!channel) return;
+    if (!channel) return logger('error', 'TIMER', 'Error while creating DM channel:', channel);
 
     return (await axios.post(`https://canary.discord.com/api/v10/channels/${channel.id}/messages`, message, {
         headers: {
@@ -73,32 +73,36 @@ setInterval(async () => {
 
     for (let i = 0; i < timers.length; i++) {
         if (timers[i].time <= now) {
-            let c = timers[i].config;
+            let timer = timers.splice(i, 1)[0];
 
-            if (timers[i].callback) {
+            let c = timer?.config;
+
+            if (timer.callback) {
                 try {
-                    await eval(`(${timers[i].callback})()`);
+                    await eval(`(${timer.callback})()`);
                 } catch (error) {
-                    logger('error', 'TIMER', 'Error while executing callback:', error);
+                    logger('error', 'TIMER', 'Error while executing callback:', timer.callback, error);
                 };
             }
-            if (timers[i].type === 'sendUserMessage') {
+            if (timer.type === 'sendUserMessage') {
                 try {
-                    await sendUserMessage(timers[i].userId, timers[i].message);
+                    let response = await sendUserMessage(timer.userId, timer.message);
+
+                    logger('debug', 'TIMER', 'Sent user message:', JSON.stringify(response, null, 4));
                 } catch (error) {
                     logger('error', 'TIMER', 'Error while sending user message:', error);
                 };
-            } else if (timers[i].type === 'deleteMessage') {
+            } else if (timer.type === 'deleteMessage') {
                 try {
-                    await deleteMessage(timers[i].channelId, timers[i].messageId);
+                    let response = await deleteMessage(timer.channelId, timer.messageId);
+
+                    logger('debug', 'TIMER', 'Deleted message:', JSON.stringify(response, null, 4));
                 } catch (error) {
                     logger('error', 'TIMER', 'Error while deleting message:', error);
                 };
             };
 
-            logger('debug', 'TIMER', `Timer ${timers[i].id ?? i} executed`);
-
-            timers.splice(i, 1);
+            logger('debug', 'TIMER', `Timer executed:`, timer?.id ?? i);
         };
     };
 

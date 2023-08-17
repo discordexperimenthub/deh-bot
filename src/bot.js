@@ -1298,7 +1298,7 @@ client.on('interactionCreate', async interaction => {
 
 client.on('messageCreate', async message => {
     if (!message.guild) return;
-    if (message.reference?.messageId) {
+    if (message.type === 0 && message.content !== '' && message.reference?.messageId) {
         const home = await new Home(message.guildId).setup();
 
         home.check('reply', message);

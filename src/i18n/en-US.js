@@ -52,5 +52,7 @@ module.exports = {
     REMINDER_SET: 'Reminder has been set to {{0}} successfully! Be sure I can send messages to you!',
     MESSAGE_REMINDERS: 'Message Reminders',
     NO_MESSAGE_REMINDERS: 'You have no Reminders!\n**PROTIP:** You can mark any message as a Reminder to have it appear here.',
-    MESSAGE_REMINDER_CANCELLED: 'Message Reminder has been cancelled successfully!'
+    MESSAGE_REMINDER_CANCELLED: 'Message Reminder has been cancelled successfully!',
+    NO_CONTENT: 'No content',
+    REMINDER_ATTACHMENTS_NOT_SUPPORTED: 'Currently, attachments are not supported for Message Reminders!'
 };
