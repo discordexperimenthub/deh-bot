@@ -1587,7 +1587,7 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on('messageCreate', async message => {
-    if (!message.guild) return;
+    if (!message.guild || !message.member) return;
     if (message.type === 0 && message.content !== '' && message.reference?.messageId) {
         const home = await new Home(message.guildId).setup();
 
