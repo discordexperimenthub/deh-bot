@@ -129,12 +129,14 @@ module.exports = class Home {
         timer('deleteMessage', {
             time,
             callback: async () => {
-                c.data.messages = c.data.messages.filter(m => m !== message.message);
+                c.data.messages = c.data.messages.filter(m => m !== c.message.message);
 
-                await db.set(`guilds.${this.guild}.home`, c.data);
+                await db.set(`guilds.${c.guild}.home`, c.data);
             },
             config: {
-                data: this.data
+                data: this.data,
+                message,
+                guild: this.guild
             },
             channelId: this.data.channel,
             messageId: post.id

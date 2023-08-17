@@ -24,6 +24,7 @@ module.exports = {
     ENABLE: 'Enable',
     DISABLE: 'Disable',
     BOT_MISSING_PERMISSIONS: 'I need the following permissions to perform this action: {{0}}',
+    USER_MISSING_PERMISSIONS: 'You need the following permissions to perform this action: {{0}}',
     HOME_SETUP_SUCCESS: 'Home has been set up successfully! Channel: {{0}}',
     SET_CHANNEL: 'Set Channel',
     CHANNEL_SELECT: 'Select a channel...',

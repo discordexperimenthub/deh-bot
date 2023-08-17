@@ -61,7 +61,9 @@ module.exports = async (type, settings) => {
         userId: settings.userId,
         message: settings.message,
         config: settings.config,
-        id: settings.id
+        id: settings.id,
+        channelId: settings.channelId,
+        messageId: settings.messageId
     });
 };
 

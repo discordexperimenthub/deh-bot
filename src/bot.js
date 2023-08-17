@@ -1055,8 +1055,6 @@ client.on('interactionCreate', async interaction => {
                 case 'settings':
                     switch (interaction.values[0]) {
                         case 'home':
-                            const home = await new Home(guildId).setup();
-
                             interaction.update({
                                 embeds: [
                                     new EmbedMaker(client)
@@ -1114,6 +1112,10 @@ client.on('interactionCreate', async interaction => {
                     };
                     break;
                 case 'home_setup':
+                    if (!interaction.member.permissions.has('ManageChannels')) return interaction.reply({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Channels'),
+                        ephemeral: true
+                    });
                     if (!interaction.appPermissions.has('ManageChannels') || !interaction.appPermissions.has('ManageWebhooks') || !interaction.appPermissions.has('ManageMessages')) return interaction.reply({
                         content: localize(interaction.locale, 'BOT_MISSING_PERMISSIONS', 'Manage Channels, Manage Webhooks, Manage Messages'),
                         ephemeral: true
@@ -1145,16 +1147,15 @@ client.on('interactionCreate', async interaction => {
                         webhook: webhook.url
                     });
 
-                    interaction.followUp({
+                    interaction.editReply({
                         content: localize(locale, 'HOME_SETUP_SUCCESS', `<#${channel.id}>`)
                     });
                     break;
                 case 'home_enable':
                     await interaction.deferUpdate();
-
                     await home.toggle();
 
-                    interaction.followUp({
+                    interaction.editReply({
                         content: localize(locale, 'SETTING_ENABLE_SUCCESS', localize(locale, 'HOME')),
                         embeds: [],
                         components: []
@@ -1162,10 +1163,9 @@ client.on('interactionCreate', async interaction => {
                     break;
                 case 'home_disable':
                     await interaction.deferUpdate();
-
                     await home.toggle();
 
-                    interaction.followUp({
+                    interaction.editReply({
                         content: localize(locale, 'SETTING_DISABLE_SUCCESS', localize(locale, 'HOME')),
                         embeds: [],
                         components: []
@@ -1251,7 +1251,7 @@ client.on('interactionCreate', async interaction => {
 
             switch (customId) {
                 case 'home_min_interactions_modal':
-                    await interaction.deferReply();
+                    await interaction.deferUpdate();
 
                     const home = await new Home(args[0]).setup();
 
@@ -1261,7 +1261,11 @@ client.on('interactionCreate', async interaction => {
 
                     await home.setMinInteractions(minInteractions);
 
-                    interaction.editReply(localize(locale, 'SETTING_MIN_INTERACTIONS_SUCCESS', minInteractions));
+                    interaction.editReply({
+                        content: localize(locale, 'SETTING_MIN_INTERACTIONS_SUCCESS', minInteractions),
+                        embeds: [],
+                        components: []
+                    });
                     break;
                 default:
                     logger('warning', 'COMMAND', 'Modal', interaction.customId, 'not found');
