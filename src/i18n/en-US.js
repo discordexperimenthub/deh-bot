@@ -69,6 +69,7 @@ module.exports = {
     TEST: 'Test',
     TEST_MESSAGE: 'Test Message',
     AUTOMOD_RESPONSE: '**AutoMod response:**',
+    AUTOMOD_TOGGLE_SUCCESS: 'AutoMod has been enabled/disabled successfully!',
     SETTING_ADD_RULE_SUCCESS: 'Rule has been added successfully: {{0}}',
     SETTING_REMOVE_RULE_SUCCESS: 'Rule has been removed successfully!',
     SET_BYPASS_ROLES: 'Set Bypass Roles',

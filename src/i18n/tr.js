@@ -66,6 +66,7 @@ module.exports = {
     TEST: 'Test Et',
     TEST_MESSAGE: 'Test Mesajı',
     AUTOMOD_RESPONSE: '**Otomatik Moderasyon yanıtı:**',
+    AUTOMOD_TOGGLE_SUCCESS: 'Otomatik Moderasyon başarıyla açıldı/kapatıldı!',
     SETTING_ADD_RULE_SUCCESS: 'Kural başarıyla eklendi: {{0}}',
     SETTING_REMOVE_RULE_SUCCESS: 'Kural başarıyla kaldırıldı!',
     SET_BYPASS_ROLES: 'Bypass Rollerini Ayarla',
