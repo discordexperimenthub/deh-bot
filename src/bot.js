@@ -1517,7 +1517,10 @@ client.on('interactionCreate', async interaction => {
                     let message = interaction.fields.getTextInputValue('message');
                     let result = await automod.check({
                         content: message,
-                        author: interaction.user
+                        author: interaction.user,
+                        channel: {
+                            name: 'test-channel'
+                        }
                     }, true);
 
                     interaction.editReply(`${localize(locale, 'AUTOMOD_RESPONSE')}\n${result}`);
