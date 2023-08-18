@@ -77,6 +77,10 @@ module.exports = class AutoMod {
      */
     async check(message, rawContent = false) {
         let history = message.channel.messages.cache.toJSON().map(m => m.content);
+
+        history.pop();
+
+        let sendData = `{\n\t"history": "${history}",\\n\t"messageContent": "${message.content}",\n\t"channel": "${message.channel.name}",\n\t"author": {\n\t\t"id": "${message.author.id}",\n\t\t"username": "${message.author.username}"\n\t}\n}`
         let response = (await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
             model: 'gpt-3.5-turbo-16k',
             messages: [
@@ -90,7 +94,7 @@ module.exports = class AutoMod {
                 },
                 {
                     role: 'user',
-                    content: `\`\`\`json\n{\n\t"history": "${history}",\\n\t"messageContent": "${message.content}",\n\t"channel": "${message.channel.name}",\n\t"author": {\n\t\t"id": "${message.author.id}",\n\t\t"username": "${message.author.username}"\n\t}\n}\n\`\`\``
+                    content: `\`\`\`json\n${sendData}\n\`\`\``
                 }
             ],
             overwriteOnError: false
@@ -114,15 +118,13 @@ module.exports = class AutoMod {
             return logger('error', 'AUTOMOD', 'Failed to parse JSON:', error, content);
         };
 
-        let sendData = `{\n\t"rule": "No spam.", // the rule which AutoMod triggered\n\t"channel": "channel-name", // where the message sent\n\t"history": [] // the message history before the message\n\t"messageContent": "", // the blocked message content\n\t"reason": "", // the block reason\n}`;
-
         if (data.againstRules) {
             let response2 = (await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
                 model: 'gpt-3.5-turbo-16k',
                 messages: [
                     {
                         role: 'system',
-                        content: `You are AutoMod manager. Your job is checking blocked messages. Do not criticize block reasons, only block purposes. You must respond with JSON format in a code block like this: \`\`\`json\n{\n\t"correct": true, // whether the block is correct or not\n}\n\`\`\`\n\nUser messages will be in the format of: \`\`\`json\n${sendData}\n\`\`\``
+                        content: `You are AutoMod manager. Your job is checking blocked messages. Do not criticize block reasons, only block purposes. You must respond with JSON format in a code block like this: \`\`\`json\n{\n\t"correct": true, // whether the block is correct or not\n}\n\`\`\`\n\nUser messages will be in the format of: \`\`\`json\n{\n\t"rule": "No spam.", // the rule which AutoMod triggered\n\t"channel": "channel-name", // where the message sent\n\t"history": [] // the message history before the message\n\t"messageContent": "", // the blocked message content\n\t"reason": "", // the block reason\n}\n\`\`\``
                     },
                     {
                         role: 'user',
