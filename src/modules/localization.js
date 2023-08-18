@@ -6,6 +6,8 @@ const locales = {
     de: require('../i18n/de.js')
 };
 
+module.exports.locales = locales;
+
 /**
  * @param {string} locale 
  * @param {string} id 
