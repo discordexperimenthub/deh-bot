@@ -119,7 +119,7 @@ module.exports = class AutoMod {
                 messages: [
                     {
                         role: 'system',
-                        content: `You are AutoMod manager. Your job is checking blocked messages. Do not criticize block reasons, only block purposes. Don't be so sensitive. Think like you are a human and be fair. If it's allowed in the rules, do not block only-emoji messages (emojis are in format <:name:1234>). Please focus on the current message, not past messages. You must respond with JSON format in a code block like this: \`\`\`json\n{\n\t"correct": true, // whether the block is correct or not\n}\n\`\`\`\n\nUser messages will be in the format of: \`\`\`json\n{\n\t"rule": "No spam.", // the rule which AutoMod triggered\n\t"channel": "channel-name", // where the message sent\n\t"messageContent": "", // the blocked message content\n\t"reason": "", // the block reason\n}\n\`\`\`\n\nJust respond all messages with ONE JSON format in a code block. Nothing else.`
+                        content: `You are AutoMod manager. Your job is checking blocked messages. Do not criticize block reasons, only block purposes. Don't be so sensitive. Think like you are a human and be fair. If it's allowed in the rules, do not block only-emoji messages (emojis are in format <:name:1234>). Please focus on the current message, not past messages. Don't block all links, some links can be good. You must respond with JSON format in a code block like this: \`\`\`json\n{\n\t"correct": true, // whether the block is correct or not\n}\n\`\`\`\n\nUser messages will be in the format of: \`\`\`json\n{\n\t"rule": "No spam.", // the rule which AutoMod triggered\n\t"channel": "channel-name", // where the message sent\n\t"messageContent": "", // the blocked message content\n\t"reason": "", // the block reason\n}\n\`\`\`\n\nJust respond all messages with ONE JSON format in a code block. Nothing else.`
                     },
                     {
                         role: 'system',
@@ -157,10 +157,10 @@ module.exports = class AutoMod {
             };
             if (!data2.correct) return logger('error', 'AUTOMOD', 'AutoMod blocked a message incorrectly.', this.data.rules[data.rule - 1], sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
 
-            logger('info', 'AUTOMOD', 'AutoMod blocked a message correctly.', sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
+            logger('info', 'AUTOMOD', 'AutoMod blocked a message correctly.', this.data.rules[data.rule - 1], sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
 
             if (data.deleteMessage) {
-                await message.reply(`Your message has been deleted by AutoMod because it is against the server rules.\n**Reason:** ${data.reason}\n*Powered by purgpt.xyz*`);
+                await message.reply(`Your message has been deleted by AutoMod because it is against the server rules.\n**Reason:** ${data.reason}\n*Powered by purgpt.xyz (if do you think this is a mistake, please report that issue in our Discord server)*`);
                 await message.delete();
             } else await message.reply(`${data.reason}\n*Powered by purgpt.xyz*`);
         } else if (rawContent) return content;

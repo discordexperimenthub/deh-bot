@@ -86,5 +86,13 @@ module.exports = {
 
             interaction.editReply(localize(locale, 'MESSAGE_REMINDER_CANCELLED'));
         };
+    },
+    /**
+     * @param {AutocompleteInteraction} autocomplete
+     */
+    async autocomplete(autocomplete) {
+        let subcommand = autocomplete.options.getSubcommand();
+        let reminders = await db.get(`users.${autocomplete.user.id}.reminders`) ?? [];
+        
     }
 };
