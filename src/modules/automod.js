@@ -134,7 +134,7 @@ module.exports = class AutoMod {
                 }
             }).catch(error => error?.response))?.data
 
-            if (!response2 || !response2?.choices?.[0]?.message?.content) return logger('error', 'AUTOMOD', 'Failed to get response from PurGPT API.', JSON.stringify(response2, null, 4));
+            if (!response2 || !response2?.choices?.[0]?.message?.content) return logger('error', 'AUTOMOD', 'Failed to get response from PurGPT API.', JSON.stringify(response2?.error?.message ? { message: response2?.error?.message } : {}, null, 4));
 
             let content2 = response2.choices[0].message.content;
 
