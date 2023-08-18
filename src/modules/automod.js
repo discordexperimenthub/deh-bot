@@ -88,7 +88,9 @@ module.exports = class AutoMod {
 
         history = history.join(', ');
 
-        let sendData = `{\n\t"history": "[${history}]",\\n\t"messageContent": "${message.content}",\n\t"channel": "${message.channel.name}",\n\t"author": {\n\t\t"id": "${message.author.id}",\n\t\t"username": "${message.author.username}"\n\t}\n}`
+        console.log(history);
+
+        let sendData = `{\n\t"history": "[${history}]",\n\t"messageContent": "${message.content}",\n\t"channel": "${message.channel.name}",\n\t"author": {\n\t\t"id": "${message.author.id}",\n\t\t"username": "${message.author.username}"\n\t}\n}`
         let response = (await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
             model: 'gpt-3.5-turbo-16k',
             messages: [
