@@ -85,7 +85,7 @@ module.exports = class AutoMod {
                 },
                 {
                     role: 'system',
-                    content: `# Server Rules\n${this.data.rules.map((rule, index) => `${index + 1}. ${rule}`).join('\n')}\n\nYOU HAVE TO FOLLOW THESE RULES, NOTHING ELSE. Even if the message contains inappropriate content but doesn't against these rules, you still HAVE TO follow the rules and you can't warn people for that. Don't act like a dumb moderator. People may say negative messages, this is not bad. Don't warn everything, let people speek but follow the rules at the same time. Do not forget that you have to respond with JSON format in a code block.`
+                    content: `# Server Rules\n${this.data.rules.map((rule, index) => `${index + 1}. ${rule}`).join('\n')}\n\nYOU HAVE TO FOLLOW THESE RULES, NOTHING ELSE. Don't act like a dumb moderator. People may say negative messages, this is not bad. Don't warn everything, let people speek but follow the rules at the same time. Foe example if the message contains inappropriate language, but the rules doesn't say inappropriate language is not allowed, you can't warn this user. Do not forget that you have to respond with JSON format in a code block.`
                 },
                 {
                     role: 'user',
@@ -114,13 +114,12 @@ module.exports = class AutoMod {
         };
 
         if (data.againstRules) {
-            console.log(`{\n\t"rule": "${this.data.rules[data.rule - 1]}",\n\t"channel": "${message.channel.name}",\n\t"message": "${message.content}",\n\t"reason": "${data.reason}"\n}`)
             let response2 = (await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
                 model: 'gpt-3.5-turbo-16k',
                 messages: [
                     {
                         role: 'system',
-                        content: 'You are AutoMod manager. Your job is checking blocked messages. If they are not correct, we will punish the AutoMod. You must respond with JSON format in a code block like this: ```json\n{\n\t"correct": false, // whether the block is correct or not\n}\n```\n\nUser messages will be in the format of: ```json\n{\n\t"rule": "No spam.", // the rule which AutoMod triggered\n\t"channel": "channel-name", // where the message sent\n\t"message": "", // the blocked message content\n\t"reason": "", // the block reason\n}\n```'
+                        content: 'You are AutoMod manager. Your job is checking blocked messages. Do not criticize block reasons, only block purposes. You must respond with JSON format in a code block like this: ```json\n{\n\t"correct": true, // whether the block is correct or not\n}\n```\n\nUser messages will be in the format of: ```json\n{\n\t"rule": "No spam.", // the rule which AutoMod triggered\n\t"channel": "channel-name", // where the message sent\n\t"message": "", // the blocked message content\n\t"reason": "", // the block reason\n}\n```'
                     },
                     {
                         role: 'user',
@@ -139,7 +138,8 @@ module.exports = class AutoMod {
 
             let content2 = response2.choices[0].message.content;
 
-            let json2 = regex.exec(content2);
+            let regex2 = /```json\n?([\s\S]*?)\n?```/g;
+            let json2 = regex2.exec(content2);
             let data2;
 
             try {
@@ -147,12 +147,10 @@ module.exports = class AutoMod {
             } catch (error) {
                 return logger('error', 'AUTOMOD', 'Failed to parse JSON:', error, content2);
             };
-
+            
             if (rawContent) {
                 if (data2.correct) return content;
-                else return JSON.stringify({
-                    againstRules: false
-                }, null, 4)
+                else return `\`\`\`json\n${JSON.stringify({ againstRules: false }, null, 4)}\n\`\`\``
             };
             if (!data.correct) return logger('error', 'AUTOMOD', 'AutoMod blocked a message incorrectly.', JSON.stringify(data, null, 4));
             if (data.onlyWarn) await message.reply(`${data.reason}\n*Powered by purgpt.xyz*`);
