@@ -103,7 +103,7 @@ module.exports = class Home {
             await this.save();
 
             post = await webhook.send({
-                avatarURL: homeMessage.author.displayAvatarURL({ forceStatic: true }),
+                avatarURL: homeMessage.member ? homeMessage.member.displayAvatarURL({ forceStatic: true }) : homeMessage.author.displayAvatarURL({ forceStatic: true }),
                 username: homeMessage.member?.displayName || homeMessage.author?.displayName,
                 content: m.length > 2000 ? `${m.slice(0, 2000 - 3)}...` : m,
                 embeds: homeMessage.embeds,
