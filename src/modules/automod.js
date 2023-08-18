@@ -76,7 +76,13 @@ module.exports = class AutoMod {
      * @param {boolean} rawContent
      */
     async check(message, rawContent = false) {
-        let history = rawContent ? [] : message.channel.messages.cache.toJSON().slice(-11).map(m => `"${m.content}"`);
+        let history = rawContent ? [] : message.channel.messages.cache.toJSON().slice(-11).map(m => JSON.stringify(({
+            messageContent: m.content,
+            author: {
+                id: m.author.id,
+                username: m.author.username
+            }
+        }, null, 4)));
 
         history.pop();
 
@@ -163,7 +169,7 @@ module.exports = class AutoMod {
             };
             if (!data2.correct) return logger('error', 'AUTOMOD', 'AutoMod blocked a message incorrectly.', sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
 
-            logger('debug', 'AUTOMOD', 'AutoMod blocked a message correctly.', sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
+            logger('debug', 'AUTOMOD', 'Sent Data:', sendData, 'AutoMod Response:', JSON.stringify(data, null, 4), 'Checker Response:', JSON.stringify(data2, null, 4));
 
             if (data.deleteMessage) {
                 await message.reply(`Your message has been deleted by AutoMod because it is against the server rules.\n**Reason:** ${data.reason}\n*Powered by purgpt.xyz*`);
