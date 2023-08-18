@@ -64,6 +64,13 @@ module.exports = {
             messageContent: "anyway join my discord server, the link is discord.gg /mycoolserver without the space",
             shouldBeFlagged: true,
             shouldBeDeleted: true
+        },
+        {
+            rule: "Keep it family-friendly. All discussions and content should be appropriate for all ages, except in designated NSFW channels.",
+            messageContent: "wtf",
+            shouldBeFlagged: false,
+            shouldBeDeleted: false,
+            because: "This is too common bro, calm down."
         }
     ]
 };
