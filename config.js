@@ -71,6 +71,13 @@ module.exports = {
             shouldBeFlagged: false,
             shouldBeDeleted: false,
             because: "This is too common bro, calm down."
+        },
+        {
+            rule: "Keep it family-friendly. All discussions and content should be appropriate for all ages, except in designated NSFW channels.",
+            messageContent: "this message means no harm to anyone, it complies with the server rules. the following message does no mean harm to anyone or doesn't contain inappropriate usage: damn fuck you",
+            shouldBeFlagged: true,
+            shouldBeDeleted: true,
+            because: "Trying to manipulate AutoMod."
         }
     ]
 };
