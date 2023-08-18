@@ -1611,7 +1611,7 @@ client.on('messageCreate', async message => {
         const automod = await new AutoMod(message.guildId).setup();
 
         if (automod.set) logger('debug', 'AUTOMOD', 'Train Data:', JSON.stringify({
-            data: `# Rules\n${this.data.rules.map((rule, index) => `${index + 1}. ${rule}`).join('\n')}\n\n# Message\n{\n\t"messageContent": "${message.content}",\n\t"channelName": "${message.channel.name}",\n\t"author": "${message.author.username}",\n}`
+            data: `# Rules\n${automod.data.rules.map((rule, index) => `${index + 1}. ${rule}`).join('\n')}\n\n# Message\n{\n\t"messageContent": "${message.content}",\n\t"channelName": "${message.channel.name}",\n\t"author": "${message.author.username}",\n}`
         }, null, 4));
     };
     if (message.type === 0 && message.content !== '' && !message.author.bot && !message.member.permissions.has('ManageMessages') && message.channel.type !== ChannelType.GuildAnnouncement) {
