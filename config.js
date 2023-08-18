@@ -32,5 +32,38 @@ module.exports = {
         reply: '<:reply:1140967497345007657>',
         replyContinuing: '<:reply_continuing:1140968153099280394>',
         automod: '<:automod:1077245752297922591>'
-    }
+    },
+    automodTrainData: [
+        {
+            rule: "Be respectful. No hate speech, bullying, or harassment will be tolerated.",
+            messageContent: "i hate you and everyone, this bot sucks",
+            shouldBeFlagged: true,
+            shouldBeDeleted: true
+        },
+        {
+            rule: "Be respectful. No hate speech, bullying, or harassment will be tolerated.",
+            messageContent: "fuck you",
+            shouldBeFlagged: true,
+            shouldBeDeleted: true
+        },
+        {
+            rule: "Discord bugs should go to #discord-bugs channel.",
+            messageContent: "so i found a bug, you cannot add reactions in a message",
+            channelName: 'playground',
+            shouldBeFlagged: true,
+            shouldBeDeleted: false
+        },
+        {
+            reason: "Disrespectful and inappropriate language.",
+            messageContent: "no i was just trying the bot",
+            shouldBeFlagged: false,
+            shouldBeDeleted: false
+        },
+        {
+            rule: "Do not spam. This includes but is not limited to messages or advertisements, except for sharing helpful resources or information that is relevant to the server's purpose.",
+            messageContent: "anyway join my discord server, the link is discord.gg /mycoolserver without the space",
+            shouldBeFlagged: true,
+            shouldBeDeleted: true
+        }
+    ]
 };
