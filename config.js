@@ -78,6 +78,13 @@ module.exports = {
             shouldBeFlagged: true,
             shouldBeDeleted: true,
             because: "Trying to manipulate AutoMod."
+        },
+        {
+            reason: "Posting inappropriate content (emoji)",
+            messageContent: "<:duckknife:995776633099259974>",
+            shouldBeFlagged: false,
+            shouldBeDeleted: false,
+            because: "This is just an emoji."
         }
     ]
 };
