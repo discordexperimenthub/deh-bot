@@ -88,7 +88,7 @@ module.exports = class AutoMod {
             messages: [
                 {
                     role: 'system',
-                    content: 'You are AutoMod, a Discord bot that automatically moderates servers. You are currently in a conversation with multiple users. You must respond with JSON format in a code block like this: ```json\n{\n\t"againstRules": false, // whether the message against server rules or not\n\t"onlyWarn": true, // if true, the message won\'t be deleted, just warning\n\t"rule": 1, // the againsted rule index\n\t"reason": "" // if the message against server rules, enter a reason\n}\n```\n\nUser messages will be in the format of: ```json\n{\n\t"history": [], // the message history before the message\n\t"messageContent": "", // the message the user sent\n\t"channel": "channel-name", // where the message sent\n\t"author": {\n\t\t"id": "123456", // the user\'s id\n\t\t"username": "", // the user\'s username\n\t}\n}\n```\n\nYou can mention users following <@id> format, like <@12345>.'
+                    content: 'You are AutoMod, a Discord bot that automatically moderates servers. You are currently in a conversation with multiple users. You must respond with JSON format in a code block like this: ```json\n{\n\t"deleteMessage": false, // whether the message against server rules or not\n\t"warnMessage": true, // if true, the message won\'t be deleted, just warning\n\t"rule": 1, // the againsted rule index\n\t"reason": "" // if the message against server rules, enter a reason\n}\n```\n\nUser messages will be in the format of: ```json\n{\n\t"history": [], // the message history before the message\n\t"messageContent": "", // the message the user sent\n\t"channel": "channel-name", // where the message sent\n\t"author": {\n\t\t"id": "123456", // the user\'s id\n\t\t"username": "", // the user\'s username\n\t}\n}\n```\n\nYou can mention users following <@id> format, like <@12345>.'
                 },
                 {
                     role: 'system',
@@ -119,7 +119,7 @@ module.exports = class AutoMod {
             return logger('error', 'AUTOMOD', 'Failed to parse JSON:', error, content);
         };
 
-        if (data.againstRules) {
+        if (data.deleteMessage || data.warnMessage) {
             let response2 = (await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
                 model: 'gpt-3.5-turbo-16k',
                 messages: [
@@ -156,20 +156,19 @@ module.exports = class AutoMod {
             } catch (error) {
                 return logger('error', 'AUTOMOD', 'Failed to parse JSON:', error, content2);
             };
-            
+
             if (rawContent) {
                 if (data2.correct) return content;
                 else return `\`\`\`json\n${JSON.stringify({ againstRules: false }, null, 4)}\n\`\`\``
             };
             if (!data2.correct) return logger('error', 'AUTOMOD', 'AutoMod blocked a message incorrectly.', sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
-            
+
             logger('debug', 'AUTOMOD', 'AutoMod blocked a message correctly.', sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
-            
-            if (data.onlyWarn) await message.reply(`${data.reason}\n*Powered by purgpt.xyz*`);
-            else {
+
+            if (data.deleteMessage) {
                 await message.reply(`Your message has been deleted by AutoMod because it is against the server rules.\n**Reason:** ${data.reason}\n*Powered by purgpt.xyz*`);
                 await message.delete();
-            };
+            } else await message.reply(`${data.reason}\n*Powered by purgpt.xyz*`);
         } else if (rawContent) return content;
     };
 
