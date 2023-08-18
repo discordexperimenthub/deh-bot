@@ -155,7 +155,7 @@ module.exports = class AutoMod {
                 if (data2.correct) return content;
                 else return `\`\`\`json\n${JSON.stringify({ againstRules: false }, null, 4)}\n\`\`\``
             };
-            if (!data2.correct) return logger('error', 'AUTOMOD', 'AutoMod blocked a message incorrectly.', sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
+            if (!data2.correct) return logger('error', 'AUTOMOD', 'AutoMod blocked a message incorrectly.', this.data.rules[data.rule - 1], sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
 
             logger('info', 'AUTOMOD', 'AutoMod blocked a message correctly.', sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
 

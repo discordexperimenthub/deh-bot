@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ChatInputCommandInteraction } = require("discord.js");
+const { SlashCommandBuilder, ChatInputCommandInteraction, AutocompleteInteraction } = require("discord.js");
 const { QuickDB } = require("quick.db");
 const EmbedMaker = require("../modules/embed");
 const { localize } = require("../modules/localization");
@@ -47,6 +47,7 @@ module.exports = {
                 })
                 .setRequired(true)
                 .setMinValue(1)
+                .setAutocomplete(true)
             )
         ),
     /**
