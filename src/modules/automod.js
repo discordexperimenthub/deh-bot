@@ -82,7 +82,7 @@ module.exports = class AutoMod {
             messages: [
                 {
                     role: 'system',
-                    content: 'You are AutoMod, a Discord bot that automatically moderates servers. You are currently in a conversation with multiple users. You must respond with JSON format in a code block like this: ```json\n{\n\t"deleteMessage": false, // whether the message against server rules or not\n\t"warnMessage": true, // if true, the message won\'t be deleted, just warning\n\t"rule": 1, // the againsted rule index\n\t"reason": "" // if the message against server rules, enter a reason\n}\n```\n\nUser messages will be in the format of: ```json\n{\n\t"messageContent": "", // the message the user sent\n\t"channel": "channel-name", // where the message sent\n\t"author": {\n\t\t"id": "123456", // the user\'s id\n\t\t"username": "", // the user\'s username\n\t}\n}\n```\n\nIf the message is not against server rules, you can respond with this: ```json\n{\n\t"deleteMessage": false,\n\t"warnMessage": false\n}\n```'
+                    content: 'You are AutoMod, a Discord bot that automatically moderates messages. You are currently in a conversation with multiple users. You must respond with JSON format in a code block like this: ```json\n{\n\t"deleteMessage": false, // whether the message should be deleted or not\n\t"warnMessage": true, // whether a warning should be sent or not\n\t"rule": 1, // the againsted rule index\n\t"reason": "" // if the message against server rules, enter a reason\n}\n```\n\nUser messages will be in the format of: ```json\n{\n\t"messageContent": "", // the message the user sent\n\t"channel": "channel-name", // where the message sent\n\t"author": {\n\t\t"id": "123456", // the user\'s id\n\t\t"username": "", // the user\'s username\n\t}\n}\n```\n\nIf the message is not against server rules, you can respond with this:\n```json\n{\n\t"deleteMessage": false,\n\t"warnMessage": false\n}\n```'
                 },
                 {
                     role: 'system',
@@ -119,7 +119,7 @@ module.exports = class AutoMod {
                 messages: [
                     {
                         role: 'system',
-                        content: `You are AutoMod manager. Your job is checking blocked messages. Do not criticize block reasons, only block purposes. Don't be so sensitive. Think like you are a human and be fair. If it's allowed in the rules, do not block only-emoji messages (emojis are in format <:name:1234>). Please focus on the current message, not past messages. You must respond with JSON format in a code block like this: \`\`\`json\n{\n\t"correct": true, // whether the block is correct or not\n}\n\`\`\`\n\nUser messages will be in the format of: \`\`\`json\n{\n\t"rule": "No spam.", // the rule which AutoMod triggered\n\t"channel": "channel-name", // where the message sent\n\t"history": [] // the message history before the message\n\t"messageContent": "", // the blocked message content\n\t"reason": "", // the block reason\n}\n\`\`\`\n\nJust respond all messages with ONE JSON format in a code block. Nothing else.`
+                        content: `You are AutoMod manager. Your job is checking blocked messages. Do not criticize block reasons, only block purposes. Don't be so sensitive. Think like you are a human and be fair. If it's allowed in the rules, do not block only-emoji messages (emojis are in format <:name:1234>). Please focus on the current message, not past messages. You must respond with JSON format in a code block like this: \`\`\`json\n{\n\t"correct": true, // whether the block is correct or not\n}\n\`\`\`\n\nUser messages will be in the format of: \`\`\`json\n{\n\t"rule": "No spam.", // the rule which AutoMod triggered\n\t"channel": "channel-name", // where the message sent\n\t"messageContent": "", // the blocked message content\n\t"reason": "", // the block reason\n}\n\`\`\`\n\nJust respond all messages with ONE JSON format in a code block. Nothing else.`
                     },
                     {
                         role: 'system',
@@ -127,7 +127,7 @@ module.exports = class AutoMod {
                     },
                     {
                         role: 'user',
-                        content: `\`\`\`json\n{\n\t"rule": "${this.data.rules[data.rule - 1]}",\n\t"channel": "${message.channel.name}",\n\t"history": "[${history}]"\n\t"messageContent": "${message.content}",\n\t"reason": "${data.reason}"\n}\n\`\`\``
+                        content: `\`\`\`json\n{\n\t"rule": "${this.data.rules[data.rule - 1]}",\n\t"channel": "${message.channel.name}"\n\t"messageContent": "${message.content}",\n\t"reason": "${data.reason}"\n}\n\`\`\``
                     }
                 ]
             }, {
@@ -156,7 +156,7 @@ module.exports = class AutoMod {
                 else return `\`\`\`json\n${JSON.stringify({ againstRules: false }, null, 4)}\n\`\`\``
             };
             if (!data2.correct) return logger('error', 'AUTOMOD', 'AutoMod blocked a message incorrectly.', sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
-            
+
             logger('info', 'AUTOMOD', 'AutoMod blocked a message correctly.', sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
 
             if (data.deleteMessage) {
