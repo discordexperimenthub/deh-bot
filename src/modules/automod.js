@@ -76,11 +76,11 @@ module.exports = class AutoMod {
      * @param {boolean} rawContent
      */
     async check(message, rawContent = false) {
-        let history = message.channel.messages.cache.toJSON().map(m => m.content);
+        let history = message.channel.messages.cache.toJSON().map(m => `"${m.content}"`);
 
         history.pop();
 
-        history = history.join(', ')
+        history = history.join(', ');
 
         let sendData = `{\n\t"history": "[${history}]",\\n\t"messageContent": "${message.content}",\n\t"channel": "${message.channel.name}",\n\t"author": {\n\t\t"id": "${message.author.id}",\n\t\t"username": "${message.author.username}"\n\t}\n}`
         let response = (await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
