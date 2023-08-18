@@ -91,8 +91,11 @@ module.exports = {
      * @param {AutocompleteInteraction} autocomplete
      */
     async autocomplete(autocomplete) {
-        let subcommand = autocomplete.options.getSubcommand();
         let reminders = await db.get(`users.${autocomplete.user.id}.reminders`) ?? [];
-        
+
+        autocomplete.respond(reminders.map((reminder, index) => ({
+            name: `${index + 1}. ${reminder.content === '' ? 'No content' : reminder.content.length > 25 ? `${reminder.content.slice(0, 25)}...` : reminder.content}`,
+            value: `${index + 1}`
+        })));
     }
 };
