@@ -160,15 +160,15 @@ module.exports = class AutoMod {
                 return logger('error', 'AUTOMOD', 'Failed to parse JSON:', error, content2);
             };
 
+            logger('debug', 'AUTOMOD', 'Train Data:', JSON.stringify({
+                data: `# Rules\n${this.data.rules.map((rule, index) => `${index + 1}. ${rule}`).join('\n')}\n\n# Message\n{\n\t"channelHistory": "${history}",\n\t"messageContent": "${message.content}",\n\t"channelName": "${message.channel.name}",\n\t"author": "${message.author.username}",\n}`
+            }, null, 4));
+
             if (rawContent) {
                 if (data2.correct) return content;
                 else return `\`\`\`json\n${JSON.stringify({ againstRules: false }, null, 4)}\n\`\`\``
             };
             if (!data2.correct) return logger('error', 'AUTOMOD', 'AutoMod blocked a message incorrectly.', sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
-
-            logger('debug', 'AUTOMOD', 'Train Data:', JSON.stringify({
-                data: `# Rules\n${this.data.rules.map((rule, index) => `${index + 1}. ${rule}`).join('\n')}\n\n# Message\n{\n\t"channelHistory": "${history}",\n\t"messageContent": "${message.content}",\n\t"channelName": "${message.channel.name}",\n\t"author": "${message.author.username}",\n}`
-            }, null, 4));
 
             if (data.deleteMessage) {
                 await message.reply(`Your message has been deleted by AutoMod because it is against the server rules.\n**Reason:** ${data.reason}\n*Powered by purgpt.xyz*`);
