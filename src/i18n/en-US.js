@@ -82,5 +82,6 @@ module.exports = {
     BYPASS_ROLES_SUCCESS: 'Bypass roles have been set as {{0}} successfully!',
     BYPASS_CHANNELS_SUCCESS: 'Bypass channels have been set as {{0}} successfully!',
     SET_BYPASS_RESET: 'Reset Bypasses',
-    BYPASS: 'Bypass'
+    BYPASS: 'Bypass',
+    REMINDER_NOT_SUPPORTED: 'Message Reminders are not supported for this message type!'
 };

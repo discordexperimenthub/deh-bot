@@ -78,5 +78,6 @@ module.exports = {
     BYPASS_ROLES_SUCCESS: 'Bypass rolleri başarıyla {{0}} olarak ayarlandı!',
     BYPASS_CHANNELS_SUCCESS: 'Bypass kanalları başarıyla {{0}} olarak ayarlandı!',
     SET_BYPASS_RESET: 'Bypassleri Sıfırla',
-    BYPASS: 'Bypass'
+    BYPASS: 'Bypass',
+    REMINDER_NOT_SUPPORTED: 'Mesaj Hatırlatıcıları bu mesaj türünü desteklemiyor.'
 };

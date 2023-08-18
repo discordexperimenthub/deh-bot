@@ -26,6 +26,7 @@ module.exports = {
 
         let locale = interaction.locale;
 
+        if (interaction.targetMessage.type !== 0) return interaction.editReply(localize(locale, 'REMINDER_NOT_SUPPORTED'));
         if (!interaction.targetMessage.content && interaction.targetMessage.embeds?.length === 0) return interaction.editReply(localize(locale, 'REMINDER_ATTACHMENTS_NOT_SUPPORTED'));
 
         interaction.editReply({
