@@ -76,7 +76,7 @@ module.exports = class AutoMod {
      * @param {boolean} rawContent
      */
     async check(message, rawContent = false) {
-        let history = message.channel.messages.cache.toJSON().slice(0, 11).map(m => `"${m.content}"`);
+        let history = message.channel.messages.cache.toJSON().slice(-11).map(m => `"${m.content}"`);
 
         history.pop();
 
