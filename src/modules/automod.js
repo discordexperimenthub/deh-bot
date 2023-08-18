@@ -76,11 +76,11 @@ module.exports = class AutoMod {
      * @param {boolean} rawContent
      */
     async check(message, rawContent = false) {
-        let history = message.channel.messages.cache.toJSON().map(m => m.content);
+        let history = message.channel.messages.cache.toJSON().map(m => m.content).join(', ');
 
         history.pop();
 
-        let sendData = `{\n\t"history": "${history}",\\n\t"messageContent": "${message.content}",\n\t"channel": "${message.channel.name}",\n\t"author": {\n\t\t"id": "${message.author.id}",\n\t\t"username": "${message.author.username}"\n\t}\n}`
+        let sendData = `{\n\t"history": "[${history}]",\\n\t"messageContent": "${message.content}",\n\t"channel": "${message.channel.name}",\n\t"author": {\n\t\t"id": "${message.author.id}",\n\t\t"username": "${message.author.username}"\n\t}\n}`
         let response = (await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
             model: 'gpt-3.5-turbo-16k',
             messages: [
@@ -128,7 +128,7 @@ module.exports = class AutoMod {
                     },
                     {
                         role: 'user',
-                        content: `\`\`\`json\n{\n\t"rule": "${this.data.rules[data.rule - 1]}",\n\t"channel": "${message.channel.name}",\n\t"history": "${history}"\n\t"messageContent": "${message.content}",\n\t"reason": "${data.reason}"\n}\n\`\`\``
+                        content: `\`\`\`json\n{\n\t"rule": "${this.data.rules[data.rule - 1]}",\n\t"channel": "${message.channel.name}",\n\t"history": "[${history}]"\n\t"messageContent": "${message.content}",\n\t"reason": "${data.reason}"\n}\n\`\`\``
                     }
                 ],
                 overwriteOnError: false
