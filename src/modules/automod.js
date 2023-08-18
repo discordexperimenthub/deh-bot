@@ -167,10 +167,7 @@ module.exports = class AutoMod {
             if (!data2.correct) return logger('error', 'AUTOMOD', 'AutoMod blocked a message incorrectly.', sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
 
             logger('debug', 'AUTOMOD', 'Train Data:', JSON.stringify({
-                rules: this.data.rules.map((rule, index) => `${index + 1}. ${rule}`).join('\n'),
-                messageHistory: history,
-                messageContent: message.content,
-                author: message.author.username,
+                data: `# Rules\n${this.data.rules.map((rule, index) => `${index + 1}. ${rule}`).join('\n')}\n\n# Message\n{\n\t"channelHistory": "${history}",\n\t"messageContent": "${message.content}",\n\t"channelName": "${message.channel.name}",\n\t"author": "${message.author.username}",\n}`
             }, null, 4));
 
             if (data.deleteMessage) {
