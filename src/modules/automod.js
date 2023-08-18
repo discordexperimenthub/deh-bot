@@ -161,7 +161,7 @@ module.exports = class AutoMod {
             };
 
             logger('debug', 'AUTOMOD', 'Train Data:', JSON.stringify({
-                data: `# Rules\n${this.data.rules.map((rule, index) => `${index + 1}. ${rule}`).join('\n')}\n\n# Message\n{\n\t"channelHistory": "${history}",\n\t"messageContent": "${message.content}",\n\t"channelName": "${message.channel.name}",\n\t"author": "${message.author.username}",\n}`
+                data: `# Rules\n${this.data.rules.map((rule, index) => `${index + 1}. ${rule}`).join('\n')}\n\n# Message\n{\n\t"messageContent": "${message.content}",\n\t"channelName": "${message.channel.name}",\n\t"author": "${message.author.username}",\n}`
             }, null, 4));
 
             if (rawContent) {
