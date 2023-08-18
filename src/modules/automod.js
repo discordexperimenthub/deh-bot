@@ -100,7 +100,7 @@ module.exports = class AutoMod {
             }
         }).catch(error => error?.response))?.data
 
-        if (!response || !response?.choices?.[0]?.message?.content) return logger('error', 'AUTOMOD', 'Failed to get response from PurGPT API.', JSON.stringify(response, null, 4));
+        if (!response || !response?.choices?.[0]?.message?.content) return logger('error', 'AUTOMOD', 'Failed to get response from PurGPT API.', JSON.stringify(response?.error?.message ? { message: response?.error?.message } : response, null, 4));
 
         let content = response.choices[0].message.content;
         let regex = /```json\n?({[\s\S]*?})\n?```/g;
@@ -134,7 +134,7 @@ module.exports = class AutoMod {
                 }
             }).catch(error => error?.response))?.data
 
-            if (!response2 || !response2?.choices?.[0]?.message?.content) return logger('error', 'AUTOMOD', 'Failed to get response from PurGPT API.', JSON.stringify(response2?.error?.message ? { message: response2?.error?.message } : {}, null, 4));
+            if (!response2 || !response2?.choices?.[0]?.message?.content) return logger('error', 'AUTOMOD', 'Failed to get response from PurGPT API.', JSON.stringify(response2?.error?.message ? { message: response2?.error?.message } : response2, null, 4));
 
             let content2 = response2.choices[0].message.content;
 
