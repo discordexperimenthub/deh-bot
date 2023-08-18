@@ -153,6 +153,9 @@ module.exports = class AutoMod {
                 else return `\`\`\`json\n${JSON.stringify({ againstRules: false }, null, 4)}\n\`\`\``
             };
             if (!data2.correct) return logger('error', 'AUTOMOD', 'AutoMod blocked a message incorrectly.', message, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
+            
+            logger('debug', 'AUTOMOD', 'AutoMod blocked a message correctly.', message, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
+            
             if (data.onlyWarn) await message.reply(`${data.reason}\n*Powered by purgpt.xyz*`);
             else {
                 await message.reply(`Your message has been deleted by AutoMod because it is against the server rules.\n**Reason:** ${data.reason}\n*Powered by purgpt.xyz*`);
