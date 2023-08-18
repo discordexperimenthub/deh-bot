@@ -76,5 +76,7 @@ module.exports = {
     BYPASS_CHANNELS: 'Bypass Kanalları',
     ROLES_SELECT: 'Rol seç...',
     BYPASS_ROLES_SUCCESS: 'Bypass rolleri başarıyla {{0}} olarak ayarlandı!',
-    BYPASS_CHANNELS_SUCCESS: 'Bypass kanalları başarıyla {{0}} olarak ayarlandı!'
+    BYPASS_CHANNELS_SUCCESS: 'Bypass kanalları başarıyla {{0}} olarak ayarlandı!',
+    SET_BYPASS_RESET: 'Bypassleri Sıfırla',
+    BYPASS: 'Bypass'
 };

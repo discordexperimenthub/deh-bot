@@ -1180,6 +1180,10 @@ client.on('interactionCreate', async interaction => {
                                                 .setLabel(localize(locale, 'SET_BYPASS_CHANNELS'))
                                                 .setStyle(ButtonStyle.Primary),
                                             new ButtonBuilder()
+                                                .setCustomId(`${interaction.user.id}:automod_bypass_reset`)
+                                                .setLabel(localize(locale, 'SET_BYPASS_RESET'))
+                                                .setStyle(ButtonStyle.Primary),
+                                            new ButtonBuilder()
                                                 .setCustomId(`${interaction.user.id}:automod_test`)
                                                 .setLabel(localize(locale, 'TEST'))
                                                 .setStyle(ButtonStyle.Primary),
@@ -1472,6 +1476,16 @@ client.on('interactionCreate', async interaction => {
                         components: []
                     });
                     break;
+                case 'automod_bypass_reset':
+                    await interaction.deferUpdate();
+                    await automod.setBypassRoles([]);
+                    await automod.setBypassChannels([]);
+
+                    interaction.editReply({
+                        content: localize(locale, 'SETTING_RESET_SUCCESS', localize(locale, 'BYPASS')),
+                        embeds: [],
+                        components: []
+                    });
                 default:
                     logger('warning', 'COMMAND', 'Message component', interaction.customId, 'not found');
             };

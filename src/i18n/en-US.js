@@ -80,5 +80,7 @@ module.exports = {
     ROLES_SELECT: 'Select roles...',
     CHANNELS_SELECT: 'Select channels...',
     BYPASS_ROLES_SUCCESS: 'Bypass roles have been set as {{0}} successfully!',
-    BYPASS_CHANNELS_SUCCESS: 'Bypass channels have been set as {{0}} successfully!'
+    BYPASS_CHANNELS_SUCCESS: 'Bypass channels have been set as {{0}} successfully!',
+    SET_BYPASS_RESET: 'Reset Bypasses',
+    BYPASS: 'Bypass'
 };
