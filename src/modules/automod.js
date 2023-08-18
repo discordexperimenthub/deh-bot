@@ -98,8 +98,7 @@ module.exports = class AutoMod {
                     role: 'user',
                     content: `\`\`\`json\n${sendData}\n\`\`\``
                 }
-            ],
-            overwriteOnError: false
+            ]
         }, {
             headers: {
                 'Content-Type': 'application/json',
@@ -132,8 +131,7 @@ module.exports = class AutoMod {
                         role: 'user',
                         content: `\`\`\`json\n{\n\t"rule": "${this.data.rules[data.rule - 1]}",\n\t"channel": "${message.channel.name}",\n\t"history": "[${history}]"\n\t"messageContent": "${message.content}",\n\t"reason": "${data.reason}"\n}\n\`\`\``
                     }
-                ],
-                overwriteOnError: false
+                ]
             }, {
                 headers: {
                     'Content-Type': 'application/json',
