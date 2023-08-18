@@ -76,6 +76,10 @@ module.exports = class AutoMod {
      * @param {boolean} rawContent
      */
     async check(message, rawContent = false) {
+        logger('debug', 'AUTOMOD', 'Train Data:', JSON.stringify({
+            data: `# Rules\n${this.data.rules.map((rule, index) => `${index + 1}. ${rule}`).join('\n')}\n\n# Message\n{\n\t"messageContent": "${message.content}",\n\t"channelName": "${message.channel.name}",\n\t"author": "${message.author.username}",\n}`
+        }, null, 4));
+        
         let history = rawContent ? [] : message.channel.messages.cache.toJSON().slice(-11).map(m => JSON.stringify({
             messageContent: m.content,
             author: m.author.username
@@ -159,10 +163,6 @@ module.exports = class AutoMod {
             } catch (error) {
                 return logger('error', 'AUTOMOD', 'Failed to parse JSON:', error, content2);
             };
-
-            logger('debug', 'AUTOMOD', 'Train Data:', JSON.stringify({
-                data: `# Rules\n${this.data.rules.map((rule, index) => `${index + 1}. ${rule}`).join('\n')}\n\n# Message\n{\n\t"messageContent": "${message.content}",\n\t"channelName": "${message.channel.name}",\n\t"author": "${message.author.username}",\n}`
-            }, null, 4));
 
             if (rawContent) {
                 if (data2.correct) return content;
