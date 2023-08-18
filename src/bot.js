@@ -1347,7 +1347,7 @@ client.on('interactionCreate', async interaction => {
                     await automod.toggle();
 
                     interaction.editReply({
-                        content: localize(locale, 'AUTOMOD_TOGGLE_SUCCESS', localize(locale, 'AUTOMOD')),
+                        content: localize(locale, `AUTOMOD_${automod.data.enabled ? 'ENABLE' : 'DISABLE'}_SUCCESS`, localize(locale, 'AUTOMOD')),
                         embeds: [],
                         components: []
                     });
