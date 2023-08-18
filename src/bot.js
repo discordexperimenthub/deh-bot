@@ -1426,7 +1426,7 @@ client.on('interactionCreate', async interaction => {
                                     new RoleSelectMenuBuilder()
                                         .setCustomId(`${interaction.user.id}:automod_bypass_roles_select`)
                                         .setPlaceholder(localize(locale, 'ROLES_SELECT'))
-                                        .setMaxValues(interaction.guild.roles.cache.size)
+                                        .setMaxValues(interaction.guild.roles.cache.size > 25 ? 25 : interaction.guild.roles.cache.size)
                                 )
                         ]
                     });
@@ -1453,7 +1453,7 @@ client.on('interactionCreate', async interaction => {
                                     new ChannelSelectMenuBuilder()
                                         .setCustomId(`${interaction.user.id}:automod_bypass_channels_select`)
                                         .setPlaceholder(localize(locale, 'CHANNELS_SELECT'))
-                                        .setMaxValues(interaction.guild.channels.cache.size)
+                                        .setMaxValues(interaction.guild.channels.cache.size > 25 ? 25 : interaction.guild.channels.cache.size)
                                         .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum)
                                 )
                         ]

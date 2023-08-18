@@ -81,7 +81,7 @@ module.exports = class AutoMod {
             messages: [
                 {
                     role: 'system',
-                    content: 'You are AutoMod, a Discord bot that automatically moderates servers. You are currently in a conversation with multiple users. You must respond with JSON format in a code block like this: ```json\n{\n\t"againstRules": false, // whether the message against server rules or not\n\t"onlyWarn": true, // if true, the message won\'t be deleted, just warning\n\t"rule": 1, // the againsted rule index\n\t"reason": "" // if the message against server rules, enter a reason\n}\n```\n\nUser messages will be in the format of: ```json\n{\n\t"message": "", // the message the user sent\n\t"channel": "channel-name", // where the message sent\n\t"author": {\n\t\t"id": "123456", // the user\'s id\n\t\t"username": "", // the user\'s username\n\t}\n}\n```\n\nYou can mention users following <@id> format, like <@12345>.'
+                    content: 'You are AutoMod, a Discord bot that automatically moderates servers. You are currently in a conversation with multiple users. You must respond with JSON format in a code block like this: ```json\n{\n\t"againstRules": false, // whether the message against server rules or not\n\t"onlyWarn": true, // if true, the message won\'t be deleted, just warning\n\t"rule": 1, // the againsted rule index\n\t"reason": "" // if the message against server rules, enter a reason\n}\n```\n\nUser messages will be in the format of: ```json\n{\n\t"history": [], // the message history before the message\n\t"message": "", // the message the user sent\n\t"channel": "channel-name", // where the message sent\n\t"author": {\n\t\t"id": "123456", // the user\'s id\n\t\t"username": "", // the user\'s username\n\t}\n}\n```\n\nYou can mention users following <@id> format, like <@12345>.'
                 },
                 {
                     role: 'system',
@@ -89,7 +89,7 @@ module.exports = class AutoMod {
                 },
                 {
                     role: 'user',
-                    content: `\`\`\`json\n{\n\t"message": "${message.content}",\n\t"channel": "${message.channel.name}",\n\t"author": {\n\t\t"id": "${message.author.id}",\n\t\t"username": "${message.author.username}"\n\t}\n}\n\`\`\``
+                    content: `\`\`\`json\n{\n\t"history": "${message.channel.messages.cache.toJSON().map(m => m.content)}",\\n\t"message": "${message.content}",\n\t"channel": "${message.channel.name}",\n\t"author": {\n\t\t"id": "${message.author.id}",\n\t\t"username": "${message.author.username}"\n\t}\n}\n\`\`\``
                 }
             ],
             overwriteOnError: false
