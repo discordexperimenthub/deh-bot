@@ -4,7 +4,8 @@
   "description": "This is a template for a Discord bot. It is written in JavaScript and uses the discord.js library. It is designed to be easy to use and easy to modify.",
   "main": "./src",
   "scripts": {
-    "start": "node ./src"
+    "start": "node ./src",
+    "i18n": "node ./src/modules/i18n.helper.js"
   },
   "keywords": [],
   "author": "Tolgchu",
