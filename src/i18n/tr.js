@@ -144,5 +144,6 @@ module.exports = {
     SET_FILTERS_SUCCESS: 'Filtreler başarıyla ayarlandı!',
     REMOVE_BLACKLIST_ROLES: 'Kara Listeden Rol Kaldır',
     REMOVE_BLACKLIST_CHANNELS: 'Kara Listeden Kanal Kaldır',
-    FILTERS_SELECT: 'Filtre seç...'
+    FILTERS_SELECT: 'Filtre seç...',
+    SYNC_RULES_ERROR: 'Kurallar senkronize edilirken bir hata oluştu! Lütfen daha sonra tekrar deneyin veya bu sorunu [Discord sunucumuzda](https://discord.gg/experiments) bildirin.',
 };

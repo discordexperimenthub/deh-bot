@@ -132,5 +132,6 @@ module.exports = {
     SELF_HARM_INSTRUCTIONS: 'Self Harm/Instructions',
     HARASSMENT_THREATENING: 'Harassment/Threatening',
     VIOLENCE: 'Violence',
-    SET_FILTERS_SUCCESS: 'Bad Content Filter filters have been set successfully!'
+    SET_FILTERS_SUCCESS: 'Bad Content Filter filters have been set successfully!',
+    SYNC_RULES_ERROR: 'An error occurred while syncing rules! Please try again later or report this issue in [our Discord server](<https://discord.gg/experiments>).',
 };

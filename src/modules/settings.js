@@ -44,7 +44,7 @@ module.exports.homeSettings = async (interaction, home, locale) => {
                             .setStyle(ButtonStyle.Success)
                     ] : []),
                     new ButtonBuilder()
-                        .setCustomId(`${interaction.user.id}:home_${home.data?.enabled ? 'disable' : 'enable'}`)
+                        .setCustomId(`${interaction.user.id}:home_toggle`)
                         .setLabel(localize(locale, home.data?.enabled ? 'DISABLE' : 'ENABLE'))
                         .setStyle(home.data?.enabled ? ButtonStyle.Danger : ButtonStyle.Success),
                     new ButtonBuilder()
@@ -133,12 +133,12 @@ module.exports.automodSettings = async (interaction, automod, locale) => {
  * @param {Locale} locale
  */
 module.exports.automodAIConfigure = (interaction, automod, locale) => {
-    let rules = automod.data.ai.rules.length > 0 ? automod.data.ai.rules.join('\n\n') : localize(locale, 'NONE');
+    let rules = automod.data.ai.rules.filter(rule => rule !== '').length > 0 ? automod.data.ai.rules.map((rule, index) => `${index + 1}. ${rule}`).join('\n') : localize(locale, 'NONE');
 
     interaction.editReply({
         embeds: [
             new EmbedMaker(interaction.client)
-                .setTitle(`${emojis.automod} ${localize(locale, 'AUTOMOD_AI')} (Experimental)`)
+                .setTitle(`${emojis.automod} ${localize(locale, 'AUTOMOD_AI')} (${localize(locale, 'EXPERIMENTAL')})`)
                 .setFields(
                     {
                         name: localize(locale, 'RULES'),

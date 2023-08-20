@@ -1201,8 +1201,47 @@ client.on('interactionCreate', async interaction => {
 
                     let rulesChannel2 = interaction.guild.rulesChannel;
                     let messages2 = await rulesChannel2.messages.fetch({ limit: 50 });
+                    let rules;
 
-                    await automod.syncAIRules(messages2.toJSON().map(m => m.content));
+                    try {
+                        rules = (await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
+                            model: 'gpt-3.5-turbo-16k',
+                            messages: [
+                                {
+                                    role: 'system',
+                                    content: 'You have to return with an array of rules. Nothing else. Do not include if something is not a rule. Do not break the order of the rules.'
+                                },
+                                {
+                                    role: 'user',
+                                    content: '* No spamming\n2. No NSFW\n:three: No advertising\n* No harassment\nblablabla hey\nPing @Cat'
+                                },
+                                {
+                                    role: 'assistant',
+                                    content: '["No spamming", "No NSFW", "No advertising", "No harassment", "Ping @Cat"]'
+                                },
+                                {
+                                    role: 'user',
+                                    content: messages2.map(m => m.content).join('\n')
+                                }
+                            ]
+                        }, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${automod.data.purgptKey ?? process.env.PURGPT_API_KEY}`
+                            },
+                            timeout: 20000
+                        })).data.choices[0].message.content;
+                        rules = JSON.parse(rules);
+                    } catch (error) {
+                        logger('error', 'AUTOMOD', 'Failed to sync rules with AI:', error);
+
+                        return interaction.followUp({
+                            content: localize(locale, 'SYNC_RULES_ERROR'),
+                            ephemeral: true
+                        });
+                    };
+
+                    await automod.syncAIRules(rules);
                     await interaction.followUp({
                         content: localize(locale, 'SYNC_RULES_SUCCESS'),
                         ephemeral: true
