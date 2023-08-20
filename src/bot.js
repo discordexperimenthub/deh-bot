@@ -1110,7 +1110,7 @@ client.on('interactionCreate', async interaction => {
 
                     homeSettings(interaction, home, locale);
                     break;
-                case 'home_enable':
+                case 'home_toggle':
                     await interaction.deferUpdate();
                     await home.toggle();
                     await interaction.followUp({
