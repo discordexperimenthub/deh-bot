@@ -1221,7 +1221,7 @@ client.on('interactionCreate', async interaction => {
                                 },
                                 {
                                     role: 'user',
-                                    content: messages2.map(m => m.content).join('\n')
+                                    content: messages2.filter(m => m.content || m.embeds[0]?.description).map(m => m.content === '' ? m.embeds[0]?.description : '').join('\n')
                                 }
                             ]
                         }, {
