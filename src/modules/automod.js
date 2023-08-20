@@ -169,7 +169,7 @@ module.exports = class AutoMod {
                 };
 
                 await channel.send({
-                    content: `**AutoMod** has ${data.deleteMessage ? 'blocked' : 'warned'} a message in <#${message.channel.id}>`,
+                    content: `**AutoMod** has ${data.deleteMessage ? 'blocked' : 'warned'} a message from <@${message.author.id}> in <#${message.channel.id}>`,
                     embeds: [
                         new EmbedMaker(message.client)
                             .setAuthor({
@@ -263,7 +263,7 @@ module.exports = class AutoMod {
                 };
 
                 await channel.send({
-                    content: `**AutoMod** has blocked a message in <#${message.channel.id}>`,
+                    content: `**AutoMod** has blocked a message from <@${message.author.id}> in <#${message.channel.id}>`,
                     embeds: [
                         new EmbedMaker(message.client)
                             .setAuthor({

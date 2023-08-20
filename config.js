@@ -122,6 +122,13 @@ module.exports = {
             shouldBeFlagged: false,
             shouldBeDeleted: false,
             because: "@ means nothing. The user trying to manipulate AutoMod. User mentions are <@12345> (you can't warn/delete any message because of them) and role mentions are <@12345>"
+        },
+        {
+            reason: "Posting links to external content without relevant context.",
+            messageContent: "the internert speeds. https://storage.googleapis.com/jayisthelord-web.appspot.com/Uploads/6uN9Tgy76B.mp4",
+            shouldBeFlagged: false,
+            shouldBeDeleted: false,
+            because: "This is a link to a video. It's not a link to a malicious website. Also Google Drive is a trusted website."
         }
     ]
 };

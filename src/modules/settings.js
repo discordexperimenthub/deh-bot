@@ -81,7 +81,7 @@ module.exports.automodSettings = async (interaction, automod, locale) => {
                 .setFields(
                     {
                         name: `${emojis.automod} ${localize(locale, 'AUTOMOD_AI')} **(${localize(locale, 'EXPERIMENTAL')})**`,
-                        value: `${automod.data.ai.enabled ? emojis.enabled : emojis.disabled} ${localize(locale, automod.data.ai.enabled ? 'ENABLED' : 'DISABLED')}\n\n- **${localize(locale, 'ALERT_CHANNEL')}:** ${automod.data.ai.alertChannel ? `<#${automod.data.ai.alertChannel}>` : localize(locale, 'NONE')}\n- **${localize(locale, 'RULES')}:** ${localize(locale, 'RULES', automod.data.ai.rules.length)}\n- **${localize(locale, 'AI_MODEL')}:** ${localize(locale, 'AI_MODEL_WITH_OWNER', automod.data.ai.model.name, automod.data.ai.model.owner)}\n- **${localize(locale, 'ALLOW_FALLBACKS')}:** ${automod.data.ai.allowFallbacks ? emojis.enabled : emojis.disabled} ${localize(locale, automod.data.ai.allowFallbacks ? 'ENABLED' : 'DISABLED')}\n- **${localize(locale, 'BLACKLISTED_ROLES')}:** ${automod.data.ai.roleBlacklist.map(role => `<@&${role}>`).join(', ')}\n- **${localize(locale, 'BLACKLISTED_CHANNELS')}:** ${automod.data.ai.channelBlacklist.map(channel => `<#${channel}>`).join(', ')}`,
+                        value: `${automod.data.ai.enabled ? emojis.enabled : emojis.disabled} ${localize(locale, automod.data.ai.enabled ? 'ENABLED' : 'DISABLED')}\n\n- **${localize(locale, 'ALERT_CHANNEL')}:** ${automod.data.ai.alertChannel ? `<#${automod.data.ai.alertChannel}>` : localize(locale, 'NONE')}\n- **${localize(locale, 'RULES')}:** ${localize(locale, 'FOUND', automod.data.ai.rules.length)}\n- **${localize(locale, 'AI_MODEL')}:** ${localize(locale, 'AI_MODEL_WITH_OWNER', automod.data.ai.model.name, automod.data.ai.model.owner)}\n- **${localize(locale, 'ALLOW_FALLBACKS')}:** ${automod.data.ai.allowFallbacks ? emojis.enabled : emojis.disabled} ${localize(locale, automod.data.ai.allowFallbacks ? 'ENABLED' : 'DISABLED')}\n- **${localize(locale, 'BLACKLISTED_ROLES')}:** ${automod.data.ai.roleBlacklist.map(role => `<@&${role}>`).join(', ')}\n- **${localize(locale, 'BLACKLISTED_CHANNELS')}:** ${automod.data.ai.channelBlacklist.map(channel => `<#${channel}>`).join(', ')}`,
                         inline: false
                     },
                     {
@@ -142,7 +142,7 @@ module.exports.automodAIConfigure = (interaction, automod, locale) => {
                 .setFields(
                     {
                         name: localize(locale, 'RULES'),
-                        value: rules.length > 1950 ? `${rules.slice(0, 1950)}...` : rules,
+                        value: rules.length > 1000 ? `${rules.slice(0, 1000)}...` : rules,
                         inline: false
                     },
                     {
