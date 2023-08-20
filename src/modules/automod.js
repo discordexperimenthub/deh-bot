@@ -143,9 +143,21 @@ module.exports = class AutoMod {
             logger('debug', 'AUTOMOD', 'AutoMod blocked a message:', this.data.ai.rules[data.rule - 1], sendData, JSON.stringify(data, null, 4));
 
             if (data.deleteMessage) {
-                await message.reply(`Your message has been deleted by AutoMod because it is against the server rules.\n**Reason:** ${data.reason}\n*Powered by purgpt.xyz (if you think this is a mistake, please report this issue in our Discord server)*`);
+                await message.reply({
+                    content: `Your message has been deleted by AutoMod because it is against the server rules.\n**Reason:** ${data.reason}\n*Powered by purgpt.xyz (if you think this is a mistake, please report this issue in our Discord server)*`,
+                    allowedMentions: {
+                        repliedUser: true,
+                        roles: []
+                    }
+                });
                 await message.delete();
-            } else await message.reply(`${data.reason}\n*Powered by purgpt.xyz (if you think this is a mistake, please report this issue in our Discord server)*`);
+            } else await message.reply({
+                content: `${data.reason}\n*Powered by purgpt.xyz (if you think this is a mistake, please report this issue in our Discord server)*`,
+                allowedMentions: {
+                    repliedUser: true,
+                    roles: []
+                }
+            });
 
             if (this.data.ai.alertChannel) {
                 let channel = await message.guild.channels.fetch(this.data.ai.alertChannel).catch(() => null);
