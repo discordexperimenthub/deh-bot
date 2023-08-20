@@ -186,8 +186,8 @@ module.exports = class AutoMod {
                                     inline: false
                                 },
                                 {
-                                    name: 'Rule Index',
-                                    value: data.rule.toString(),
+                                    name: 'Rule',
+                                    value: this.data.ai.rules[data.rule - 1],
                                     inline: false
                                 },
                                 {
