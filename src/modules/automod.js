@@ -109,7 +109,7 @@ module.exports = class AutoMod {
                 },
                 {
                     role: 'system',
-                    content: `# Server Rules\n${this.data.ai.rules.map(rule => rule).join('\n\n')}\n\nYOU HAVE TO FOLLOW THESE RULES, NOTHING ELSE. Don't act like a dumb moderator. People may send negative messages, this is not bad. Don't warn everything, let people speak but follow the rules at the same time. Also don't block emojis. For example if the message contains inappropriate language, but the rules doesn't say inappropriate language is not allowed, you can't warn this user. Do not forget that you have to respond with JSON format in a code block.`
+                    content: `# Server Rules\n${this.data.ai.rules.map(rule => rule).join('\n\n')}\n\nYOU HAVE TO FOLLOW THESE RULES, NOTHING ELSE. Don't act like a dumb moderator. People may send negative messages, this is not bad. Don't warn everything, let people speak but follow the rules at the same time. Also don't block emojis. For example if the message contains inappropriate language, but the rules doesn't say inappropriate language is not allowed, you can't warn this user. Role and user mentions are different things. Role mentions are in "<@&12345>" format and user mentions are "<@12345>". You can't warn/delete any message because of an user mention. Only role mentions if included in the rules. Do not forget that you have to respond with JSON format in a code block.`
                 },
                 {
                     role: 'user',
@@ -173,8 +173,8 @@ module.exports = class AutoMod {
                                     inline: false
                                 },
                                 {
-                                    name: 'Rule',
-                                    value: this.data.ai.rules[data.rule - 1],
+                                    name: 'Rule Index',
+                                    value: data.rule.toString(),
                                     inline: false
                                 },
                                 {

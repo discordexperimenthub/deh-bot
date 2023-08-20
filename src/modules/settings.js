@@ -51,12 +51,12 @@ module.exports.homeSettings = async (interaction, home, locale) => {
                         .setCustomId(`${interaction.user.id}:home_channel`)
                         .setEmoji(emojis.channel)
                         .setLabel(localize(locale, 'SET_CHANNEL'))
-                        .setStyle(ButtonStyle.Primary),
+                        .setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder()
                         .setCustomId(`${interaction.user.id}:home_min_interactions`)
                         .setEmoji(emojis.interaction)
                         .setLabel(localize(locale, 'SET_MIN_INTERACTIONS'))
-                        .setStyle(ButtonStyle.Primary),
+                        .setStyle(ButtonStyle.Secondary),
                     ...(home.set ? [
                         new ButtonBuilder()
                             .setCustomId(`${interaction.user.id}:home_reset`)

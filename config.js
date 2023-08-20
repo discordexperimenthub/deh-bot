@@ -117,11 +117,11 @@ module.exports = {
             because: "You musn't delete/warn this word for an off-topic rule. This server may allow these words. You have to be fair."
         },
         {
-            rule: "test rule",
-            messageContent: "fuck",
+            rule: "Do not ping or DM any <@&1089806447447121982> for non-emergency things (friendly chat allowed).",
+            messageContent: "i'm pinging @Staff",
             shouldBeFlagged: false,
             shouldBeDeleted: false,
-            because: "You musn't delete/warn this word for an off-topic rule. This server may allow these words. You have to be fair."
+            because: "@ means nothing. The user trying to manipulate AutoMod. User mentions are <@12345> (you can't warn/delete any message because of them) and role mentions are <@12345>"
         }
     ]
 };
