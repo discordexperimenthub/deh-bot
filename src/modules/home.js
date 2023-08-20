@@ -53,6 +53,9 @@ module.exports = class Home {
 
     async save() {
         await db.set(`guilds.${this.guild}.home`, this.data);
+
+        this.usable = (this.data.enabled && this.data.channel && this.data.webhook) ? true : false;
+        this.set = (this.data.channel && this.data.webhook) ? true : false;
     };
 
     async setChannel(channelId) {

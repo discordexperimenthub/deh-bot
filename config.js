@@ -20,8 +20,7 @@ module.exports = {
     },
     features: ['home', 'automod'],
     beta: {
-        home: true,
-        automod: true
+        home: true
     },
     emojis: {
         beta: '<:beta1:1071445535510249493><:beta2:1071445584038334504><:beta3:1071445631786303498>',
@@ -31,7 +30,17 @@ module.exports = {
         featuredMessage: '<:highlight:1077611464317218907>',
         reply: '<:reply:1140967497345007657>',
         replyContinuing: '<:reply_continuing:1140968153099280394>',
-        automod: '<:automod:1077245752297922591>'
+        automod: '<:automod:1077245752297922591>',
+        automodBadContent: '<:spam:1141651664848310293>',
+        channel: '<:text_channel:1077252243973210226>',
+        interaction: '<:message:1077252673356701806>',
+        aiModel: '<:activity:1077277603683127386>',
+        important: '<:warning:1062422181268697179>',
+        sync: '<:sync:1066636523119837244>',
+        fallback: '<:refresh:1064152296092610640>',
+        set: '<:edit:1079417776638283856>',
+        add: '<:create:1079056996545855488>',
+        remove: '<:delete:1079026158206734498>'
     },
     automodTrainData: [
         {
@@ -85,6 +94,34 @@ module.exports = {
             shouldBeFlagged: false,
             shouldBeDeleted: false,
             because: "This is just an emoji."
+        },
+        {
+            rule: "test rule",
+            messageContent: "fuck",
+            shouldBeFlagged: false,
+            shouldBeDeleted: false,
+            because: "You musn't delete/warn this word for an off-topic rule. This server may allow these words. You have to be fair."
+        },
+        {
+            rule: "test rule",
+            messageContent: "fuck",
+            shouldBeFlagged: false,
+            shouldBeDeleted: false,
+            because: "You musn't delete/warn this word for an off-topic rule. This server may allow these words. You have to be fair."
+        },
+        {
+            rule: "test rule",
+            messageContent: "fuck",
+            shouldBeFlagged: false,
+            shouldBeDeleted: false,
+            because: "You musn't delete/warn this word for an off-topic rule. This server may allow these words. You have to be fair."
+        },
+        {
+            rule: "test rule",
+            messageContent: "fuck",
+            shouldBeFlagged: false,
+            shouldBeDeleted: false,
+            because: "You musn't delete/warn this word for an off-topic rule. This server may allow these words. You have to be fair."
         }
     ]
 };

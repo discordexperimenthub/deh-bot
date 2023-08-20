@@ -1,10 +1,12 @@
-const { Message, MessageReaction, WebhookClient, Client, TextChannel, User } = require('discord.js');
+const { Message, MessageReaction, WebhookClient, Client, TextChannel, User, Guild } = require('discord.js');
 const { QuickDB } = require('quick.db');
 const DBMessage = require('./message');
 const timer = require('./timer');
 const { emojis, automodTrainData } = require('../../config');
 const logger = require('./logger');
 const { default: axios } = require('axios');
+const EmbedMaker = require('./embed');
+const { localize } = require('./localization');
 
 const db = new QuickDB();
 
@@ -12,15 +14,11 @@ module.exports = class AutoMod {
     /**
      * @type {import('discord.js').Snowflake}
      */
-    guild;
+    guildId;
     /**
      * @type {boolean}
      */
     usable;
-    /**
-     * @type {{ enabled: boolean; rules: string[], bypassRoles: import('discord.js').Snowflake[], bypassChannels: import('discord.js').Snowflake[] } | null}
-     */
-    data;
     /**
      * @type {boolean}
      */
@@ -30,43 +28,62 @@ module.exports = class AutoMod {
      * @param {import('discord.js').Snowflake} guildId 
      */
     constructor(guildId) {
-        this.guild = guildId;
-        this.usable = false;
+        this.guildId = guildId;
     };
 
     async setup() {
-        this.data = (await db.get(`guilds.${this.guild}.automod`)) ?? {
-            enabled: false,
-            rules: [],
-            bypassRoles: [],
-            bypassChannels: []
+        this.data = (await db.get(`guilds.${this.guildId}.automod`)) ?? {
+            purgptKey: null,
+            ai: {
+                enabled: false,
+                rules: [],
+                roleBlacklist: [],
+                channelBlacklist: [],
+                model: {
+                    name: 'gpt-3.5-turbo-16k',
+                    owner: 'OpenAI'
+                },
+                allowFallbacks: true,
+                alertChannel: null
+            },
+            badContent: {
+                enabled: false,
+                roleBlacklist: [],
+                channelBlacklist: [],
+                model: {
+                    name: 'text-moderation-stable',
+                    owner: 'OpenAI'
+                },
+                filters: 'all',
+                alertChannel: null
+            }
         };
-
-        this.usable = (this.data.enabled && this.data.rules.length > 0) ? true : false;
-        this.set = (this.data.rules.length > 0) ? true : false;
 
         return this;
     };
 
     async save() {
-        await db.set(`guilds.${this.guild}.automod`, this.data);
+        await db.set(`guilds.${this.guildId}.automod`, this.data);
     };
 
-    async toggle() {
-        this.data.enabled = !this.data.enabled;
+    /**
+     * @param {'ai' | 'badContent'} category 
+     */
+    async toggle(category) {
+        this.data[category].enabled = !this.data[category].enabled;
 
         await this.save();
     };
 
     async delete() {
-        await db.delete(`guilds.${this.guild}.automod`);
+        await db.delete(`guilds.${this.guildId}.automod`);
     };
 
     /**
      * @param {string[]} rules
      */
-    async sync(rules) {
-        this.data.rules = rules;
+    async syncAIRules(rules) {
+        this.data.ai.rules = rules;
 
         await this.save();
     };
@@ -75,10 +92,12 @@ module.exports = class AutoMod {
      * @param {Message} message 
      * @param {boolean} rawContent
      */
-    async check(message, rawContent = false) {
+    async ai(message, rawContent = false) {
+        //logger('debug', 'AUTOMOD', 'AI received a message:', message.content)
+
         let sendData = `{\n\t"messageContent": "${message.content}",\n\t"channel": "${message.channel.name}",\n\t"author": {\n\t\t"id": "${message.author.id}",\n\t\t"username": "${message.author.username}"\n\t}\n}`
-        let response = (await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
-            model: 'gpt-3.5-turbo-16k',
+        let response = (await axios.post(`https://beta.purgpt.xyz/${this.data.ai.model.owner}/chat/completions`, {
+            model: this.data.ai.model.name,
             messages: [
                 {
                     role: 'system',
@@ -86,23 +105,30 @@ module.exports = class AutoMod {
                 },
                 {
                     role: 'system',
-                    content: `# Server Rules\n${this.data.rules.map((rule, index) => `${index + 1}. ${rule}`).join('\n')}\n\nYOU HAVE TO FOLLOW THESE RULES, NOTHING ELSE. Don't act like a dumb moderator. People may send negative messages, this is not bad. Don't warn everything, let people speak but follow the rules at the same time. Also don't block emojis. For example if the message contains inappropriate language, but the rules doesn't say inappropriate language is not allowed, you can't warn this user. Do not forget that you have to respond with JSON format in a code block.`
+                    content: `# Here are some examples for you:\n${JSON.stringify(automodTrainData, null, 4)}`
+                },
+                {
+                    role: 'system',
+                    content: `# Server Rules\n${this.data.ai.rules.map((rule, index) => `${index + 1}. ${rule}`).join('\n')}\n\nYOU HAVE TO FOLLOW THESE RULES, NOTHING ELSE. Don't act like a dumb moderator. People may send negative messages, this is not bad. Don't warn everything, let people speak but follow the rules at the same time. Also don't block emojis. For example if the message contains inappropriate language, but the rules doesn't say inappropriate language is not allowed, you can't warn this user. Do not forget that you have to respond with JSON format in a code block.`
                 },
                 {
                     role: 'user',
-                    content: `\`\`\`json\n${sendData}\n\`\`\``
+                    content: `\`\`\`json\n${sendData}\n\`\`\`\n\nDo not forget, you have to be fair. Do not warn/delete everything. If you do, you will be punished.`
                 }
             ]
         }, {
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.PURGPT_API_KEY}`
+                'Authorization': `Bearer ${this.data.purgptKey ?? process.env.PURGPT_API_KEY}`
             }
         }).catch(error => error?.response))?.data
 
         if (!response || !response?.choices?.[0]?.message?.content) return logger('error', 'AUTOMOD', 'Failed to get response from PurGPT API.', JSON.stringify(response?.error?.message ? { message: response?.error?.message } : response, null, 4));
 
         let content = response.choices[0].message.content;
+
+        if (rawContent) return content;
+
         let regex = /```json\n?({[\s\S]*?})\n?```/g;
         let json = regex.exec(content);
         let data;
@@ -114,63 +140,148 @@ module.exports = class AutoMod {
         };
 
         if (data.deleteMessage || data.warnMessage) {
-            let response2 = (await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
-                model: 'gpt-3.5-turbo-16k',
-                messages: [
-                    {
-                        role: 'system',
-                        content: `You are AutoMod manager. Your job is checking blocked messages. Do not criticize block reasons, only block purposes. Don't be so sensitive. Think like you are a human and be fair. If it's allowed in the rules, do not block only-emoji messages (emojis are in format <:name:1234>). Please focus on the current message, not past messages. Don't block all links, some links can be good. You must respond with JSON format in a code block like this: \`\`\`json\n{\n\t"correct": true, // whether the block is correct or not\n}\n\`\`\`\n\nUser messages will be in the format of: \`\`\`json\n{\n\t"rule": "No spam.", // the rule which AutoMod triggered\n\t"channel": "channel-name", // where the message sent\n\t"messageContent": "", // the blocked message content\n\t"reason": "", // the block reason\n}\n\`\`\`\n\nJust respond all messages with ONE JSON format in a code block. Nothing else.`
-                    },
-                    {
-                        role: 'system',
-                        content: `# Here are some examples for you:\n${JSON.stringify(automodTrainData, null, 4)}`
-                    },
-                    {
-                        role: 'user',
-                        content: `\`\`\`json\n{\n\t"rule": "${this.data.rules[data.rule - 1]}",\n\t"channel": "${message.channel.name}"\n\t"messageContent": "${message.content}",\n\t"reason": "${data.reason}"\n}\n\`\`\``
-                    }
-                ]
+            logger('debug', 'AUTOMOD', 'AutoMod blocked a message:', this.data.ai.rules[data.rule - 1], sendData, JSON.stringify(data, null, 4));
+
+            if (data.deleteMessage) {
+                await message.reply(`Your message has been deleted by AutoMod because it is against the server rules.\n**Reason:** ${data.reason}\n*Powered by purgpt.xyz (if you think this is a mistake, please report this issue in our Discord server)*`);
+                await message.delete();
+            } else await message.reply(`${data.reason}\n*Powered by purgpt.xyz (if you think this is a mistake, please report this issue in our Discord server)*`);
+
+            if (this.data.ai.alertChannel) {
+                let channel = await message.guild.channels.fetch(this.data.ai.alertChannel).catch(() => null);
+
+                if (!channel) {
+                    this.setAIAlertChannel(null);
+
+                    return logger('error', 'AUTOMOD', 'Failed to fetch alert channel:', data.ai.alertChannel);
+                };
+
+                await channel.send({
+                    content: `**AutoMod** has ${data.deleteMessage ? 'blocked' : 'warned'} a message in <#${message.channel.id}>`,
+                    embeds: [
+                        new EmbedMaker(message.client)
+                            .setAuthor({
+                                name: message.member ? message.member.displayName : message.author.displayName,
+                                iconURL: message.member ? message.member.displayAvatarURL({ forceStatic: true }) : message.author.displayAvatarURL({ forceStatic: true })
+                            })
+                            .setTitle('Message Content')
+                            .setDescription(message.content)
+                            .setFields(
+                                {
+                                    name: 'Reason',
+                                    value: data.reason,
+                                    inline: false
+                                },
+                                {
+                                    name: 'Rule',
+                                    value: this.data.ai.rules[data.rule - 1],
+                                    inline: false
+                                },
+                                {
+                                    name: 'Warning',
+                                    value: 'AutoMod is an **experimental** feature. If you think this is a mistake, please report this issue in [our Discord server](https://discord.gg/experiments).'
+                                }
+                            )
+                    ]
+                });
+
+                return true;
+            };
+        } else if (rawContent) return content;
+
+        return false;
+    };
+
+    /**
+     * @param {Message} message 
+     * @param {boolean} rawContent
+     */
+    async badContent(message, rawContent = false) {
+        let response;
+
+        try {
+            response = await axios.post('https://beta.purgpt.xyz/openai/moderations', {
+                model: this.data.badContent.model.name,
+                input: message.content
             }, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${process.env.PURGPT_API_KEY}`
+                    Authorization: `Bearer ${this.data.purgptKey ?? process.env.PURGPT_API_KEY}`
                 }
-            }).catch(error => error?.response))?.data
+            });
+        } catch (error) {
+            return logger('error', 'AUTOMOD', 'Failed to get response from PurGPT API.', error);
+        };
 
-            if (!response2 || !response2?.choices?.[0]?.message?.content) return logger('error', 'AUTOMOD', 'Failed to get response from PurGPT API.', JSON.stringify(response2?.error?.message ? { message: response2?.error?.message } : response2, null, 4));
+        if (!response || response.status !== 200) return logger('error', 'AUTOMOD', 'Failed to get response from PurGPT API.', JSON.stringify(response?.data?.error?.message ? { message: response?.data?.error?.message } : response, null, 4));
 
-            let content2 = response2.choices[0].message.content;
+        let filters = this.data.badContent.filters;
+        let categories = response.data.results[0].categories;
+        let triggered = false;
+        let triggers = [];
 
-            let regex2 = /```json\n?([\s\S]*?)\n?```/g;
-            let json2 = regex2.exec(content2);
-            let data2;
+        for (let category in categories) {
+            if (categories[category]) {
+                if (filters === 'all') {
+                    triggered = true;
 
-            try {
-                data2 = JSON.parse(json2[1]);
-            } catch (error) {
-                return logger('error', 'AUTOMOD', 'Failed to parse JSON:', error, content2);
+                    triggers.push(category);
+                } else if (filters.includes(category)) {
+                    triggered = true;
+
+                    triggers.push(category);
+                }
+            };
+        };
+
+        if (rawContent) return JSON.stringify(categories, null, 4);
+        if (triggered) {
+            logger('debug', 'AUTOMOD', 'AutoMod blocked a message:', triggers, message.content);
+
+            await message.reply(`Your message has been deleted by AutoMod because it is against the server rules.\n**Reason:** ${triggers.map(trigger => localize('en-US', trigger.toUpperCase().replaceAll('-', '_').replaceAll('/', '_'))).join(', ')}\n*Powered by purgpt.xyz*`);
+            await message.delete();
+
+            if (this.data.badContent.alertChannel) {
+                let channel = await message.guild.channels.fetch(this.data.badContent.alertChannel).catch(() => null);
+
+                if (!channel) {
+                    this.setBadContentAlertChannel(null);
+
+                    return logger('error', 'AUTOMOD', 'Failed to fetch alert channel:', this.data.ai.alertChannel);
+                };
+
+                await channel.send({
+                    content: `**AutoMod** has blocked a message in <#${message.channel.id}>`,
+                    embeds: [
+                        new EmbedMaker(message.client)
+                            .setAuthor({
+                                name: message.member ? message.member.displayName : message.author.displayName,
+                                iconURL: message.member ? message.member.displayAvatarURL({ forceStatic: true }) : message.author.displayAvatarURL({ forceStatic: true })
+                            })
+                            .setTitle('Message Content')
+                            .setDescription(message.content)
+                            .setFields(
+                                {
+                                    name: 'Reason',
+                                    value: triggers.map(trigger => localize('en-US', trigger.toUpperCase().replaceAll('-', '_').replaceAll('/', '_'))).join(', '),
+                                    inline: false
+                                }
+                            )
+                    ]
+                });
             };
 
-            if (rawContent) {
-                if (data2.correct) return content;
-                else return `\`\`\`json\n${JSON.stringify({ againstRules: false }, null, 4)}\n\`\`\``
-            };
-            if (!data2.correct) return logger('error', 'AUTOMOD', 'AutoMod blocked a message incorrectly.', this.data.rules[data.rule - 1], sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
+            return true;
+        };
 
-            logger('info', 'AUTOMOD', 'AutoMod blocked a message correctly.', this.data.rules[data.rule - 1], sendData, JSON.stringify(data, null, 4), JSON.stringify(data2, null, 4));
-
-            if (data.deleteMessage) {
-                await message.reply(`Your message has been deleted by AutoMod because it is against the server rules.\n**Reason:** ${data.reason}\n*Powered by purgpt.xyz (if do you think this is a mistake, please report that issue in our Discord server)*`);
-                await message.delete();
-            } else await message.reply(`${data.reason}\n*Powered by purgpt.xyz*`);
-        } else if (rawContent) return content;
+        return false;
     };
 
     /**
      * @param {string} rule 
      */
-    async addRule(rule) {
-        this.data.rules.push(rule);
+    async addAIRule(rule) {
+        this.data.ai.rules.push(rule);
 
         await this.save();
     };
@@ -178,26 +289,112 @@ module.exports = class AutoMod {
     /**
      * @param {number} index 
      */
-    async removeRule(index) {
-        this.data.rules.splice(index, 1);
+    async removAIRule(index) {
+        this.data.ai.rules.splice(index, 1);
 
         await this.save();
     };
 
     /**
+     * @param {string} category
      * @param {import('discord.js').Snowflake[]} roles
      */
-    async setBypassRoles(roles) {
-        this.data.bypassRoles = roles;
+    async addBlacklistRoles(category, roles) {
+        this.data[category].roleBlacklist = this.data[category].roleBlacklist.concat(roles);
 
         await this.save();
     };
 
     /**
+     * @param {string} category
+     * @param {import('discord.js').Snowflake[]} roles
+     */
+    async removeBlacklistRoles(category, roles) {
+        this.data[category].roleBlacklist = this.data[category].roleBlacklist.filter(role => !roles.includes(role));
+
+        await this.save();
+    };
+
+    /**
+     * @param {string} category
      * @param {import('discord.js').Snowflake[]} channels
      */
-    async setBypassChannels(channels) {
-        this.data.bypassChannels = channels;
+    async addBlacklistChannels(category, channels) {
+        this.data[category].channelBlacklist = this.data[category].channelBlacklist.concat(channels);
+
+        await this.save();
+    };
+
+    /**
+     * @param {string} category
+     * @param {import('discord.js').Snowflake[]} channels
+     */
+    async removeBlacklistChannels(category, channels) {
+        this.data[category].channelBlacklist = this.data[category].channelBlacklist.filter(channel => !channels.includes(channel));
+
+        await this.save();
+    };
+
+    /**
+     * @param {import('discord.js').Snowflake} channelId
+     */
+    async setAIAlertChannel(channelId) {
+        this.data.ai.alertChannel = channelId;
+
+        await this.save();
+    };
+
+    /**
+     * @param {import('discord.js').Snowflake} channelId
+     */
+    async setBadContentAlertChannel(channelId) {
+        this.data.badContent.alertChannel = channelId;
+
+        await this.save();
+    };
+
+    /**
+     * @param {string} key
+     */
+    async setPurGPTKey(key) {
+        this.data.purgptKey = key;
+
+        await this.save();
+    };
+
+    /**
+     * @param {string} model
+     * @param {string} owner
+     */
+    async setAIModel(model, owner) {
+        this.data.ai.model.name = model;
+        this.data.ai.model.owner = owner;
+
+        await this.save();
+    };
+
+    /**
+     * @param {string} model
+     * @param {string} owner
+     */
+    async setBadContentModel(model, owner) {
+        this.data.badContent.model.name = model;
+        this.data.badContent.model.owner = owner;
+
+        await this.save();
+    };
+
+    async toggleAIFallbacks() {
+        this.data.ai.allowFallbacks = !this.data.ai.allowFallbacks;
+
+        await this.save();
+    };
+
+    /**
+     * @param {string | string[]} filters
+     */
+    async setBadContentFilters(filters) {
+        this.data.badContent.filters = filters;
 
         await this.save();
     };
