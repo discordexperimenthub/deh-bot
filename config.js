@@ -137,6 +137,13 @@ module.exports = {
             shouldBeWarned: true,
             shouldBeDeleted: false,
             because: "Rule says information about donation in #support-purgpt channel. But this message is in #general channel."
+        },
+        {
+            rule: 'Be respectful',
+            messageContent: 'to be fair you could probably use something else like chimera or a free gpt-4 website online..\n*but at that point why are you using purgpt lol*',
+            shouldBeWarned: false,
+            shouldBeDeleted: false,
+            because: "This is a joke. It's not a serious message."
         }
     ]
 };
