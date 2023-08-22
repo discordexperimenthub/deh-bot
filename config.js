@@ -172,11 +172,11 @@ module.exports = {
             because: 'This is a link to a website. Not related to NSFW.'
         },
         {
-            rule: "People shouldn't ask donation-related questions because all information already written in the #support-purgpt channel.",
-            messageContent: 'can you make the #api-status update every 5 minutes instead of 10',
+            reason: "Asking for help in the correct channel.",
+            messageContent: "Hey I need a bit of help. I don't know if it's janitor or the api but my bot keeps repeating itself. Like when I hit the arrow it'll say the same thing.",
             shouldBeWarned: false,
             shouldBeDeleted: false,
-            because: 'This is not a donation-related question.'
+            because: 'Why would you warn/delete this message? This is a message asking for help. It\'s not a message asking for help in the wrong channel.'
         }
     ]
 };
