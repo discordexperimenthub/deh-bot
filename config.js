@@ -170,6 +170,13 @@ module.exports = {
             shouldBeWarned: false,
             shouldBeDeleted: false,
             because: 'This is a link to a website. Not related to NSFW.'
+        },
+        {
+            rule: "People shouldn't ask donation-related questions because all information already written in the #support-purgpt channel.",
+            messageContent: 'can you make the #api-status update every 5 minutes instead of 10',
+            shouldBeWarned: false,
+            shouldBeDeleted: false,
+            because: 'This is not a donation-related question.'
         }
     ]
 };
