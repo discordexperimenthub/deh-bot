@@ -144,6 +144,32 @@ module.exports = {
             shouldBeWarned: false,
             shouldBeDeleted: false,
             because: "This is a joke. It's not a serious message."
+        },
+        {
+            rule: 'Be respectful',
+            messageContent: 'i figured it out and you were no help.',
+            shouldBeWarned: false,
+            shouldBeDeleted: false
+        },
+        {
+            rule: 'Be respectful',
+            messageContent: 'i figured it out and you were no help.',
+            shouldBeWarned: false,
+            shouldBeDeleted: false
+        },
+        {
+            rule: 'No Inappropriate Language',
+            messageContent: 'gah damn',
+            shouldBeWarned: false,
+            shouldBeDeleted: false,
+            because: "This is a joke. It's not a serious message."
+        },
+        {
+            rule: 'No pornographic/adult/other NSFW material',
+            messageContent: 'https://sillytavernai.com/',
+            shouldBeWarned: false,
+            shouldBeDeleted: false,
+            because: 'This is a link to a website. Not related to NSFW.'
         }
     ]
 };
