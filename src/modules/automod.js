@@ -98,6 +98,7 @@ module.exports = class AutoMod {
         let sendData = `{\n\t"messageContent": "${message.content}",\n\t"channel": "${message.channel.name}",\n\t"author": {\n\t\t"id": "${message.author.id}",\n\t\t"username": "${message.author.username}"\n\t}\n}`
         let response = (await axios.post(`https://beta.purgpt.xyz/${this.data.ai.model.owner}/chat/completions`, {
             model: this.data.ai.model.name,
+            fallback: this.data.ai.allowFallbacks ? 'gpt-3.5-turbo' : null,
             messages: [
                 {
                     role: 'system',
@@ -115,7 +116,8 @@ module.exports = class AutoMod {
                     role: 'user',
                     content: `\`\`\`json\n${sendData}\n\`\`\`\n\nDo not forget, you have to be fair. Do not warn/delete everything. If you do, you will be punished.`
                 }
-            ]
+            ],
+            overwriteOnError: this.data.ai.allowFallbacks ? true : false
         }, {
             headers: {
                 'Content-Type': 'application/json',

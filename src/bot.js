@@ -1363,6 +1363,31 @@ client.on('interactionCreate', async interaction => {
                                         .setPlaceholder(localize(locale, 'SELECT_MODEL'))
                                         .setOptions(
                                             new StringSelectMenuOptionBuilder()
+                                                .setLabel('gpt-4-32k-0613')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:gpt-4-32k-0613')
+                                                .setDefault(automod.data.ai.model.name === 'gpt-4-32k-0613'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('gpt-4-32k')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:gpt-4-32k')
+                                                .setDefault(automod.data.ai.model.name === 'gpt-4-32k'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('gpt-4-0613')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:gpt-4-0613')
+                                                .setDefault(automod.data.ai.model.name === 'gpt-4-0613'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('gpt-4-0314')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:gpt-4-0314')
+                                                .setDefault(automod.data.ai.model.name === 'gpt-4-0314'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('gpt-4')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:gpt-4')
+                                                .setDefault(automod.data.ai.model.name === 'gpt-4'),
+                                            new StringSelectMenuOptionBuilder()
                                                 .setLabel('gpt-3.5-turbo-16k-0613')
                                                 .setDescription('by OpenAI')
                                                 .setValue('openai:gpt-3.5-turbo-16k-0613')
@@ -1423,15 +1448,20 @@ client.on('interactionCreate', async interaction => {
                                                 .setValue('llama:llama-2-7b-chat')
                                                 .setDefault(automod.data.ai.model.name === 'llama-2-7b-chat'),
                                             new StringSelectMenuOptionBuilder()
-                                                .setLabel('bard')
-                                                .setDescription('by Google')
-                                                .setValue('google:bard')
-                                                .setDefault(automod.data.ai.model.name === 'bard'),
+                                                .setLabel('bing')
+                                                .setDescription('by Microsoft')
+                                                .setValue('microsoft:bing')
+                                                .setDefault(automod.data.ai.model.name === 'bing'),
                                             new StringSelectMenuOptionBuilder()
-                                                .setLabel('clyde')
-                                                .setDescription('by Discord')
-                                                .setValue('discord:clyde')
-                                                .setDefault(automod.data.ai.model.name === 'clyde')
+                                                .setLabel('you-chat')
+                                                .setDescription('by You')
+                                                .setValue('you:you-chat')
+                                                .setDefault(automod.data.ai.model.name === 'you-chat'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('flan-t5-xxl')
+                                                .setDescription('by Vercel')
+                                                .setValue('vercel:flan-t5-xxl')
+                                                .setDefault(automod.data.ai.model.name === 'flan-t5-xxl'),
                                         )
                                 )
                         ]
