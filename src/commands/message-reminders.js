@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ChatInputCommandInteraction } = require("discord.js");
+const { SlashCommandBuilder, ChatInputCommandInteraction, AutocompleteInteraction } = require("discord.js");
 const { QuickDB } = require("quick.db");
 const EmbedMaker = require("../modules/embed");
 const { localize } = require("../modules/localization");
@@ -47,6 +47,7 @@ module.exports = {
                 })
                 .setRequired(true)
                 .setMinValue(1)
+                .setAutocomplete(true)
             )
         ),
     /**
@@ -85,5 +86,16 @@ module.exports = {
 
             interaction.editReply(localize(locale, 'MESSAGE_REMINDER_CANCELLED'));
         };
+    },
+    /**
+     * @param {AutocompleteInteraction} autocomplete
+     */
+    async autocomplete(autocomplete) {
+        let reminders = await db.get(`users.${autocomplete.user.id}.reminders`) ?? [];
+
+        autocomplete.respond(reminders.map((reminder, index) => ({
+            name: `${index + 1}. ${reminder.content === '' ? 'No content' : reminder.content.length > 25 ? `${reminder.content.slice(0, 25)}...` : reminder.content}`,
+            value: `${index + 1}`
+        })));
     }
 };

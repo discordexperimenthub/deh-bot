@@ -1,15 +1,17 @@
-const { Client, Collection, WebhookClient, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, ChannelSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { Client, Collection, WebhookClient, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, ChannelSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, RoleSelectMenuBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
 const { readdirSync, writeFileSync, readFileSync, mkdirSync, writeFile } = require('node:fs');
 const { default: axios } = require('axios');
 const logger = require('./modules/logger');
 const { localize } = require('./modules/localization');
-const { ownerId, developerIds, roleIds, colors, emojis } = require('../config');
+const { ownerId, developerIds, roleIds, colors, emojis, beta } = require('../config');
 const { diffLines } = require('diff');
 const EmbedMaker = require('./modules/embed');
 const { execSync } = require('node:child_process');
 const { QuickDB } = require('quick.db');
 const timer = require('./modules/timer');
 const Home = require('./modules/home');
+const AutoMod = require('./modules/automod');
+const { automodSettings, homeSettings, automodAIConfigure, automodBadContentConfigure } = require('./modules/settings');
 
 const client = new Client({
     intents: [
@@ -1050,81 +1052,38 @@ client.on('interactionCreate', async interaction => {
             let guildId = interaction.guildId;
 
             const home = await new Home(guildId).setup();
+            const automod = await new AutoMod(guildId).setup();
 
             switch (customId) {
                 case 'settings':
                     switch (interaction.values[0]) {
                         case 'home':
-                            interaction.update({
-                                embeds: [
-                                    new EmbedMaker(client)
-                                        .setColor(home.set ? home.data.enabled ? colors.green : colors.red : colors.yellow)
-                                        .setTitle(`${emojis.home} ${localize(locale, 'HOME')}`)
-                                        .setFields(
-                                            {
-                                                name: localize(locale, 'STATUS'),
-                                                value: home.data?.enabled ? `${emojis.enabled} ${localize(locale, 'ENABLED')}` : `${emojis.disabled} ${localize(locale, 'DISABLED')}`,
-                                                inline: true
-                                            },
-                                            {
-                                                name: localize(locale, 'CHANNEL'),
-                                                value: home.data?.channel ? `<#${home.data.channel}>` : localize(locale, 'NOT_SET'),
-                                                inline: true
-                                            },
-                                            {
-                                                name: localize(locale, 'MIN_INTERACTIONS'),
-                                                value: home.data.minInteractions.toString(),
-                                                inline: true
-                                            }
-                                        )
-                                ],
-                                components: [
-                                    new ActionRowBuilder()
-                                        .setComponents(
-                                            ...(!home.set ? [
-                                                new ButtonBuilder()
-                                                    .setCustomId(`${interaction.user.id}:home_setup`)
-                                                    .setLabel(localize(locale, 'QUICK_SETUP'))
-                                                    .setStyle(ButtonStyle.Success)
-                                            ] : []),
-                                            new ButtonBuilder()
-                                                .setCustomId(`${interaction.user.id}:home_${home.data?.enabled ? 'disable' : 'enable'}`)
-                                                .setLabel(localize(locale, home.data?.enabled ? 'DISABLE' : 'ENABLE'))
-                                                .setStyle(home.data?.enabled ? ButtonStyle.Danger : ButtonStyle.Success),
-                                            new ButtonBuilder()
-                                                .setCustomId(`${interaction.user.id}:home_channel`)
-                                                .setLabel(localize(locale, 'SET_CHANNEL'))
-                                                .setStyle(ButtonStyle.Primary),
-                                            new ButtonBuilder()
-                                                .setCustomId(`${interaction.user.id}:home_min_interactions`)
-                                                .setLabel(localize(locale, 'SET_MIN_INTERACTIONS'))
-                                                .setStyle(ButtonStyle.Primary),
-                                            ...(home.set ? [
-                                                new ButtonBuilder()
-                                                    .setCustomId(`${interaction.user.id}:home_reset`)
-                                                    .setLabel(localize(locale, 'RESET_DATA'))
-                                                    .setStyle(ButtonStyle.Danger)
-                                            ] : [])
-                                        )
-                                ]
-                            });
+                            await interaction.deferUpdate();
+
+                            homeSettings(interaction, home, locale);
+                            break;
+                        case 'automod':
+                            await interaction.deferUpdate();
+
+                            automodSettings(interaction, automod, locale);
                             break;
                     };
                     break;
                 case 'home_setup':
-                    if (!interaction.member.permissions.has('ManageChannels')) return interaction.reply({
+                    await interaction.deferUpdate();
+
+                    if (!interaction.member.permissions.has('ManageChannels')) return interaction.followUp({
                         content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Channels'),
                         ephemeral: true
                     });
-                    if (!interaction.appPermissions.has('ManageChannels') || !interaction.appPermissions.has('ManageWebhooks') || !interaction.appPermissions.has('ManageMessages')) return interaction.reply({
+                    if (!interaction.appPermissions.has('ManageChannels') || !interaction.appPermissions.has('ManageWebhooks') || !interaction.appPermissions.has('ManageMessages')) return interaction.followUp({
                         content: localize(interaction.locale, 'BOT_MISSING_PERMISSIONS', 'Manage Channels, Manage Webhooks, Manage Messages'),
                         ephemeral: true
                     });
 
-                    interaction.update({
+                    await interaction.followUp({
                         content: 'Setting up home...',
-                        embeds: [],
-                        components: []
+                        ephemeral: true
                     });
 
                     let channel = await interaction.guild.channels.create({
@@ -1141,35 +1100,25 @@ client.on('interactionCreate', async interaction => {
 
                     channel.send('**There are no Highlights to show you yet!**\nBut you could write some!').catch(() => { });
 
-                    await db.set(`guilds.${interaction.guildId}.home`, {
-                        enabled: true,
-                        channel: channel.id,
-                        webhook: webhook.url
+                    await home.setChannel(channel.id);
+                    await home.setWebhook(webhook.url);
+                    await home.toggle();
+                    await interaction.followUp({
+                        content: localize(locale, 'HOME_SETUP_SUCCESS', `<#${channel.id}>`),
+                        ephemeral: true
                     });
 
-                    interaction.editReply({
-                        content: localize(locale, 'HOME_SETUP_SUCCESS', `<#${channel.id}>`)
-                    });
+                    homeSettings(interaction, home, locale);
                     break;
-                case 'home_enable':
+                case 'home_toggle':
                     await interaction.deferUpdate();
                     await home.toggle();
-
-                    interaction.editReply({
-                        content: localize(locale, 'SETTING_ENABLE_SUCCESS', localize(locale, 'HOME')),
-                        embeds: [],
-                        components: []
+                    await interaction.followUp({
+                        content: localize(locale, `SETTING_${home.data.enabled ? 'ENABLE' : 'DISABLE'}_SUCCESS`, localize(locale, 'HOME')),
+                        ephemeral: true
                     });
-                    break;
-                case 'home_disable':
-                    await interaction.deferUpdate();
-                    await home.toggle();
 
-                    interaction.editReply({
-                        content: localize(locale, 'SETTING_DISABLE_SUCCESS', localize(locale, 'HOME')),
-                        embeds: [],
-                        components: []
-                    });
+                    homeSettings(interaction, home, locale);
                     break;
                 case 'home_channel':
                     interaction.update({
@@ -1191,22 +1140,22 @@ client.on('interactionCreate', async interaction => {
                     let channelId = interaction.values[0];
 
                     await home.setChannel(channelId);
-
-                    interaction.editReply({
+                    await interaction.followUp({
                         content: localize(locale, 'SETTING_CHANNEL_SUCCESS', localize(locale, 'HOME'), `<#${channelId}>`),
-                        embeds: [],
-                        components: []
+                        ephemeral: true
                     });
+
+                    homeSettings(interaction, home, locale);
                     break;
                 case 'home_reset':
                     await interaction.deferUpdate();
                     await home.delete();
-
-                    interaction.editReply({
+                    await interaction.editReply({
                         content: localize(locale, 'SETTING_RESET_SUCCESS', localize(locale, 'HOME')),
-                        embeds: [],
-                        components: []
+                        ephemeral: true
                     });
+
+                    homeSettings(interaction, home, locale);
                     break;
                 case 'home_min_interactions':
                     interaction.showModal(
@@ -1229,6 +1178,774 @@ client.on('interactionCreate', async interaction => {
                             )
                     );
                     break;
+                case 'automod_configure':
+                    await interaction.deferUpdate();
+
+                    let category2 = interaction.values[0];
+
+                    if (category2 === 'ai') automodAIConfigure(interaction, automod, locale);
+                    else if (category2 === 'bad_content') automodBadContentConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_ai_sync_rules':
+                    await interaction.deferUpdate();
+
+                    if (!interaction.memberPermissions.has('ManageMessages')) return interaction.followUp({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Messages'),
+                        ephemeral: true
+                    });
+
+                    await interaction.followUp({
+                        content: localize(locale, 'SYNCING_RULES'),
+                        ephemeral: true
+                    });
+
+                    let rulesChannel2 = interaction.guild.rulesChannel;
+                    let messages2 = await rulesChannel2.messages.fetch({ limit: 50 });
+                    let rules;
+
+                    try {
+                        rules = (await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
+                            model: 'gpt-3.5-turbo-16k',
+                            messages: [
+                                {
+                                    role: 'system',
+                                    content: 'You have to return with an array of rules. Nothing else. Do not include if something is not a rule. Do not break the order of the rules.'
+                                },
+                                {
+                                    role: 'user',
+                                    content: '* No spamming\n2. No NSFW\n:three: No advertising\n* No harassment\nblablabla hey\nPing @Cat'
+                                },
+                                {
+                                    role: 'assistant',
+                                    content: '["No spamming", "No NSFW", "No advertising", "No harassment", "Ping @Cat"]'
+                                },
+                                {
+                                    role: 'user',
+                                    content: messages2.filter(m => m.content || m.embeds[0]?.description).map(m => m.content === '' ? m.embeds[0]?.description : '').join('\n')
+                                }
+                            ]
+                        }, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${automod.data.purgptKey ?? process.env.PURGPT_API_KEY}`
+                            },
+                            timeout: 20000
+                        })).data.choices[0].message.content;
+                        rules = JSON.parse(rules);
+                    } catch (error) {
+                        logger('error', 'AUTOMOD', 'Failed to sync rules with AI:', error);
+
+                        return interaction.followUp({
+                            content: localize(locale, 'SYNC_RULES_ERROR'),
+                            ephemeral: true
+                        });
+                    };
+
+                    await automod.syncAIRules(rules);
+                    await interaction.followUp({
+                        content: localize(locale, 'SYNC_RULES_SUCCESS'),
+                        ephemeral: true
+                    });
+
+                    automodAIConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_toggle':
+                    await interaction.deferUpdate();
+
+                    let category = args[0];
+
+                    await automod.toggle(category);
+                    await interaction.followUp({
+                        content: localize(locale, `AUTOMOD_${category.toLocaleUpperCase()}_${automod.data.enabled ? 'ENABLE' : 'DISABLE'}_SUCCESS`, localize(locale, 'AUTOMOD')),
+                        ephemeral: true
+                    });
+
+                    automodSettings(interaction, automod, locale);
+                    break;
+                case 'automod_reset':
+                    await interaction.deferUpdate();
+                    await automod.delete();
+                    await interaction.followUp({
+                        content: localize(locale, 'SETTING_RESET_SUCCESS', localize(locale, 'AUTOMOD')),
+                        ephemeral: true
+                    });
+
+                    automodSettings(interaction, automod, locale);
+                    break;
+                case 'automod_ai_alert_channel':
+                    if (!interaction.memberPermissions.has('ManageChannels')) return interaction.followUp({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Channels'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new ChannelSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_ai_alert_channel_select`)
+                                        .setPlaceholder(localize(locale, 'CHANNEL_SELECT'))
+                                        .setChannelTypes(ChannelType.GuildText)
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_ai_alert_channel_select':
+                    await interaction.deferUpdate();
+
+                    let channelId2 = interaction.values[0];
+
+                    await automod.setAIAlertChannel(channelId2);
+                    await interaction.followUp({
+                        content: localize(locale, 'SETTING_SUCCESS', localize(locale, 'ALERT_CHANNEL'), `<#${channelId2}>`),
+                        ephemeral: true
+                    });
+
+                    automodAIConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_bad_content_alert_channel':
+                    if (!interaction.memberPermissions.has('ManageChannels')) return interaction.followUp({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Channels'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new ChannelSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_bad_content_alert_channel_select`)
+                                        .setPlaceholder(localize(locale, 'CHANNEL_SELECT'))
+                                        .setChannelTypes(ChannelType.GuildText)
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_bad_content_alert_channel_select':
+                    await interaction.deferUpdate();
+
+                    let channelId3 = interaction.values[0];
+
+                    await automod.setBadContentAlertChannel(channelId3);
+                    await interaction.followUp({
+                        content: localize(locale, 'SETTING_SUCCESS', localize(locale, 'ALERT_CHANNEL'), `<#${channelId3}>`),
+                        ephemeral: true
+                    });
+
+                    automodBadContentConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_ai_model':
+                    interaction.update({
+                        content: localize(locale, 'AI_MODEL_KEY'),
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new ButtonBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_ai_model_set_key`)
+                                        .setEmoji(emojis.important.split(':')[2].replace('>', ''))
+                                        .setLabel(localize(locale, 'SET_KEY'))
+                                        .setStyle(ButtonStyle.Primary)
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_ai_model_key':
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new StringSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_ai_model_key_select`)
+                                        .setPlaceholder(localize(locale, 'SELECT_MODEL'))
+                                        .setOptions(
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('gpt-4-32k-0613')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:gpt-4-32k-0613')
+                                                .setDefault(automod.data.ai.model.name === 'gpt-4-32k-0613'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('gpt-4-32k')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:gpt-4-32k')
+                                                .setDefault(automod.data.ai.model.name === 'gpt-4-32k'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('gpt-4-0613')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:gpt-4-0613')
+                                                .setDefault(automod.data.ai.model.name === 'gpt-4-0613'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('gpt-4-0314')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:gpt-4-0314')
+                                                .setDefault(automod.data.ai.model.name === 'gpt-4-0314'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('gpt-4')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:gpt-4')
+                                                .setDefault(automod.data.ai.model.name === 'gpt-4'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('gpt-3.5-turbo-16k-0613')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:gpt-3.5-turbo-16k-0613')
+                                                .setDefault(automod.data.ai.model.name === 'gpt-3.5-turbo-16k-0613'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('gpt-3.5-turbo-16k')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:gpt-3.5-turbo-16k')
+                                                .setDefault(automod.data.ai.model.name === 'gpt-3.5-turbo-16k'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('gpt-3.5-turbo-0613')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:gpt-3.5-turbo-0613')
+                                                .setDefault(automod.data.ai.model.name === 'gpt-3.5-turbo-0613'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('gpt-3.5-turbo')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:gpt-3.5-turbo')
+                                                .setDefault(automod.data.ai.model.name === 'gpt-3.5-turbo'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('text-davinci-003')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:text-davinci-003')
+                                                .setDefault(automod.data.ai.model.name === 'text-davinci-003'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('chat-bison-001')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:chat-bison-001')
+                                                .setDefault(automod.data.ai.model.name === 'chat-bison-001'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('claude-2')
+                                                .setDescription('by Anthropic')
+                                                .setValue('anthropic:claude-2')
+                                                .setDefault(automod.data.ai.model.name === 'claude-2'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('claude-1')
+                                                .setDescription('by Anthropic')
+                                                .setValue('anthropic:claude-1')
+                                                .setDefault(automod.data.ai.model.name === 'claude-1'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('claude-instant-1')
+                                                .setDescription('by Anthropic')
+                                                .setValue('anthropic:claude-instant-1')
+                                                .setDefault(automod.data.ai.model.name === 'claude-instant-1'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('llama-2-70b-chat')
+                                                .setDescription('by Llama')
+                                                .setValue('llama:llama-2-70b-chat')
+                                                .setDefault(automod.data.ai.model.name === 'llama-2-70b-chat'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('llama-2-13b-chat')
+                                                .setDescription('by Llama')
+                                                .setValue('llama:llama-2-13b-chat')
+                                                .setDefault(automod.data.ai.model.name === 'llama-2-13b-chat'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('llama-2-7b-chat')
+                                                .setDescription('by Llama')
+                                                .setValue('llama:llama-2-7b-chat')
+                                                .setDefault(automod.data.ai.model.name === 'llama-2-7b-chat'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('bing')
+                                                .setDescription('by Microsoft')
+                                                .setValue('microsoft:bing')
+                                                .setDefault(automod.data.ai.model.name === 'bing'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('you-chat')
+                                                .setDescription('by You')
+                                                .setValue('you:you-chat')
+                                                .setDefault(automod.data.ai.model.name === 'you-chat'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('flan-t5-xxl')
+                                                .setDescription('by Vercel')
+                                                .setValue('vercel:flan-t5-xxl')
+                                                .setDefault(automod.data.ai.model.name === 'flan-t5-xxl'),
+                                        )
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_bad_content_model_key':
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new StringSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_bad_content_model_key_select`)
+                                        .setPlaceholder(localize(locale, 'SELECT_MODEL'))
+                                        .setOptions(
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('text-moderation-latest')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:text-moderation-latest')
+                                                .setDefault(automod.data.badContent.model.name === 'text-moderation-latest'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('text-moderation-stable')
+                                                .setDescription('by OpenAI')
+                                                .setValue('openai:text-moderation-stable')
+                                                .setDefault(automod.data.badContent.model.name === 'text-moderation-stable'),
+                                        )
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_ai_model_key_select':
+                    await interaction.deferUpdate();
+
+                    let [owner, model] = interaction.values[0].split(':');
+
+                    await automod.setAIModel(model, owner);
+                    await interaction.followUp({
+                        content: localize(locale, 'AUTOMOD_AI_MODEL_SET_SUCCESS', model),
+                        ephemeral: true
+                    });
+
+                    automodAIConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_bad_content_model_key_select':
+                    await interaction.deferUpdate();
+
+                    let [owner2, model2] = interaction.values[0].split(':');
+
+                    await automod.setBadContentModel(model2, owner2);
+                    await interaction.followUp({
+                        content: localize(locale, 'BAD_CONTENT_AI_MODEL_SET_SUCCESS', model2),
+                        ephemeral: true
+                    });
+
+                    automodBadContentConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_ai_model_set_key':
+                    interaction.showModal(
+                        new ModalBuilder()
+                            .setCustomId('automod_ai_model_set_key_modal')
+                            .setTitle(localize(locale, 'SET_KEY'))
+                            .setComponents(
+                                new ActionRowBuilder()
+                                    .setComponents(
+                                        new TextInputBuilder()
+                                            .setCustomId('key')
+                                            .setLabel(localize(locale, 'API_KEY'))
+                                            .setPlaceholder('purgpt-XXXXXX')
+                                            .setRequired(false)
+                                            .setStyle(TextInputStyle.Short)
+                                    )
+                            )
+                    );
+                    break;
+                case 'automod_ai_toggle_fallbacks':
+                    await interaction.deferUpdate();
+                    await automod.toggleAIFallbacks();
+                    await interaction.followUp({
+                        content: localize(locale, `${automod.data.ai.allowFallbacks ? 'ENABLE' : 'DISABLE'}_FALLBACKS_SUCCESS`),
+                        ephemeral: true
+                    });
+
+                    automodAIConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_ai_test':
+                    interaction.showModal(
+                        new ModalBuilder()
+                            .setCustomId('automod_ai_test_modal')
+                            .setTitle(localize(locale, 'TEST'))
+                            .setComponents(
+                                new ActionRowBuilder()
+                                    .setComponents(
+                                        new TextInputBuilder()
+                                            .setCustomId('message')
+                                            .setLabel(localize(locale, 'TEST_MESSAGE'))
+                                            .setStyle(TextInputStyle.Paragraph)
+                                            .setRequired(true)
+                                    )
+                            )
+                    );
+                    break;
+                case 'automod_ai_add_rule':
+                    if (!interaction.memberPermissions.has('ManageMessages')) return interaction.reply({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Messages'),
+                        ephemeral: true
+                    });
+
+                    interaction.showModal(
+                        new ModalBuilder()
+                            .setCustomId('automod_ai_add_rule_modal')
+                            .setTitle(localize(locale, 'ADD_RULE'))
+                            .setComponents(
+                                new ActionRowBuilder()
+                                    .setComponents(
+                                        new TextInputBuilder()
+                                            .setCustomId('rule')
+                                            .setLabel(localize(locale, 'RULE'))
+                                            .setPlaceholder('No swearing allowed.')
+                                            .setRequired(true)
+                                            .setStyle(TextInputStyle.Paragraph)
+                                    )
+                            )
+                    );
+                    break;
+                case 'automod_ai_remove_rule':
+                    if (!interaction.memberPermissions.has('ManageMessages')) return interaction.reply({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Messages'),
+                        ephemeral: true
+                    });
+
+                    interaction.showModal(
+                        new ModalBuilder()
+                            .setCustomId('automod_ai_remove_rule_modal')
+                            .setTitle(localize(locale, 'REMOVE_RULE'))
+                            .setComponents(
+                                new ActionRowBuilder()
+                                    .setComponents(
+                                        new TextInputBuilder()
+                                            .setCustomId('rule')
+                                            .setLabel(localize(locale, 'RULE_INDEX'))
+                                            .setPlaceholder('1')
+                                            .setRequired(true)
+                                            .setMinLength(1)
+                                            .setMaxLength(2)
+                                            .setStyle(TextInputStyle.Short)
+                                    )
+                            )
+                    );
+                    break;
+                case 'automod_ai_add_blacklist_roles':
+                    if (!interaction.memberPermissions.has('ManageRoles')) return interaction.reply({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Roles'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new RoleSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_ai_add_blacklist_roles_select`)
+                                        .setPlaceholder(localize(locale, 'ROLES_SELECT'))
+                                        .setMaxValues(interaction.guild.roles.cache.size > 25 ? 25 : interaction.guild.roles.cache.size)
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_ai_add_blacklist_roles_select':
+                    await interaction.deferUpdate();
+
+                    let roleIds = interaction.values;
+
+                    await automod.addBlacklistRoles('ai', roleIds);
+                    await interaction.followUp({
+                        content: localize(locale, 'ADD_BLACKLIST_ROLES_SUCCESS', roleIds.map(id => `<@&${id}>`).join(', ')),
+                        ephemeral: true
+                    });
+
+                    automodAIConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_ai_remove_blacklist_roles':
+                    if (!interaction.memberPermissions.has('ManageRoles')) return interaction.reply({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Roles'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new RoleSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_ai_remove_blacklist_roles_select`)
+                                        .setPlaceholder(localize(locale, 'ROLES_SELECT'))
+                                        .setMaxValues(interaction.guild.roles.cache.size > 25 ? 25 : interaction.guild.roles.cache.size)
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_ai_remove_blacklist_roles_select':
+                    await interaction.deferUpdate();
+
+                    let roleIds2 = interaction.values;
+
+                    await automod.removeBlacklistRoles('ai', roleIds2);
+                    await interaction.followUp({
+                        content: localize(locale, 'REMOVE_BLACKLIST_ROLES_SUCCESS', roleIds2.map(id => `<@&${id}>`).join(', ')),
+                        ephemeral: true
+                    });
+
+                    automodAIConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_ai_add_blacklist_channels':
+                    if (!interaction.memberPermissions.has('ManageChannels')) return interaction.reply({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Channels'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new ChannelSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_ai_add_blacklist_channels_select`)
+                                        .setPlaceholder(localize(locale, 'CHANNELS_SELECT'))
+                                        .setMaxValues(interaction.guild.channels.cache.size > 25 ? 25 : interaction.guild.channels.cache.size)
+                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum)
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_ai_add_blacklist_channels_select':
+                    await interaction.deferUpdate();
+
+                    let channelIds = interaction.values;
+
+                    await automod.addBlacklistChannels('ai', channelIds);
+                    await interaction.followUp({
+                        content: localize(locale, 'ADD_BLACKLIST_CHANNELS_SUCCESS', channelIds.map(id => `<#${id}>`).join(', ')),
+                        ephemeral: true
+                    });
+
+                    automodAIConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_ai_remove_blacklist_channels':
+                    if (!interaction.memberPermissions.has('ManageChannels')) return interaction.reply({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Channels'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new ChannelSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_ai_remove_blacklist_channels_select`)
+                                        .setPlaceholder(localize(locale, 'CHANNELS_SELECT'))
+                                        .setMaxValues(interaction.guild.channels.cache.size > 25 ? 25 : interaction.guild.channels.cache.size)
+                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum)
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_ai_remove_blacklist_channels_select':
+                    await interaction.deferUpdate();
+
+                    let channelIds2 = interaction.values;
+
+                    await automod.removeBlacklistChannels('ai', channelIds2);
+                    await interaction.followUp({
+                        content: localize(locale, 'REMOVE_BLACKLIST_CHANNELS_SUCCESS', channelIds2.map(id => `<#${id}>`).join(', ')),
+                        ephemeral: true
+                    });
+
+                    automodAIConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_bad_content_add_blacklist_roles':
+                    if (!interaction.memberPermissions.has('ManageRoles')) return interaction.reply({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Roles'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new RoleSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_bad_content_add_blacklist_roles_select`)
+                                        .setPlaceholder(localize(locale, 'ROLES_SELECT'))
+                                        .setMaxValues(interaction.guild.roles.cache.size > 25 ? 25 : interaction.guild.roles.cache.size)
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_bad_content_add_blacklist_roles_select':
+                    await interaction.deferUpdate();
+
+                    let roleIds3 = interaction.values;
+
+                    await automod.addBlacklistRoles('badContent', roleIds3);
+                    await interaction.followUp({
+                        content: localize(locale, 'ADD_BLACKLIST_ROLES_SUCCESS', roleIds3.map(id => `<@&${id}>`).join(', ')),
+                        ephemeral: true
+                    });
+
+                    automodBadContentConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_bad_content_remove_blacklist_roles':
+                    if (!interaction.memberPermissions.has('ManageRoles')) return interaction.reply({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Roles'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new RoleSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_bad_content_remove_blacklist_roles_select`)
+                                        .setPlaceholder(localize(locale, 'ROLES_SELECT'))
+                                        .setMaxValues(interaction.guild.roles.cache.size > 25 ? 25 : interaction.guild.roles.cache.size)
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_bad_content_remove_blacklist_roles_select':
+                    await interaction.deferUpdate();
+
+                    let roleIds4 = interaction.values;
+
+                    await automod.removeBlacklistRoles('badContent', roleIds4);
+                    await interaction.followUp({
+                        content: localize(locale, 'REMOVE_BLACKLIST_ROLES_SUCCESS', roleIds4.map(id => `<@&${id}>`).join(', ')),
+                        ephemeral: true
+                    });
+
+                    automodBadContentConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_bad_content_add_blacklist_channels':
+                    if (!interaction.memberPermissions.has('ManageChannels')) return interaction.reply({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Channels'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new ChannelSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_bad_content_add_blacklist_channels_select`)
+                                        .setPlaceholder(localize(locale, 'CHANNELS_SELECT'))
+                                        .setMaxValues(interaction.guild.channels.cache.size > 25 ? 25 : interaction.guild.channels.cache.size)
+                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum)
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_bad_content_add_blacklist_channels_select':
+                    await interaction.deferUpdate();
+
+                    let channelIds3 = interaction.values;
+
+                    await automod.addBlacklistChannels('badContent', channelIds3);
+                    await interaction.followUp({
+                        content: localize(locale, 'ADD_BLACKLIST_CHANNELS_SUCCESS', channelIds3.map(id => `<#${id}>`).join(', ')),
+                        ephemeral: true
+                    });
+
+                    automodBadContentConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_bad_content_remove_blacklist_channels':
+                    if (!interaction.memberPermissions.has('ManageChannels')) return interaction.reply({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Channels'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new ChannelSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_bad_content_remove_blacklist_channels_select`)
+                                        .setPlaceholder(localize(locale, 'CHANNELS_SELECT'))
+                                        .setMaxValues(interaction.guild.channels.cache.size > 25 ? 25 : interaction.guild.channels.cache.size)
+                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum)
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_bad_content_remove_blacklist_channels_select':
+                    await interaction.deferUpdate();
+
+                    let channelIds4 = interaction.values;
+
+                    await automod.removeBlacklistChannels('badContent', channelIds4);
+                    await interaction.followUp({
+                        content: localize(locale, 'REMOVE_BLACKLIST_CHANNELS_SUCCESS', channelIds4.map(id => `<#${id}>`).join(', ')),
+                        ephemeral: true
+                    });
+
+                    automodBadContentConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_bad_content_set_filters':
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new StringSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_bad_content_set_filters_select`)
+                                        .setPlaceholder(localize(locale, 'FILTERS_SELECT'))
+                                        .setOptions(
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'SEXUAL'))
+                                                .setValue('sexual')
+                                                .setDefault(automod.data.badContent.filters === 'all' || automod.data.badContent.filters.includes('sexual')),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'HATE'))
+                                                .setValue('hate')
+                                                .setDefault(automod.data.badContent.filters === 'all' || automod.data.badContent.filters.includes('hate')),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'HARASSMENT'))
+                                                .setValue('harassment')
+                                                .setDefault(automod.data.badContent.filters === 'all' || automod.data.badContent.filters.includes('harassment')),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'SELF_HARM'))
+                                                .setValue('self-harm')
+                                                .setDefault(automod.data.badContent.filters === 'all' || automod.data.badContent.filters.includes('self-harm')),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'SEXUAL_MINORS'))
+                                                .setValue('sexual/minors')
+                                                .setDefault(automod.data.badContent.filters === 'all' || automod.data.badContent.filters.includes('sexual/minors')),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'HATE_THREATENING'))
+                                                .setValue('hate/threatening')
+                                                .setDefault(automod.data.badContent.filters === 'all' || automod.data.badContent.filters.includes('hate/threatening')),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'VIOLENCE_GRAPHIC'))
+                                                .setValue('violence/graphic')
+                                                .setDefault(automod.data.badContent.filters === 'all' || automod.data.badContent.filters.includes('violence/graphic')),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'SELF_HARM_INTENT'))
+                                                .setValue('self-harm/intent')
+                                                .setDefault(automod.data.badContent.filters === 'all' || automod.data.badContent.filters.includes('self-harm/intent')),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'SELF_HARM_INSTRUCTIONS'))
+                                                .setValue('self-harm/instructions')
+                                                .setDefault(automod.data.badContent.filters === 'all' || automod.data.badContent.filters.includes('self-harm/instructions')),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'HARASSMENT_THREATENING'))
+                                                .setValue('harassment/threatening')
+                                                .setDefault(automod.data.badContent.filters === 'all' || automod.data.badContent.filters.includes('harassment/threatening')),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'VIOLENCE'))
+                                                .setValue('violence')
+                                                .setDefault(automod.data.badContent.filters === 'all' || automod.data.badContent.filters.includes('violence'))
+                                        )
+                                        .setMaxValues(11)
+                                )
+                        ]
+                    });
+                    break;
+                case 'automod_bad_content_set_filters_select':
+                    await interaction.deferUpdate();
+
+                    let filters = interaction.values;
+
+                    if (filters.length === 11) filters = 'all';
+
+                    await automod.setBadContentFilters(filters);
+                    await interaction.followUp({
+                        content: localize(locale, 'SET_FILTERS_SUCCESS'),
+                        ephemeral: true
+                    });
+
+                    automodBadContentConfigure(interaction, automod, locale);
+                    break;
                 default:
                     logger('warning', 'COMMAND', 'Message component', interaction.customId, 'not found');
             };
@@ -1249,11 +1966,12 @@ client.on('interactionCreate', async interaction => {
             let [customId, ...args] = interaction.customId.split(':');
             let locale = interaction.locale;
 
+            const home = await new Home(interaction.guildId).setup();
+            const automod = await new AutoMod(interaction.guildId).setup();
+
             switch (customId) {
                 case 'home_min_interactions_modal':
                     await interaction.deferUpdate();
-
-                    const home = await new Home(args[0]).setup();
 
                     let minInteractions = parseInt(interaction.fields.getTextInputValue('count'));
 
@@ -1266,6 +1984,133 @@ client.on('interactionCreate', async interaction => {
                         embeds: [],
                         components: []
                     });
+                    break;
+                case 'automod_ai_test_modal':
+                    await interaction.deferReply({ ephemeral: true });
+
+                    let message = interaction.fields.getTextInputValue('message');
+                    let result = await automod.ai({
+                        content: message,
+                        author: interaction.user,
+                        channel: {
+                            name: 'test-channel'
+                        }
+                    }, true);
+
+                    interaction.editReply(`${localize(locale, 'AUTOMOD_AI_RESPONSE')}\n${result}`);
+                    break;
+                case 'automod_ai_add_rule_modal':
+                    await interaction.deferUpdate();
+
+                    let rule = interaction.fields.getTextInputValue('rule');
+
+                    await automod.addAIRule(rule);
+                    await interaction.followUp({
+                        content: localize(locale, 'SETTING_ADD_RULE_SUCCESS', rule),
+                        ephemeral: true
+                    });
+
+                    automodAIConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_ai_remove_rule_modal':
+                    await interaction.deferUpdate();
+
+                    let index = parseInt(interaction.fields.getTextInputValue('rule'));
+
+                    if (isNaN(index)) return interaction.editReply(localize(interaction.locale, 'INVALID_NUMBER'));
+
+                    await automod.removAIRule(index - 1);
+                    await interaction.followUp({
+                        content: localize(locale, 'SETTING_REMOVE_RULE_SUCCESS'),
+                        ephemeral: true
+                    });
+
+                    automodAIConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_ai_model_set_key_modal':
+                    await interaction.deferUpdate();
+                    await interaction.followUp({
+                        content: localize(locale, 'CHECKING_KEY'),
+                        ephemeral: true
+                    });
+
+                    let key = interaction.fields.getTextInputValue('key') ?? '';
+
+                    if (key === '') {
+                        await automod.setPurGPTKey(null);
+                        await interaction.followUp({
+                            content: localize(locale, 'SET_KEY_SUCCESS'),
+                            ephemeral: true
+                        });
+
+                        return automodAIConfigure(interaction, automod, locale);
+                    };
+
+                    let response;
+
+                    try {
+                        response = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
+                            model: 'gpt-3.5-turbo',
+                            messages: [
+                                {
+                                    role: 'user',
+                                    content: 'Hello, world!'
+                                }
+                            ]
+                        }, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${key}`
+                            }
+                        });
+                    } catch (error) {
+                        return interaction.followUp({
+                            content: localize(locale, 'INVALID_KEY'),
+                            ephemeral: true
+                        });
+                    };
+
+                    if (response.status !== 200) return interaction.followUp({
+                        content: localize(locale, 'INVALID_KEY'),
+                        ephemeral: true
+                    });
+
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    try {
+                        response = await axios.post('https://beta.purgpt.xyz/openai/chat/completions', {
+                            model: 'gpt-3.5-turbo',
+                            messages: [
+                                {
+                                    role: 'user',
+                                    content: 'Hello, world!'
+                                }
+                            ]
+                        }, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${key}`
+                            }
+                        });
+                    } catch (error) {
+                        return interaction.followUp({
+                            content: localize(locale, 'INVALID_KEY'),
+                            ephemeral: true
+                        });
+                    };
+
+                    if (response.status !== 200) return interaction.followUp({
+                        content: localize(locale, 'INVALID_KEY'),
+                        ephemeral: true
+                    });
+
+                    await automod.setPurGPTKey(key);
+                    await interaction.followUp({
+                        content: localize(locale, 'SET_KEY_SUCCESS'),
+                        ephemeral: true
+                    });
+
+                    automodAIConfigure(interaction, automod, locale);
                     break;
                 default:
                     logger('warning', 'COMMAND', 'Modal', interaction.customId, 'not found');
@@ -1301,11 +2146,23 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on('messageCreate', async message => {
-    if (!message.guild) return;
-    if (message.type === 0 && message.content !== '' && message.reference?.messageId) {
-        const home = await new Home(message.guildId).setup();
+    try {
+        if (!message.guild || !message.member) return;
+        if (message.type === 0 && message.content !== '' && message.reference?.messageId) {
+            const home = await new Home(message.guildId).setup();
 
-        home.check('reply', message);
+            home.check('reply', message);
+        };
+        if (message.type === 0 && message.content !== '' && !message.author.bot && !message.member.permissions.has('ManageMessages') && message.channel.type !== ChannelType.GuildAnnouncement) {
+            const automod = await new AutoMod(message.guildId).setup();
+
+            let blocked = false;
+
+            if (!blocked && automod.data.ai.enabled && !automod.data.ai.channelBlacklist.includes(message.channelId) && !automod.data.ai.channelBlacklist.includes(message.channel.parentId) && !automod.data.ai.roleBlacklist.filter(role => message.member.roles.cache.get(role))[0]) blocked = await automod.ai(message);
+            if (!blocked && automod.data.badContent.enabled && !automod.data.badContent.channelBlacklist.includes(message.channelId) && !automod.data.badContent.channelBlacklist.includes(message.channel.parentId) && !automod.data.badContent.roleBlacklist.filter(role => message.member.roles.cache.get(role))[0]) blocked = await automod.badContent(message);
+        };
+    } catch (error) {
+        logger('error', 'EVENT', 'Error while executing messageCreate:', `${error.message}\n`, error.stack);
     };
 });
 
