@@ -6,6 +6,7 @@ const locales = {
     de: require('../i18n/de.js'),
     'es-ES': require('../i18n/es-ES.js'),
     it: require('../i18n/it.js'),
+    ru: require('../i18n/ru.js')
 };
 
 module.exports.locales = locales;
