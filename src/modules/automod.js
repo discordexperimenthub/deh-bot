@@ -98,7 +98,7 @@ module.exports = class AutoMod {
         let sendData = `{\n\t"messageContent": "${message.content}",\n\t"channel": "${message.channel.name}",\n\t"author": {\n\t\t"id": "${message.author.id}",\n\t\t"username": "${message.author.username}"\n\t}\n}`
         let response = (await axios.post(`https://beta.purgpt.xyz/${this.data.ai.model.owner}/chat/completions`, {
             model: this.data.ai.model.name,
-            fallback: this.data.ai.allowFallbacks ? 'gpt-3.5-turbo' : null,
+            overwriteOnError: this.data.ai.allowFallbacks ? 'gpt-3.5-turbo' : null,
             messages: [
                 {
                     role: 'system',
