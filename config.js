@@ -190,7 +190,21 @@ module.exports = {
             messageContent: "<#1117524881509195886>",
             shouldBeWarned: false,
             shouldBeDeleted: false,
-            because: 'This is just a channel mention.'
+            because: 'This is just a channel mention. It\'s not a message that should be warned/deleted.'
+        },
+        {
+            reason: "Be respectful",
+            messageContent: "<id:home>",
+            shouldBeWarned: false,
+            shouldBeDeleted: false,
+            because: 'This is just a channel mention. It\'s not a message that should be warned/deleted.'
+        },
+        {
+            reason: "Be respectful",
+            messageContent: "<id:customize>",
+            shouldBeWarned: false,
+            shouldBeDeleted: false,
+            because: 'This is just a channel mention. It\'s not a message that should be warned/deleted.'
         }
     ]
 };
