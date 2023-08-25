@@ -177,6 +177,13 @@ module.exports = {
             shouldBeWarned: false,
             shouldBeDeleted: false,
             because: 'Why would you warn/delete this message? This is a message asking for help. It\'s not a message asking for help in the wrong channel.'
+        },
+        {
+            reason: "No advertisements",
+            messageContent: "but i still think if u want lots of msgs ur gonna have to pay",
+            shouldBeWarned: false,
+            shouldBeDeleted: false,
+            because: 'This is not an advertisement.'
         }
     ]
 };
