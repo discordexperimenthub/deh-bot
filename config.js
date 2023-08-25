@@ -184,6 +184,13 @@ module.exports = {
             shouldBeWarned: false,
             shouldBeDeleted: false,
             because: 'This is not an advertisement.'
+        },
+        {
+            reason: "Be respectful",
+            messageContent: "<#1117524881509195886>",
+            shouldBeWarned: false,
+            shouldBeDeleted: false,
+            because: 'This is just a channel mention.'
         }
     ]
 };
