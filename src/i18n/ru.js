@@ -133,5 +133,5 @@ module.exports = {
     HARASSMENT_THREATENING: 'Преследования/Угрозы',
     VIOLENCE: 'Насилие',
     SET_FILTERS_SUCCESS: 'Фильтр плохого контента был установлен успешно!',
-    SYNC_RULES_ERROR: 'Произошла оши! Повторите попытку позже или сообщите об этой проблеме на нашем [Discord сервере](<https://discord.gg/experiments>).',
+    SYNC_RULES_ERROR: 'Произошла ошибка! Повторите попытку позже или сообщите об этой проблеме на нашем [Discord сервере](<https://discord.gg/experiments>).',
 };
