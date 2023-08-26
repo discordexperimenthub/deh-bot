@@ -3,6 +3,7 @@ const logger = require('./logger.js');
 const locales = {
     'en-US': require('../i18n/en-US.js'),
     tr: require('../i18n/tr.js'),
+    da: require('../i18n/da.js'),
     de: require('../i18n/de.js'),
     'es-ES': require('../i18n/es-ES.js'),
     it: require('../i18n/it.js'),
