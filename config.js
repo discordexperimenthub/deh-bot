@@ -177,6 +177,34 @@ module.exports = {
             shouldBeWarned: false,
             shouldBeDeleted: false,
             because: 'Why would you warn/delete this message? This is a message asking for help. It\'s not a message asking for help in the wrong channel.'
+        },
+        {
+            reason: "No advertisements",
+            messageContent: "but i still think if u want lots of msgs ur gonna have to pay",
+            shouldBeWarned: false,
+            shouldBeDeleted: false,
+            because: 'This is not an advertisement.'
+        },
+        {
+            reason: "Be respectful",
+            messageContent: "<#1117524881509195886>",
+            shouldBeWarned: false,
+            shouldBeDeleted: false,
+            because: 'This is just a channel mention. It\'s not a message that should be warned/deleted.'
+        },
+        {
+            reason: "Be respectful",
+            messageContent: "<id:home>",
+            shouldBeWarned: false,
+            shouldBeDeleted: false,
+            because: 'This is just a channel mention. It\'s not a message that should be warned/deleted.'
+        },
+        {
+            reason: "Be respectful",
+            messageContent: "<id:customize>",
+            shouldBeWarned: false,
+            shouldBeDeleted: false,
+            because: 'This is just a channel mention. It\'s not a message that should be warned/deleted.'
         }
     ]
 };

@@ -99,6 +99,7 @@ module.exports = class AutoMod {
         let response = (await axios.post(`https://beta.purgpt.xyz/${this.data.ai.model.owner}/chat/completions`, {
             model: this.data.ai.model.name,
             fallback: this.data.ai.allowFallbacks ? 'gpt-3.5-turbo' : null,
+            overwriteOnError: this.data.ai.allowFallbacks ? true : false,
             messages: [
                 {
                     role: 'system',
@@ -144,7 +145,7 @@ module.exports = class AutoMod {
         if (data.deleteMessage || data.warnMessage) {
             if (!this.data.ai.rules[data.rule - 1]) return logger('error', 'AUTOMOD', 'Failed to get rule:', data.rule, this.data.ai.rules);
             if (!data.reason) return logger('error', 'AUTOMOD', 'Failed to get reason:', JSON.stringify(data, null, 4));
-            
+
             logger('debug', 'AUTOMOD', 'AutoMod blocked a message:', this.data.ai.rules[data.rule - 1], sendData, JSON.stringify(data, null, 4));
 
             if (data.deleteMessage) {
@@ -194,6 +195,10 @@ module.exports = class AutoMod {
                                     value: this.data.ai.rules[data.rule - 1],
                                     inline: false
                                 },
+                                ...(data.deleteMessage ? [] : [{
+                                    name: 'Message',
+                                    value: `[Jump to message](https://discord.com/channels/${message.guild.id}/${message.channel.id}/${message.id})`
+                                }]),
                                 {
                                     name: 'Warning',
                                     value: 'AutoMod is an **experimental** feature. If you think this is a mistake, please report this issue in [our Discord server](https://discord.gg/experiments).'
