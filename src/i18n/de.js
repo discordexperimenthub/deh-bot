@@ -134,4 +134,5 @@ module.exports = {
     VIOLENCE: 'Gewalt',	
     SET_FILTERS_SUCCESS: 'Die Filter für schlechte Inhalte wurden erfolgreich gesetzt!',
     SYNC_RULES_ERROR: 'Beim Synchronisieren der Regeln ist ein Fehler aufgetreten! Bitte versuche es später noch einmal oder melde dieses Problem auf [unserem Discord-Server] (<https://discord.gg/experiments>).',
+    FEATURE_MESSAGE_ALREADY_SET: 'Diese Nachricht wird bereits angezeigt!'
 };
