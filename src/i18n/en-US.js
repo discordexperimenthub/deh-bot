@@ -134,4 +134,5 @@ module.exports = {
     VIOLENCE: 'Violence',
     SET_FILTERS_SUCCESS: 'Bad Content Filter filters have been set successfully!',
     SYNC_RULES_ERROR: 'An error occurred while syncing rules! Please try again later or report this issue in [our Discord server](<https://discord.gg/experiments>).',
+    FEATURE_MESSAGE_ALREADY_SET: 'This message is already featured!'
 };

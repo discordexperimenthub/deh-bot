@@ -29,10 +29,11 @@ module.exports = {
         const home = await new Home(guildId).setup();
         const message = await new DBMessage(interaction.targetId).setup();
 
-        if (home.data.enabled && !home.usable) return interaction.editReply(localize(interaction.locale, 'FEATURE_MESSAGE_NOT_SET'));
-        if (!home.data.enabled) return interaction.editReply(localize(interaction.locale, 'FEATURE_MESSAGE_NOT_ENABLED'));
-
         let locale = interaction.locale;
+
+        if (home.data.enabled && !home.usable) return interaction.editReply(localize(locale, 'FEATURE_MESSAGE_NOT_SET'));
+        if (!home.data.enabled) return interaction.editReply(localize(locale, 'FEATURE_MESSAGE_NOT_ENABLED'));
+        if (home.data.channel === interaction.targetMessage.channelId || home.data.messages.includes(interaction.targetId)) return interaction.editReply(localize(locale, 'FEATURE_MESSAGE_ALREADY_SET'));
 
         const componentMessage = interaction.editReply({
             components: [

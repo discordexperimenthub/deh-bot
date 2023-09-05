@@ -146,4 +146,5 @@ module.exports = {
     REMOVE_BLACKLIST_CHANNELS: 'Kara Listeden Kanal Kaldır',
     FILTERS_SELECT: 'Filtre seç...',
     SYNC_RULES_ERROR: 'Kurallar senkronize edilirken bir hata oluştu! Lütfen daha sonra tekrar deneyin veya bu sorunu [Discord sunucumuzda](https://discord.gg/experiments) bildirin.',
+    FEATURE_MESSAGE_ALREADY_SET: 'Bu mesaj zaten öne çıkartılmış!'
 };
