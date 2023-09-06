@@ -65,7 +65,7 @@ module.exports = {
                 embeds: [
                     new EmbedMaker(interaction.client)
                         .setTitle(localize(locale, 'MESSAGE_REMINDERS'))
-                        .setDescription(reminders.length > 0 ? `${reminders.slice(0, 30).map((reminder, index) => `${index + 1}. ${reminder.content === '' ? localize(locale, 'NO_CONTENT') : reminder.content.length > 100 ? `${reminder.content.slice(0, 100)}...` : reminder.content} **-** Ends in <t:${reminder.time}:R>`).join('\n')}${reminders.length > 30 ? `\n**(${reminders.length - 30} more)**` : ''}` : localize(locale, 'NO_MESSAGE_REMINDERS'))
+                        .setDescription(reminders.length > 0 ? `${reminders.slice(0, 30).map((reminder, index) => `${index + 1}. Ends in <t:${reminder.time}:R>\n\`\`\`${reminder.content === '' ? localize(locale, 'NO_CONTENT') : reminder.content.length > 100 ? `${reminder.content.slice(0, 100)}...` : reminder.content}\`\`\``).join('\n')}${reminders.length > 30 ? `\n**(${reminders.length - 30} more)**` : ''}` : localize(locale, 'NO_MESSAGE_REMINDERS'))
                 ]
             }).catch(error => logger('error', 'REMINDER', 'Error while sending message reminder list', error));
         } else if (subcommand === 'cancel') {

@@ -219,6 +219,11 @@ module.exports = class AutoMod {
      * @param {boolean} rawContent
      */
     async badContent(message, rawContent = false) {
+        //emoji only message regex (should match unicode and discord emojis like 😀 or :smile:)
+        let emojiRegex = /^((<a?:\w+:\d+>)|([\u{1F000}-\u{1FFFF}]))+$/u;
+
+        if (emojiRegex.test(message.content)) return false;
+
         let response;
 
         try {
