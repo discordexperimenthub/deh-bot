@@ -15,8 +15,8 @@ module.exports = {
     SERVER_SETTINGS: "Impostazioni del server",
     HOME: "Home",
     SETTINGS_MENU: "Scegli una funzione da gestire...",
-    ENABLED: "Abilitata",
-    DISABLED: "Disabilitata",
+    ENABLED: "Abilitato",
+    DISABLED: "Disabilitato",
     NOT_SET: "Non impostato",
     STATUS: "Stato",
     CHANNEL: "Canale",
@@ -115,7 +115,7 @@ module.exports = {
     SET_ALERT_CHANNEL: "Imposta canale di allerta",
     SETTING_SUCCESS: "{{0}} è stato impostato a {{1}} con successo!",
     API_KEY: "Chiave API",
-    SET_KEY_SUCCESS: "La tua chiave PurGPT è stata impsotata con successo!",
+    SET_KEY_SUCCESS: "La tua chiave PurGPT è stata impostata con successo!",
     SELECT_MODEL: "Seleziona un modello...",
     AUTOMOD_AI_MODEL_SET_SUCCESS:
         "Modello di AutoMod IA impostato a **`{{0}}`** con successo!",
@@ -157,4 +157,17 @@ module.exports = {
         "I filtri del filtro per contenuto cattivo sono stati impsotati con successo!",
     SYNC_RULES_ERROR:
         "C'è stato un errore nella sincronizzazione delle regole! Riprova più tardi o segnala questo problema nel [nostro server Discord](<https://discord.gg/experiments>).",
+    FEATURE_MESSAGE_ALREADY_SET: 'Questo messaggio è già in primo piano!',
+    TOXIC_CONTENT: 'Filtro per tossicità',
+    AUTOMOD_TOXIC_CONTENT_DISABLE: 'Disabilita filtro per tossicità',
+    AUTOMOD_TOXIC_CONTENT_ENABLE: 'Abilita filtro per tossicità',
+    AUTOMOD_TOXICCONTENT_ENABLE_SUCCESS: 'Filtro per tossicità attivato con successo!',
+    AUTOMOD_TOXICCONTENT_DISABLE_SUCCESS: 'Filtro per tossicità disattivato con successo!',
+    TOXICITY: 'Tossicità',
+    SEVERE_TOXICITY: 'Tossicità severa',
+    IDENTITY_ATTACK: 'Attacco d\'identità',
+    INSULT: 'Insulto',
+    PROFANITY: 'Profanità',
+    THREAT: 'Minaccia',
+    API_IS_DOWN: 'L\'API è in manutenzione al momento! Prova più tardi.'
 };
