@@ -134,4 +134,17 @@ module.exports = {
     VIOLENCE: 'Насильство',
     SET_FILTERS_SUCCESS: 'Фільтр поганого контенту було встановлено успішно!',
     SYNC_RULES_ERROR: 'Виникла помилка! Повторіть спробу пізніше або повідомте про цю проблему на нашому [Discord сервері](<https://discord.gg/experiments>).',
+    FEATURE_MESSAGE_ALREADY_SET: 'Це повідомлення вже опубліковано!',
+    TOXIC_CONTENT: 'Фільтр токсичного контенту',
+    AUTOMOD_TOXIC_CONTENT_DISABLE: 'Вимкнути фільтр токсичного контенту',
+    AUTOMOD_TOXIC_CONTENT_ENABLE: 'Увімкнути фільтр токсичного контенту',
+    AUTOMOD_TOXICCONTENT_ENABLE_SUCCESS: 'Фільтр токсичного контенту успішно включений!',
+    AUTOMOD_TOXICCONTENT_DISABLE_SUCCESS: 'Фільтр токсичного контенту успішно вимкнено!',
+    TOXICITY: 'Токсичність',
+    SEVERE_TOXICITY: 'Сильна токсичність',
+    IDENTITY_ATTACK: 'Атака особистості',
+    INSULT: 'Образник',
+    PROFANITY: 'Ненормативна лексика',
+    THREAT: 'Загроза',
+    API_IS_DOWN: 'API зараз не працює. Будь ласка, повторіть спробу пізніше'
 };
