@@ -32,7 +32,7 @@ module.exports = class AutoMod {
     };
 
     async setup() {
-        this.data = (await db.get(`guilds.${this.guildId}.automod`)) ?? {
+        let defaultData = {
             purgptKey: null,
             ai: {
                 enabled: false,
@@ -56,8 +56,21 @@ module.exports = class AutoMod {
                 },
                 filters: 'all',
                 alertChannel: null
+            },
+            toxicContent: {
+                enabled: false,
+                roleBlacklist: [],
+                channelBlacklist: [],
+                model: {
+                    name: 'perspective-v1',
+                    owner: 'Google'
+                },
+                filters: 'all',
+                alertChannel: null
             }
         };
+
+        this.data = Object.assign(defaultData, (await db.get(`guilds.${this.guildId}.automod`)) ?? {});
 
         return this;
     };
@@ -67,7 +80,7 @@ module.exports = class AutoMod {
     };
 
     /**
-     * @param {'ai' | 'badContent'} category 
+     * @param {'ai' | 'badContent' | 'toxicContent'} category 
      */
     async toggle(category) {
         this.data[category].enabled = !this.data[category].enabled;
@@ -130,7 +143,7 @@ module.exports = class AutoMod {
 
         let content = response.choices[0].message.content;
 
-        if (rawContent) return content;
+        if (rawContent) return content ?? 'API is down at the moment. Please try again later.';
 
         let regex = /```json\n?({[\s\S]*?})\n?```/g;
         let json = regex.exec(content);
@@ -209,7 +222,7 @@ module.exports = class AutoMod {
 
                 return true;
             };
-        } else if (rawContent) return content;
+        } else if (rawContent) return content ?? 'API is down at the moment. Please try again later.';
 
         return false;
     };
@@ -261,7 +274,7 @@ module.exports = class AutoMod {
             };
         };
 
-        if (rawContent) return JSON.stringify(categories, null, 4);
+        if (rawContent) return categories ? `\`\`\`json\n${JSON.stringify(categories, null, 4)}\n\`\`\`` : 'API is down at the moment. Please try again later.';
         if (triggered) {
             logger('debug', 'AUTOMOD', 'AutoMod blocked a message:', triggers, message.content);
 
@@ -273,6 +286,96 @@ module.exports = class AutoMod {
 
                 if (!channel) {
                     this.setBadContentAlertChannel(null);
+
+                    return logger('error', 'AUTOMOD', 'Failed to fetch alert channel:', this.data.ai.alertChannel);
+                };
+
+                await channel.send({
+                    content: `**AutoMod** has blocked a message from <@${message.author.id}> in <#${message.channel.id}>`,
+                    embeds: [
+                        new EmbedMaker(message.client)
+                            .setAuthor({
+                                name: message.member ? message.member.displayName : message.author.displayName,
+                                iconURL: message.member ? message.member.displayAvatarURL({ forceStatic: true }) : message.author.displayAvatarURL({ forceStatic: true })
+                            })
+                            .setTitle('Message Content')
+                            .setDescription(message.content)
+                            .setFields(
+                                {
+                                    name: 'Reason',
+                                    value: triggers.map(trigger => localize('en-US', trigger.toUpperCase().replaceAll('-', '_').replaceAll('/', '_'))).join(', '),
+                                    inline: false
+                                }
+                            )
+                    ]
+                });
+            };
+
+            return true;
+        };
+
+        return false;
+    };
+
+    /**
+     * @param {Message} message 
+     * @param {boolean} rawContent
+     */
+    async toxicContent(message, rawContent = false) {
+        //emoji only message regex (should match unicode and discord emojis like 😀 or :smile:)
+        let emojiRegex = /^((<a?:\w+:\d+>)|([\u{1F000}-\u{1FFFF}]))+$/u;
+
+        if (emojiRegex.test(message.content)) return false;
+
+        let response;
+
+        try {
+            response = await axios.post('https://beta.purgpt.xyz/google/moderations', {
+                model: this.data.toxicContent.model.name,
+                input: message.content
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${this.data.purgptKey ?? process.env.PURGPT_API_KEY}`
+                }
+            }).catch(error => error?.response ?? error);
+        } catch (error) {
+            return logger('error', 'AUTOMOD', 'Failed to get response from PurGPT API.', error);
+        };
+
+        if (!response || response.status !== 200) return logger('error', 'AUTOMOD', 'Failed to get toxic content filter response from PurGPT API.', JSON.stringify(response?.data?.error?.message ? { message: response?.data?.error?.message } : response, null, 4));
+
+        let filters = this.data.toxicContent.filters;
+        let categories = response.data.result.categories;
+        let triggered = false;
+        let triggers = [];
+
+        for (let category in categories) {
+            if (categories[category]) {
+                if (filters === 'all') {
+                    triggered = true;
+
+                    triggers.push(category);
+                } else if (filters.includes(category)) {
+                    triggered = true;
+
+                    triggers.push(category);
+                }
+            };
+        };
+
+        if (rawContent) return categories ? `\`\`\`json\n${JSON.stringify(categories, null, 4)}\n\`\`\`` : 'API is down at the moment. Please try again later.';
+        if (triggered) {
+            logger('debug', 'AUTOMOD', 'AutoMod blocked a message:', triggers, message.content);
+
+            await message.reply(`Your message has been deleted by AutoMod because it is against the server rules.\n**Reason:** ${triggers.map(trigger => localize('en-US', trigger.toUpperCase().replaceAll('-', '_').replaceAll('/', '_'))).join(', ')}\n*Powered by purgpt.xyz*`);
+            await message.delete();
+
+            if (this.data.toxicContent.alertChannel) {
+                let channel = await message.guild.channels.fetch(this.data.toxicContent.alertChannel).catch(() => null);
+
+                if (!channel) {
+                    this.setToxicContentAlertChannel(null);
 
                     return logger('error', 'AUTOMOD', 'Failed to fetch alert channel:', this.data.ai.alertChannel);
                 };
@@ -381,6 +484,15 @@ module.exports = class AutoMod {
     };
 
     /**
+     * @param {import('discord.js').Snowflake} channelId
+     */
+    async setToxicContentAlertChannel(channelId) {
+        this.data.toxicContent.alertChannel = channelId;
+
+        await this.save();
+    };
+
+    /**
      * @param {string} key
      */
     async setPurGPTKey(key) {
@@ -411,6 +523,17 @@ module.exports = class AutoMod {
         await this.save();
     };
 
+    /**
+     * @param {string} model
+     * @param {string} owner
+     */
+    async setToxicContentModel(model, owner) {
+        this.data.toxicContent.model.name = model;
+        this.data.toxicContent.model.owner = owner;
+
+        await this.save();
+    };
+
     async toggleAIFallbacks() {
         this.data.ai.allowFallbacks = !this.data.ai.allowFallbacks;
 
@@ -422,6 +545,15 @@ module.exports = class AutoMod {
      */
     async setBadContentFilters(filters) {
         this.data.badContent.filters = filters;
+
+        await this.save();
+    };
+
+    /**
+     * @param {string | string[]} filters
+     */
+    async setToxicContentFilters(filters) {
+        this.data.toxicContent.filters = filters;
 
         await this.save();
     };

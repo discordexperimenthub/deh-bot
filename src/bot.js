@@ -11,7 +11,7 @@ const { QuickDB } = require('quick.db');
 const timer = require('./modules/timer');
 const Home = require('./modules/home');
 const AutoMod = require('./modules/automod');
-const { automodSettings, homeSettings, automodAIConfigure, automodBadContentConfigure } = require('./modules/settings');
+const { automodSettings, homeSettings, automodAIConfigure, automodBadContentConfigure, automodToxicContentConfigure } = require('./modules/settings');
 
 const client = new Client({
     intents: [
@@ -1185,6 +1185,7 @@ client.on('interactionCreate', async interaction => {
 
                     if (category2 === 'ai') automodAIConfigure(interaction, automod, locale);
                     else if (category2 === 'bad_content') automodBadContentConfigure(interaction, automod, locale);
+                    else if (category2 === 'toxic_content') automodToxicContentConfigure(interaction, automod, locale);
                     break;
                 case 'automod_ai_sync_rules':
                     await interaction.deferUpdate();
@@ -1323,6 +1324,25 @@ client.on('interactionCreate', async interaction => {
                         ]
                     });
                     break;
+                case 'automod_toxic_content_alert_channel':
+                    if (!interaction.memberPermissions.has('ManageChannels')) return interaction.followUp({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Channels'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new ChannelSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_toxic_content_alert_channel_select`)
+                                        .setPlaceholder(localize(locale, 'CHANNEL_SELECT'))
+                                        .setChannelTypes(ChannelType.GuildText)
+                                )
+                        ]
+                    });
+                    break;
                 case 'automod_bad_content_alert_channel_select':
                     await interaction.deferUpdate();
 
@@ -1335,6 +1355,19 @@ client.on('interactionCreate', async interaction => {
                     });
 
                     automodBadContentConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_toxic_content_alert_channel_select':
+                    await interaction.deferUpdate();
+
+                    let channelId4 = interaction.values[0];
+
+                    await automod.setToxicContentAlertChannel(channelId4);
+                    await interaction.followUp({
+                        content: localize(locale, 'SETTING_SUCCESS', localize(locale, 'ALERT_CHANNEL'), `<#${channelId4}>`),
+                        ephemeral: true
+                    });
+
+                    automodToxicContentConfigure(interaction, automod, locale);
                     break;
                 case 'automod_ai_model':
                     interaction.update({
@@ -1492,6 +1525,31 @@ client.on('interactionCreate', async interaction => {
                         ]
                     });
                     break;
+                case 'automod_toxic_content_model_key':
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new StringSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_toxic_content_model_key_select`)
+                                        .setPlaceholder(localize(locale, 'SELECT_MODEL'))
+                                        .setOptions(
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('perspective-v1alpha1')
+                                                .setDescription('by Google')
+                                                .setValue('google:perspective-v1alpha1')
+                                                .setDefault(automod.data.toxicContent.model.name === 'perspective-v1alpha1'),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel('perspective-v1')
+                                                .setDescription('by Google')
+                                                .setValue('google:perspective-v1')
+                                                .setDefault(automod.data.toxicContent.model.name === 'perspective-v1'),
+                                        )
+                                )
+                        ]
+                    });
+                    break;
                 case 'automod_ai_model_key_select':
                     await interaction.deferUpdate();
 
@@ -1517,6 +1575,19 @@ client.on('interactionCreate', async interaction => {
                     });
 
                     automodBadContentConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_toxic_content_model_key_select':
+                    await interaction.deferUpdate();
+
+                    let [owner3, model3] = interaction.values[0].split(':');
+
+                    await automod.setToxicContentModel(model3, owner3);
+                    await interaction.followUp({
+                        content: localize(locale, 'TOXIC_CONTENT_AI_MODEL_SET_SUCCESS', model3),
+                        ephemeral: true
+                    });
+
+                    automodToxicContentConfigure(interaction, automod, locale);
                     break;
                 case 'automod_ai_model_set_key':
                     interaction.showModal(
@@ -1550,6 +1621,40 @@ client.on('interactionCreate', async interaction => {
                     interaction.showModal(
                         new ModalBuilder()
                             .setCustomId('automod_ai_test_modal')
+                            .setTitle(localize(locale, 'TEST'))
+                            .setComponents(
+                                new ActionRowBuilder()
+                                    .setComponents(
+                                        new TextInputBuilder()
+                                            .setCustomId('message')
+                                            .setLabel(localize(locale, 'TEST_MESSAGE'))
+                                            .setStyle(TextInputStyle.Paragraph)
+                                            .setRequired(true)
+                                    )
+                            )
+                    );
+                    break;
+                case 'automod_bad_content_test':
+                    interaction.showModal(
+                        new ModalBuilder()
+                            .setCustomId('automod_bad_content_test_modal')
+                            .setTitle(localize(locale, 'TEST'))
+                            .setComponents(
+                                new ActionRowBuilder()
+                                    .setComponents(
+                                        new TextInputBuilder()
+                                            .setCustomId('message')
+                                            .setLabel(localize(locale, 'TEST_MESSAGE'))
+                                            .setStyle(TextInputStyle.Paragraph)
+                                            .setRequired(true)
+                                    )
+                            )
+                    );
+                    break;
+                case 'automod_toxic_content_test':
+                    interaction.showModal(
+                        new ModalBuilder()
+                            .setCustomId('automod_toxic_content_test_modal')
                             .setTitle(localize(locale, 'TEST'))
                             .setComponents(
                                 new ActionRowBuilder()
@@ -1760,6 +1865,25 @@ client.on('interactionCreate', async interaction => {
                         ]
                     });
                     break;
+                case 'automod_toxic_content_add_blacklist_roles':
+                    if (!interaction.memberPermissions.has('ManageRoles')) return interaction.reply({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Roles'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new RoleSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_toxic_content_add_blacklist_roles_select`)
+                                        .setPlaceholder(localize(locale, 'ROLES_SELECT'))
+                                        .setMaxValues(interaction.guild.roles.cache.size > 25 ? 25 : interaction.guild.roles.cache.size)
+                                )
+                        ]
+                    });
+                    break;
                 case 'automod_bad_content_add_blacklist_roles_select':
                     await interaction.deferUpdate();
 
@@ -1772,6 +1896,19 @@ client.on('interactionCreate', async interaction => {
                     });
 
                     automodBadContentConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_toxic_content_add_blacklist_roles_select':
+                    await interaction.deferUpdate();
+
+                    let roleIds5 = interaction.values;
+
+                    await automod.addBlacklistRoles('toxicContent', roleIds5);
+                    await interaction.followUp({
+                        content: localize(locale, 'ADD_BLACKLIST_ROLES_SUCCESS', roleIds5.map(id => `<@&${id}>`).join(', ')),
+                        ephemeral: true
+                    });
+
+                    automodToxicContentConfigure(interaction, automod, locale);
                     break;
                 case 'automod_bad_content_remove_blacklist_roles':
                     if (!interaction.memberPermissions.has('ManageRoles')) return interaction.reply({
@@ -1792,14 +1929,46 @@ client.on('interactionCreate', async interaction => {
                         ]
                     });
                     break;
+                case 'automod_toxic_content_remove_blacklist_roles':
+                    if (!interaction.memberPermissions.has('ManageRoles')) return interaction.reply({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Roles'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new RoleSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_toxic_content_remove_blacklist_roles_select`)
+                                        .setPlaceholder(localize(locale, 'ROLES_SELECT'))
+                                        .setMaxValues(interaction.guild.roles.cache.size > 25 ? 25 : interaction.guild.roles.cache.size)
+                                )
+                        ]
+                    });
+                    break;
                 case 'automod_bad_content_remove_blacklist_roles_select':
                     await interaction.deferUpdate();
 
                     let roleIds4 = interaction.values;
 
-                    await automod.removeBlacklistRoles('badContent', roleIds4);
+                    await automod.removeBlacklistRoles('toxicContent', roleIds4);
                     await interaction.followUp({
                         content: localize(locale, 'REMOVE_BLACKLIST_ROLES_SUCCESS', roleIds4.map(id => `<@&${id}>`).join(', ')),
+                        ephemeral: true
+                    });
+
+                    automodToxicContentConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_toxic_content_remove_blacklist_roles_select':
+                    await interaction.deferUpdate();
+
+                    let roleIds6 = interaction.values;
+
+                    await automod.removeBlacklistRoles('toxicContent', roleIds6);
+                    await interaction.followUp({
+                        content: localize(locale, 'REMOVE_BLACKLIST_ROLES_SUCCESS', roleIds6.map(id => `<@&${id}>`).join(', ')),
                         ephemeral: true
                     });
 
@@ -1825,6 +1994,26 @@ client.on('interactionCreate', async interaction => {
                         ]
                     });
                     break;
+                case 'automod_toxic_content_add_blacklist_channels':
+                    if (!interaction.memberPermissions.has('ManageChannels')) return interaction.reply({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Channels'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new ChannelSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_toxic_content_add_blacklist_channels_select`)
+                                        .setPlaceholder(localize(locale, 'CHANNELS_SELECT'))
+                                        .setMaxValues(interaction.guild.channels.cache.size > 25 ? 25 : interaction.guild.channels.cache.size)
+                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum)
+                                )
+                        ]
+                    });
+                    break;
                 case 'automod_bad_content_add_blacklist_channels_select':
                     await interaction.deferUpdate();
 
@@ -1837,6 +2026,19 @@ client.on('interactionCreate', async interaction => {
                     });
 
                     automodBadContentConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_toxic_content_add_blacklist_channels_select':
+                    await interaction.deferUpdate();
+
+                    let channelIds5 = interaction.values;
+
+                    await automod.addBlacklistChannels('toxicContent', channelIds5);
+                    await interaction.followUp({
+                        content: localize(locale, 'ADD_BLACKLIST_CHANNELS_SUCCESS', channelIds5.map(id => `<#${id}>`).join(', ')),
+                        ephemeral: true
+                    });
+
+                    automodToxicContentConfigure(interaction, automod, locale);
                     break;
                 case 'automod_bad_content_remove_blacklist_channels':
                     if (!interaction.memberPermissions.has('ManageChannels')) return interaction.reply({
@@ -1858,6 +2060,26 @@ client.on('interactionCreate', async interaction => {
                         ]
                     });
                     break;
+                case 'automod_toxic_content_remove_blacklist_channels':
+                    if (!interaction.memberPermissions.has('ManageChannels')) return interaction.reply({
+                        content: localize(locale, 'USER_MISSING_PERMISSIONS', 'Manage Channels'),
+                        ephemeral: true
+                    });
+
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new ChannelSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_toxic_content_remove_blacklist_channels_select`)
+                                        .setPlaceholder(localize(locale, 'CHANNELS_SELECT'))
+                                        .setMaxValues(interaction.guild.channels.cache.size > 25 ? 25 : interaction.guild.channels.cache.size)
+                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum)
+                                )
+                        ]
+                    });
+                    break;
                 case 'automod_bad_content_remove_blacklist_channels_select':
                     await interaction.deferUpdate();
 
@@ -1870,6 +2092,19 @@ client.on('interactionCreate', async interaction => {
                     });
 
                     automodBadContentConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_toxic_content_remove_blacklist_channels_select':
+                    await interaction.deferUpdate();
+
+                    let channelIds6 = interaction.values;
+
+                    await automod.removeBlacklistChannels('toxicContent', channelIds6);
+                    await interaction.followUp({
+                        content: localize(locale, 'REMOVE_BLACKLIST_CHANNELS_SUCCESS', channelIds6.map(id => `<#${id}>`).join(', ')),
+                        ephemeral: true
+                    });
+
+                    automodToxicContentConfigure(interaction, automod, locale);
                     break;
                 case 'automod_bad_content_set_filters':
                     interaction.update({
@@ -1931,6 +2166,46 @@ client.on('interactionCreate', async interaction => {
                         ]
                     });
                     break;
+                case 'automod_toxic_content_set_filters':
+                    interaction.update({
+                        embeds: [],
+                        components: [
+                            new ActionRowBuilder()
+                                .setComponents(
+                                    new StringSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:automod_toxic_content_set_filters_select`)
+                                        .setPlaceholder(localize(locale, 'FILTERS_SELECT'))
+                                        .setOptions(
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'TOXICITY'))
+                                                .setValue('toxicity')
+                                                .setDefault(automod.data.toxicContent.filters === 'all' || automod.data.toxicContent.filters.includes('toxicity')),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'SEVERE_TOXICITY'))
+                                                .setValue('severe-toxicity')
+                                                .setDefault(automod.data.toxicContent.filters === 'all' || automod.data.toxicContent.filters.includes('severe-toxicity')),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'IDENTITY_ATTACK'))
+                                                .setValue('identity-attack')
+                                                .setDefault(automod.data.toxicContent.filters === 'all' || automod.data.toxicContent.filters.includes('identity-attack')),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'INSULT'))
+                                                .setValue('insult')
+                                                .setDefault(automod.data.toxicContent.filters === 'all' || automod.data.toxicContent.filters.includes('insult')),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'PROFANITY'))
+                                                .setValue('profanity')
+                                                .setDefault(automod.data.badContent.filters === 'all' || automod.data.toxicContent.filters.includes('profanity')),
+                                            new StringSelectMenuOptionBuilder()
+                                                .setLabel(localize(locale, 'THREAT'))
+                                                .setValue('threat')
+                                                .setDefault(automod.data.toxicContent.filters === 'all' || automod.data.toxicContent.filters.includes('threat'))
+                                        )
+                                        .setMaxValues(6)
+                                )
+                        ]
+                    });
+                    break;
                 case 'automod_bad_content_set_filters_select':
                     await interaction.deferUpdate();
 
@@ -1945,6 +2220,21 @@ client.on('interactionCreate', async interaction => {
                     });
 
                     automodBadContentConfigure(interaction, automod, locale);
+                    break;
+                case 'automod_toxic_content_set_filters_select':
+                    await interaction.deferUpdate();
+
+                    let filters2 = interaction.values;
+
+                    if (filters2.length === 11) filters2 = 'all';
+
+                    await automod.setToxicContentFilters(filters2);
+                    await interaction.followUp({
+                        content: localize(locale, 'SET_TOXIC_CONTENT_FILTERS_SUCCESS'),
+                        ephemeral: true
+                    });
+
+                    automodToxicContentConfigure(interaction, automod, locale);
                     break;
                 default:
                     logger('warning', 'COMMAND', 'Message component', interaction.customId, 'not found');
@@ -1998,6 +2288,26 @@ client.on('interactionCreate', async interaction => {
                     }, true);
 
                     interaction.editReply(`${localize(locale, 'AUTOMOD_AI_RESPONSE')}\n${result}`);
+                    break;
+                case 'automod_bad_content_test_modal':
+                    await interaction.deferReply({ ephemeral: true });
+
+                    let message2 = interaction.fields.getTextInputValue('message');
+                    let result2 = await automod.badContent({
+                        content: message2
+                    }, true);
+
+                    interaction.editReply(`${localize(locale, 'BAD_CONTENT_FILTER_RESPONSE')}\n${result2 ?? localize(locale, 'API_IS_DOWN')}`);
+                    break;
+                case 'automod_toxic_content_test_modal':
+                    await interaction.deferReply({ ephemeral: true });
+
+                    let message3 = interaction.fields.getTextInputValue('message');
+                    let result3 = await automod.toxicContent({
+                        content: message3
+                    }, true);
+
+                    interaction.editReply(`${localize(locale, 'TOXIC_CONTENT_FILTER_RESPONSE')}\n${result3 ?? localize(locale, 'API_IS_DOWN')}`);
                     break;
                 case 'automod_ai_add_rule_modal':
                     await interaction.deferUpdate();
@@ -2160,6 +2470,7 @@ client.on('messageCreate', async message => {
 
             if (!blocked && automod.data.ai.enabled && !automod.data.ai.channelBlacklist.includes(message.channelId) && !automod.data.ai.channelBlacklist.includes(message.channel.parentId) && !automod.data.ai.roleBlacklist.filter(role => message.member.roles.cache.get(role))[0]) blocked = await automod.ai(message);
             if (!blocked && automod.data.badContent.enabled && !automod.data.badContent.channelBlacklist.includes(message.channelId) && !automod.data.badContent.channelBlacklist.includes(message.channel.parentId) && !automod.data.badContent.roleBlacklist.filter(role => message.member.roles.cache.get(role))[0]) blocked = await automod.badContent(message);
+            if (!blocked && automod.data.toxicContent.enabled && !automod.data.toxicContent.channelBlacklist.includes(message.channelId) && !automod.data.toxicContent.channelBlacklist.includes(message.channel.parentId) && !automod.data.toxicContent.roleBlacklist.filter(role => message.member.roles.cache.get(role))[0]) blocked = await automod.toxicContent(message);
         };
     } catch (error) {
         logger('error', 'EVENT', 'Error while executing messageCreate:', `${error.message}\n`, error.stack);

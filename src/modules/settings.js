@@ -88,6 +88,11 @@ module.exports.automodSettings = async (interaction, automod, locale) => {
                         name: `${emojis.automodBadContent} ${localize(locale, 'BAD_CONTENT')} ${emojis.beta}`,
                         value: `${automod.data.badContent.enabled ? `${emojis.enabled} ${localize(locale, 'ENABLED')}` : `${emojis.disabled} ${localize(locale, 'DISABLED')}`}\n\n- **${localize(locale, 'ALERT_CHANNEL')}:** ${automod.data.badContent.alertChannel ? `<#${automod.data.badContent.alertChannel}>` : localize(locale, 'NONE')}\n- **${localize(locale, 'FILTERS')}:** ${automod.data.badContent.filters === 'all' ? localize(locale, 'ALL') : automod.data.badContent.filters.join(', ')}\n- **${localize(locale, 'AI_MODEL')}:** ${localize(locale, 'AI_MODEL_WITH_OWNER', automod.data.badContent.model.name, automod.data.badContent.model.owner)}\n- **${localize(locale, 'BLACKLISTED_ROLES')}:** ${automod.data.badContent.roleBlacklist.map(role => `<@&${role}>`).join(', ')}\n- **${localize(locale, 'BLACKLISTED_CHANNELS')}:** ${automod.data.badContent.channelBlacklist.map(channel => `<#${channel}>`).join(', ')}`,
                         inline: false
+                    },
+                    {
+                        name: `${emojis.automodBadContent} ${localize(locale, 'TOXIC_CONTENT')} ${emojis.beta}`,
+                        value: `${automod.data.toxicContent.enabled ? `${emojis.enabled} ${localize(locale, 'ENABLED')}` : `${emojis.disabled} ${localize(locale, 'DISABLED')}`}\n\n- **${localize(locale, 'ALERT_CHANNEL')}:** ${automod.data.toxicContent.alertChannel ? `<#${automod.data.toxicContent.alertChannel}>` : localize(locale, 'NONE')}\n- **${localize(locale, 'FILTERS')}:** ${automod.data.toxicContent.filters === 'all' ? localize(locale, 'ALL') : automod.data.toxicContent.filters.join(', ')}\n- **${localize(locale, 'AI_MODEL')}:** ${localize(locale, 'AI_MODEL_WITH_OWNER', automod.data.toxicContent.model.name, automod.data.toxicContent.model.owner)}\n- **${localize(locale, 'BLACKLISTED_ROLES')}:** ${automod.data.toxicContent.roleBlacklist.map(role => `<@&${role}>`).join(', ')}\n- **${localize(locale, 'BLACKLISTED_CHANNELS')}:** ${automod.data.toxicContent.channelBlacklist.map(channel => `<#${channel}>`).join(', ')}`,
+                        inline: false
                     }
                 )
         ],
@@ -102,6 +107,10 @@ module.exports.automodSettings = async (interaction, automod, locale) => {
                         .setCustomId(`${interaction.user.id}:automod_toggle:badContent`)
                         .setLabel(localize(locale, `AUTOMOD_BAD_CONTENT_${automod.data.badContent.enabled ? 'DISABLE' : 'ENABLE'}`))
                         .setStyle(automod.data.badContent.enabled ? ButtonStyle.Danger : ButtonStyle.Success),
+                    new ButtonBuilder()
+                        .setCustomId(`${interaction.user.id}:automod_toggle:toxicContent`)
+                        .setLabel(localize(locale, `AUTOMOD_TOXIC_CONTENT_${automod.data.toxicContent.enabled ? 'DISABLE' : 'ENABLE'}`))
+                        .setStyle(automod.data.toxicContent.enabled ? ButtonStyle.Danger : ButtonStyle.Success),
                     new ButtonBuilder()
                         .setCustomId(`${interaction.user.id}:automod_reset`)
                         .setLabel(localize(locale, 'RESET_DATA'))
@@ -120,7 +129,11 @@ module.exports.automodSettings = async (interaction, automod, locale) => {
                             new StringSelectMenuOptionBuilder()
                                 .setEmoji(emojis.automodBadContent.split(':')[2].replace('>', ''))
                                 .setLabel(localize(locale, 'BAD_CONTENT'))
-                                .setValue('bad_content')
+                                .setValue('bad_content'),
+                            new StringSelectMenuOptionBuilder()
+                                .setEmoji(emojis.automodBadContent.split(':')[2].replace('>', ''))
+                                .setLabel(localize(locale, 'TOXIC_CONTENT'))
+                                .setValue('toxic_content')
                         )
                 )
         ]
@@ -291,10 +304,15 @@ module.exports.automodBadContentConfigure = (interaction, automod, locale) => {
             new ActionRowBuilder()
                 .setComponents(
                     new ButtonBuilder()
+                        .setCustomId(`${interaction.user.id}:automod_bad_content_test`)
+                        .setEmoji(emojis.automod.split(':')[2].replace('>', ''))
+                        .setLabel(localize(locale, 'TEST'))
+                        .setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder()
                         .setCustomId(`${interaction.user.id}:automod_bad_content_set_filters`)
                         .setEmoji(emojis.automod.split(':')[2].replace('>', ''))
                         .setLabel(localize(locale, 'SET_FILTERS'))
-                        .setStyle(ButtonStyle.Primary),
+                        .setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder()
                         .setCustomId(`${interaction.user.id}:automod_ai_model_set_key`)
                         .setEmoji(emojis.set.split(':')[2].replace('>', ''))
@@ -333,6 +351,103 @@ module.exports.automodBadContentConfigure = (interaction, automod, locale) => {
                         .setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder()
                         .setCustomId(`${interaction.user.id}:automod_bad_content_remove_blacklist_channels`)
+                        .setEmoji(emojis.remove.split(':')[2].replace('>', ''))
+                        .setLabel(localize(locale, 'REMOVE_BLACKLIST_CHANNELS'))
+                        .setStyle(ButtonStyle.Secondary)
+                )
+        ]
+    });
+};
+
+/**
+ * @param {import("discord.js").Interaction} interaction 
+ * @param {AutoMod} automod
+ * @param {Locale} locale
+ */
+module.exports.automodToxicContentConfigure = (interaction, automod, locale) => {
+    interaction.editReply({
+        embeds: [
+            new EmbedMaker(interaction.client)
+                .setTitle(`${emojis.automodBadContent} ${localize(locale, 'TOXIC_CONTENT')} ${emojis.beta}`)
+                .setFields(
+                    {
+                        name: localize(locale, 'FILTERS'),
+                        value: automod.data.toxicContent.filters === 'all' ? localize(locale, 'ALL') : automod.data.toxicContent.filters.length > 0 ? automod.data.toxicContent.filters.map(filter => localize(locale, filter.toUpperCase().replaceAll('-', '_').replaceAll('/', '_'))).join(', ') : localize(locale, 'NONE'),
+                        inline: false
+                    },
+                    {
+                        name: localize(locale, 'ALERT_CHANNEL'),
+                        value: automod.data.toxicContent.alertChannel ? `<#${automod.data.toxicContent.alertChannel}>` : localize(locale, 'NONE'),
+                        inline: true
+                    },
+                    {
+                        name: localize(locale, 'AI_MODEL'),
+                        value: localize(locale, 'AI_MODEL_WITH_OWNER', automod.data.toxicContent.model.name, automod.data.toxicContent.model.owner),
+                        inline: true
+                    },
+                    {
+                        name: localize(locale, 'BLACKLISTED_ROLES'),
+                        value: automod.data.toxicContent.roleBlacklist.length > 0 ? automod.data.toxicContent.roleBlacklist.map(role => `<@&${role}>`).join(', ') : localize(locale, 'NONE'),
+                        inline: false
+                    },
+                    {
+                        name: localize(locale, 'BLACKLISTED_CHANNELS'),
+                        value: automod.data.toxicContent.channelBlacklist.length > 0 ? automod.data.toxicContent.channelBlacklist.map(channel => `<#${channel}>`).join(', ') : localize(locale, 'NONE'),
+                        inline: false
+                    }
+                )
+        ],
+        components: [
+            new ActionRowBuilder()
+                .setComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`${interaction.user.id}:automod_toxic_content_test`)
+                        .setEmoji(emojis.automod.split(':')[2].replace('>', ''))
+                        .setLabel(localize(locale, 'TEST'))
+                        .setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder()
+                        .setCustomId(`${interaction.user.id}:automod_toxic_content_set_filters`)
+                        .setEmoji(emojis.automod.split(':')[2].replace('>', ''))
+                        .setLabel(localize(locale, 'SET_FILTERS'))
+                        .setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder()
+                        .setCustomId(`${interaction.user.id}:automod_ai_model_set_key`)
+                        .setEmoji(emojis.set.split(':')[2].replace('>', ''))
+                        .setLabel(localize(locale, 'SET_KEY'))
+                        .setStyle(ButtonStyle.Secondary),
+                ),
+            new ActionRowBuilder()
+                .setComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`${interaction.user.id}:automod_toxic_content_alert_channel`)
+                        .setEmoji(emojis.channel.split(':')[2].replace('>', ''))
+                        .setLabel(localize(locale, 'SET_ALERT_CHANNEL'))
+                        .setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder()
+                        .setCustomId(`${interaction.user.id}:automod_${automod.data.purgptKey ? 'toxic_content_model_key' : 'ai_model'}`)
+                        .setEmoji(emojis.aiModel.split(':')[2].replace('>', ''))
+                        .setLabel(localize(locale, 'AI_MODEL'))
+                        .setStyle(ButtonStyle.Secondary)
+                ),
+            new ActionRowBuilder()
+                .setComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`${interaction.user.id}:automod_toxic_content_add_blacklist_roles`)
+                        .setEmoji(emojis.add.split(':')[2].replace('>', ''))
+                        .setLabel(localize(locale, 'ADD_BLACKLIST_ROLES'))
+                        .setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder()
+                        .setCustomId(`${interaction.user.id}:automod_toxic_content_remove_blacklist_roles`)
+                        .setEmoji(emojis.remove.split(':')[2].replace('>', ''))
+                        .setLabel(localize(locale, 'REMOVE_BLACKLIST_ROLES'))
+                        .setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder()
+                        .setCustomId(`${interaction.user.id}:automod_toxic_content_add_blacklist_channels`)
+                        .setEmoji(emojis.add.split(':')[2].replace('>', ''))
+                        .setLabel(localize(locale, 'ADD_BLACKLIST_CHANNELS'))
+                        .setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder()
+                        .setCustomId(`${interaction.user.id}:automod_toxic_content_remove_blacklist_channels`)
                         .setEmoji(emojis.remove.split(':')[2].replace('>', ''))
                         .setLabel(localize(locale, 'REMOVE_BLACKLIST_CHANNELS'))
                         .setStyle(ButtonStyle.Secondary)
