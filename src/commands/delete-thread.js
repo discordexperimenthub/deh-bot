@@ -11,7 +11,8 @@ module.exports = {
     .setDescription("Deletes your thread")
     .setDescriptionLocalizations({
         tr: 'Alt başlığını siler'
-    }),
+    })
+    .setDMPermission(false),
     /**
      * @param {ChatInputCommandInteraction} interaction 
      */
