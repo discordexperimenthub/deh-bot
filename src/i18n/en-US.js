@@ -150,5 +150,7 @@ module.exports = {
     INSULT: 'Insult',
     PROFANITY: 'Profanity',
     THREAT: 'Threat',
-    API_IS_DOWN: 'API is down at the moment! Please try again later.'
+    API_IS_DOWN: 'API is down at the moment! Please try again later.',
+    DELETE_THREAD_NOT_A_THREAD:'This command can only be executed in thread channels.',
+    DELETE_THREAD_NOT_OWN:'You can only delete your own theads!',
 };
