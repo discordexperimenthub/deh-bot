@@ -21,7 +21,7 @@ module.exports = {
         let locale = interaction.locale;
         
         if (!interaction.channel.isThread()) return interaction.editReply(localize(locale, 'DELETE_THREAD_NOT_A_THREAD'));
-        if (!interaction.channel.isThread()) return interaction.editReply(localize(locale, 'DELETE_THREAD_NOT_OWN'));
+        if (interaction.channel.ownerId !== interaction.user.id) return interaction.editReply(localize(locale, 'DELETE_THREAD_NOT_OWN'));
 
         interaction.channel.delete();
     }
