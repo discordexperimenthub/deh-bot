@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, ChatInputCommandInteraction } = require("discord.js");
+const { localize } = require("../modules/localization");
 
 module.exports = {
     category: 'General',
@@ -17,8 +18,10 @@ module.exports = {
     async execute(interaction) {
         await interaction.deferReply({ ephemeral: true });
 
-        if (!interaction.channel.isThread()) return interaction.editReply('This command can only be executed in thread channels.');
-        if (interaction.channel.ownerId !== interaction.user.id) return interaction.editReply('You can only delete your own theads!');
+        let locale = interaction.locale;
+        
+        if (!interaction.channel.isThread()) return interaction.editReply(localize(locale, 'DELETE_THREAD_NOT_A_THREAD'));
+        if (interaction.channel.ownerId !== interaction.user.id) return interaction.editReply(localize(locale, 'DELETE_THREAD_NOT_OWN'));
 
         interaction.channel.delete();
     }
