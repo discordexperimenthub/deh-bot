@@ -138,5 +138,7 @@ module.exports = {
     VIOLENCE: 'Vold',
     SET_FILTERS_SUCCESS: 'Filtrene for dårligt indhold er blevet indstillet med succes!',
     SYNC_RULES_ERROR: 'Der opstod en fejl under synkronisering af regler! Prøv igen senere eller rapporter dette problem på [vores Discord-server] (<https://discord.gg/experiments>).',
-    FEATURE_MESSAGE_ALREADY_SET: 'Denne besked er allerede vist!'
+    FEATURE_MESSAGE_ALREADY_SET: 'Denne besked er allerede vist!',
+    DELETE_THREAD_NOT_A_THREAD:'Denne kommando kan kun udføres i tråde.',
+    DELETE_THREAD_NOT_OWN:'Du kan kun slette dine egne tråde!',
 };
