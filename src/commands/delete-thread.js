@@ -23,6 +23,10 @@ module.exports = {
         if (!interaction.channel.isThread()) return interaction.editReply(localize(locale, 'DELETE_THREAD_NOT_A_THREAD'));
         if (interaction.channel.ownerId !== interaction.user.id) return interaction.editReply(localize(locale, 'DELETE_THREAD_NOT_OWN'));
 
+
+        if(!interaction.channel.permissionsFor(interaction.guild.members.me).has("ManageThreads")) return interaction.editReply(localize(locale, "DELETE_THREAD_MISSING_PERMISSION"))
+        if(!interaction.guild.members.me.permissions.has("ManageThreads")) return interaction.editReply(localize(locale, "DELETE_THREAD_MISSING_PERMISSION"))
+
         interaction.channel.delete();
     }
 };

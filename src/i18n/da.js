@@ -157,4 +157,5 @@ module.exports = {
     TOXIC_CONTENT_AI_MODEL_SET_SUCCESS: 'Filtermodellen for giftigt indhold blev sat til **`{0}}`**!',
     BAD_CONTENT_FILTER_RESPONSE: '**Respons fra filter for dårligt indhold:**',
     TOXIC_CONTENT_FILTER_RESPONSE: '**Reaktion fra filteret for giftigt indhold:**',
+    DELETE_THREAD_MISSING_PERMISSION: 'Jeg har ikke tilladelse til at slette tråden. Påkrævet: **Administrer tråde**'
 };

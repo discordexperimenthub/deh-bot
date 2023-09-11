@@ -152,5 +152,6 @@ module.exports = {
     INSULT: 'Beleidigung',
     PROFANITY: 'Gotteslästerung',
     THREAT: 'Bedrohung',
-    API_IS_DOWN: 'API ist im Moment nicht verfügbar! Bitte versuchen Sie es später noch einmal.'
+    API_IS_DOWN: 'API ist im Moment nicht verfügbar! Bitte versuchen Sie es später noch einmal.',
+    DELETE_THREAD_MISSING_PERMISSION: 'Ich habe nicht die Berechtigung, den Thread zu löschen. Erforderlich: **Threads verwalten**'
 };
