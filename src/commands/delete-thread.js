@@ -4,7 +4,9 @@ module.exports = {
     category: 'General',
     data: new SlashCommandBuilder()
     .setName('delete-thread')
-    .setName('alt-başlık-sil')
+    .setNamelocalizations({
+        tr: 'alt-başlık-sil'
+    })
     .setDescription("Deletes your thread")
     .setDescriptionLocalizations({
         tr: 'Alt başlığını siler'
