@@ -1,4 +1,4 @@
-const { ApplicationCommandType, ContextMenuCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, InteractionCollector, MessageContextMenuCommandInteraction } = require("discord.js");
+const { ApplicationCommandType, ContextMenuCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, InteractionCollector, MessageContextMenuCommandInteraction, MessageType } = require("discord.js");
 const { localize } = require("../modules/localization");
 const timer = require("../modules/timer");
 const { QuickDB } = require("quick.db");
@@ -26,7 +26,7 @@ module.exports = {
 
         let locale = interaction.locale;
 
-        if (interaction.targetMessage.type !== 0) return interaction.editReply(localize(locale, 'REMINDER_NOT_SUPPORTED'));
+        if (![MessageType.Default, MessageType.Reply].includes(interaction.targetMessage.type)) return interaction.editReply(localize(locale, 'REMINDER_NOT_SUPPORTED'));
         if (!interaction.targetMessage.content && interaction.targetMessage.embeds?.length === 0) return interaction.editReply(localize(locale, 'REMINDER_ATTACHMENTS_NOT_SUPPORTED'));
 
         interaction.editReply({
