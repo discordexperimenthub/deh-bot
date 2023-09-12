@@ -69,6 +69,8 @@ module.exports = {
     TEST: 'Тест',
     TEST_MESSAGE: 'Тест-Сообщение',
     AUTOMOD_AI_RESPONSE: '**Ответ Автомода ИИ:**',
+    BAD_CONTENT_FILTER_RESPONSE: '**Ответ фильтра вредного контента:**',
+    TOXIC_CONTENT_FILTER_RESPONSE: '**Ответ фильтра токсичного контента:**',
     AUTOMOD_AI_ENABLE_SUCCESS: 'Автомод ИИ был успешно включен!',
     AUTOMOD_AI_DISABLE_SUCCESS: 'Автомод ИИ был успешно отключен!',
     SETTING_ADD_RULE_SUCCESS: 'Правило было добавлено успешно: {{0}}',
@@ -104,7 +106,8 @@ module.exports = {
     SET_KEY_SUCCESS: 'Ваш PurGPT API ключ был установлен успешно!',
     SELECT_MODEL: 'Выберите модель...',
     AUTOMOD_AI_MODEL_SET_SUCCESS: 'Модель Автомода ИИ была успешно установлена как **`{{0}}`**!',
-    BAD_CONTENT_AI_MODEL_SET_SUCCESS: 'Фильтр Вредного Контента был успешно установлен как **`{{0}}`**!',
+    BAD_CONTENT_AI_MODEL_SET_SUCCESS: 'Фильтр вредного Контента был успешно установлен как **`{{0}}`**!',
+    TOXIC_CONTENT_AI_MODEL_SET_SUCCESS: 'Фильтр токсичного Контента был успешно установлен как **`{{0}}`**!',
     ENABLE_FALLBACKS: 'Включить резервные варианты',
     ENABLE_FALLBACKS_SUCCESS: 'Резервные варианты успешно включены!',
     DISABLE_FALLBACKS: 'Отключить резервные варианты',
@@ -133,7 +136,7 @@ module.exports = {
     HARASSMENT_THREATENING: 'Преследования/Угрозы',
     VIOLENCE: 'Насилие',
     SET_FILTERS_SUCCESS: 'Фильтр плохого контента был установлен успешно!',
-    SET_TOXIC_CONTENT_FILTERS_SUCCESS: 'Фильтры токсичного контента были успешно настроены!',
+    SET_TOXIC_CONTENT_FILTERS_SUCCESS: 'Фильтр токсичного контента был установлен успешно!',
     SYNC_RULES_ERROR: 'Произошла ошибка! Повторите попытку позже или сообщите об этой проблеме на нашем [Discord сервере](<https://discord.gg/experiments>).',
     FEATURE_MESSAGE_ALREADY_SET: 'Это сообщение уже опубликовано!',
     TOXIC_CONTENT: 'Фильтр токсичного контента',
@@ -147,5 +150,7 @@ module.exports = {
     INSULT: 'Оскорбленик',
     PROFANITY: 'Ненормативная лексика',
     THREAT: 'Угроза',
-    API_IS_DOWN: 'API на данный момент не работает. Пожалуйста, повторите попытку позже'
+    API_IS_DOWN: 'API на данный момент не работает. Пожалуйста, повторите попытку позже',
+    DELETE_THREAD_NOT_A_THREAD:'Эта команда может быть запущена только в ветке.',
+    DELETE_THREAD_NOT_OWN:'Вы можете удалить только свои ветки.'
 };
