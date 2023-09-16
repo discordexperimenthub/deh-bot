@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, ChatInputCommandInteraction } = require("discord.js");
 const { localize } = require("../modules/localization");
 const { QuickDB } = require("quick.db");
+const Discord = require("discord.js");
 
 const db = new QuickDB();
 

@@ -1,9 +1,9 @@
-const { Client, Collection, WebhookClient, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, ChannelSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, RoleSelectMenuBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
+const { Client, Collection, WebhookClient, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, ChannelSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, RoleSelectMenuBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, OverwriteType, PermissionsBitField, UserSelectMenuBuilder } = require('discord.js');
 const { readdirSync, writeFileSync, readFileSync, mkdirSync, writeFile } = require('node:fs');
 const { default: axios } = require('axios');
 const logger = require('./modules/logger');
 const { localize } = require('./modules/localization');
-const { ownerId, developerIds, roleIds, colors, emojis, beta } = require('../config');
+const { ownerId, developerIds, roleIds, colors, emojis, beta, serverId } = require('../config');
 const { diffLines } = require('diff');
 const EmbedMaker = require('./modules/embed');
 const { execSync } = require('node:child_process');
@@ -2104,6 +2104,141 @@ client.on('interactionCreate', async interaction => {
 
                     automodToxicContentConfigure(interaction, automod, locale);
                     break;
+                case 'clyde_private_channel':
+                    await interaction.deferReply();
+
+                    if (interaction.guildId !== '1086707622759125053') return interaction.editReply(localize(locale, 'COMPONENT_NOT_AVAILABLE', localize(locale, 'SERVER')));
+
+                    let dehMember = await client.guilds.cache.get(serverId).members.fetch(interaction.user.id);
+
+                    if (!dehMember) return interaction.editReply(localize(locale, 'ACTION_REQUIRES_DEH_MEMBER'));
+                    if (!dehMember.roles.cache.has('1150833323267084359') && !developerIds.includes(interaction.user.id)) return interaction.editReply(localize(locale, 'ACTION_REQUIRES_TIER_1'));
+                    if (await db.get(`clyde.${interaction.user.id}.privateChannel`)) return interaction.editReply(localize(locale, 'PRIVATE_CHANNEL_ALREADY_EXISTS'));
+
+                    let privateChannel = await client.guilds.cache.get(serverId).channels.create({
+                        name: interaction.user.username,
+                        type: ChannelType.GuildText,
+                        parent: '1152525974878031933',
+                        permissionOverwrites: [
+                            {
+                                type: OverwriteType.Role,
+                                id: '1086707622759125053',
+                                deny: new PermissionsBitField().add(PermissionFlagsBits.ViewChannel)
+                            },
+                            {
+                                type: OverwriteType.Member,
+                                id: interaction.user.id,
+                                allow: new PermissionsBitField().add(PermissionFlagsBits.ViewChannel)
+                            }
+                        ]
+                    });
+
+                    let sentMessage = await privateChannel.send({
+                        components: [
+                            new ActionRowBuilder()
+                            .setComponents(
+                                new ButtonBuilder()
+                                .setCustomId(`${interaction.user.id}:clyde_private_add`)
+                                .setEmoji(emojis.add)
+                                .setLabel(localize(locale, 'ADD_MEMBERS'))
+                                .setStyle(ButtonStyle.Secondary),
+                                new ButtonBuilder()
+                                .setCustomId(`${interaction.user.id}:clyde_private_remove`)
+                                .setEmoji(emojis.add)
+                                .setLabel(localize(locale, 'REMOVE_MEMBERS'))
+                                .setStyle(ButtonStyle.Secondary)
+                            ),
+                            new ActionRowBuilder()
+                            .setComponents(
+                                new ButtonBuilder()
+                                .setCustomId('clyde_private_delete')
+                                .setEmoji(emojis.add)
+                                .setLabel(localize(locale, 'DELETE_CHANNEL'))
+                                .setStyle(ButtonStyle.Danger)
+                            )
+                        ]
+                    });
+
+                    sentMessage.pin();
+
+                    await db.set(`clyde.${interaction.user.id}.privateChannel`, privateChannel.id);
+
+                    interaction.editReply(localize(locale, 'PRIVATE_CHANNEL_CREATED', `<#${privateChannel.id}>`));
+                    break;
+                case 'clyde_private_add':
+                    await interaction.deferReply({ ephemeral: true });
+
+                    if (interaction.guildId !== '1086707622759125053') return interaction.editReply(localize(locale, 'COMPONENT_NOT_AVAILABLE', localize(locale, 'SERVER')));
+
+                    let memberChannel = await db.get(`clyde.${interaction.user.id}.privateChannel`);
+
+                    if (memberChannel !== interaction.channelId) return interaction.editReply(localize(locale, 'YOU_ARE_NOT_OWNER_CHANNEL'));
+
+                    if (args[0] === 'selected') {
+                        let members = interaction.values;
+
+                        for (let member of members) {
+                            await interaction.channel.permissionOverwrites.create(member, {
+                                SendMessages: true
+                            });
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                        };
+
+                        return interaction.editReply(localize(locale, 'ADDED_MEMBERS_SUCCESS', members.map(id => `<@${id}>`).join(', ')));
+                    } else interaction.editReply({
+                        components: [
+                            new ActionRowBuilder()
+                            .setComponents(
+                                new UserSelectMenuBuilder()
+                                .setCustomId(`${interaction.user.id}:clyde_private_add:selected`)
+                                .setPlaceholder(localize(locale, 'MEMBERS_SELECT'))
+                                .setMaxValues(interaction.guild.members.cache.size > 25 ? 25 : interaction.guild.members.cache.size)
+                            )
+                        ]
+                    });
+                    break;
+                case 'clyde_private_remove':
+                    await interaction.deferReply({ ephemeral: true });
+
+                    if (interaction.guildId !== '1086707622759125053') return interaction.editReply(localize(locale, 'COMPONENT_NOT_AVAILABLE', localize(locale, 'SERVER')));
+
+                    let memberChannel2 = await db.get(`clyde.${interaction.user.id}.privateChannel`);
+
+                    if (memberChannel2 !== interaction.channelId) return interaction.editReply(localize(locale, 'YOU_ARE_NOT_OWNER_CHANNEL'));
+
+                    if (args[0] === 'selected') {
+                        let members = interaction.values;
+
+                        for (let member of members) {
+                            await interaction.channel.permissionOverwrites.delete(member);
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                        };
+
+                        return interaction.editReply(localize(locale, 'ADDED_MEMBERS_SUCCESS', members.map(id => `<@${id}>`).join(', ')));
+                    } else interaction.editReply({
+                        components: [
+                            new ActionRowBuilder()
+                            .setComponents(
+                                new UserSelectMenuBuilder()
+                                .setCustomId(`${interaction.user.id}:clyde_private_remove:selected`)
+                                .setPlaceholder(localize(locale, 'MEMBERS_SELECT'))
+                                .setMaxValues(interaction.guild.members.cache.size > 25 ? 25 : interaction.guild.members.cache.size)
+                            )
+                        ]
+                    });
+                    break;
+                case 'clyde_private_delete':
+                    await interaction.deferReply({ ephemeral: true });
+
+                    if (interaction.guildId !== '1086707622759125053') return interaction.editReply(localize(locale, 'COMPONENT_NOT_AVAILABLE', localize(locale, 'SERVER')));
+
+                    let memberChannel3 = await db.get(`clyde.${interaction.user.id}.privateChannel`);
+
+                    if (memberChannel3 !== interaction.channelId) return interaction.editReply(localize(locale, 'YOU_ARE_NOT_OWNER_CHANNEL'));
+
+                    await interaction.channel.delete();
+                    await db.delete(`clyde.${interaction.user.id}.privateChannel`);
+                    break;
                 default:
                     logger('warning', 'COMMAND', 'Message component', interaction.customId, 'not found');
             };
@@ -2364,6 +2499,27 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
             parse: []
         }
     });
+});
+
+client.on('guildMemberAdd', async member => {
+    if (member.guild.id !== '1086707622759125053') return;
+
+    await member.guild.members.fetch();
+
+    if (member.guild.members.cache.size >= 100) {
+        await member.guild.members.prune({
+            days: 0,
+            roles: ['1087086754537934938']
+        });
+
+        client.channels.cache.get('1089807623496421417').send("# <a:a_dehClyde:1098205219575300108> Clyde's Home\n(<@&1089850303031033937>)\n---\n**Clyde's Home** has been cleared! You can rejoin the server [here](https://canary.discord.com/channels/1089540433010491392/1117827130236096622).");
+    } else if (member.guild.members.cache.size >= 90) client.channels.cache.get('1090658895531352194').send('**There are only 10 members left to reach 100 members! This means the server will be cleared soon! Please join our main server to rejoin here: https://discord.gg/experiments **');
+});
+
+client.on('guildMemberRemove', async member => {
+    if (member.guild.id !== '1086707622759125053') return;
+
+    await db.delete(`clyde.${member.id}.privateChannel`);
 });
 
 client.login(process.env.DISCORD_TOKEN);
