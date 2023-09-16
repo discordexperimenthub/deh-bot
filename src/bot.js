@@ -2139,11 +2139,12 @@ client.on('interactionCreate', async interaction => {
                             .setComponents(
                                 new ButtonBuilder()
                                 .setCustomId(`${interaction.user.id}:clyde_private_add`)
-                                .setEmoji(emojis.remove)
+                                .setEmoji(emojis.add)
                                 .setLabel(localize(locale, 'ADD_MEMBERS'))
                                 .setStyle(ButtonStyle.Secondary),
                                 new ButtonBuilder()
                                 .setCustomId(`${interaction.user.id}:clyde_private_remove`)
+                                .setEmoji(emojis.remove)
                                 .setLabel(localize(locale, 'REMOVE_MEMBERS'))
                                 .setStyle(ButtonStyle.Secondary)
                             ),
@@ -2151,7 +2152,6 @@ client.on('interactionCreate', async interaction => {
                             .setComponents(
                                 new ButtonBuilder()
                                 .setCustomId(`${interaction.user.id}:clyde_private_delete`)
-                                .setEmoji(emojis.add)
                                 .setLabel(localize(locale, 'DELETE_CHANNEL'))
                                 .setStyle(ButtonStyle.Danger)
                             )
