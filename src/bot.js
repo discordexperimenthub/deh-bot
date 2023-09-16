@@ -2481,7 +2481,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
     if (!oldMember.roles.cache.has('1150833335199875126') && newMember.roles.cache.has('1150833335199875126')) subscriber = true;
     if (!oldMember.roles.cache.has('1150839581273489479') && newMember.roles.cache.has('1150839581273489479')) premium = true;
     if (!oldMember.roles.cache.has('1150840476589633658') && newMember.roles.cache.has('1150840476589633658')) beast = true;
-    if (subscriber || premium || beast) client.channels.cache.get('1089807623496421417').send({
+    if (subscriber || premium || beast) client.channels.cache.get('1151920854175862784').send({
         content: `Thanks to <@${newMember.id}> for buying **${subscriber ? 'Subscriber (Tier 1)' : premium ? 'Premium (Tier 2)' : 'Beast (Tier 3)'}** subscription!`,
         allowedMentions: {
             parse: []
