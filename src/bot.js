@@ -2150,7 +2150,7 @@ client.on('interactionCreate', async interaction => {
                             new ActionRowBuilder()
                             .setComponents(
                                 new ButtonBuilder()
-                                .setCustomId('clyde_private_delete')
+                                .setCustomId(`${interaction.user.id}:clyde_private_delete`)
                                 .setEmoji(emojis.add)
                                 .setLabel(localize(locale, 'DELETE_CHANNEL'))
                                 .setStyle(ButtonStyle.Danger)
@@ -2168,11 +2168,6 @@ client.on('interactionCreate', async interaction => {
                     await interaction.deferReply({ ephemeral: true });
 
                     if (interaction.guildId !== '1086707622759125053') return interaction.editReply(localize(locale, 'COMPONENT_NOT_AVAILABLE', localize(locale, 'SERVER')));
-
-                    let memberChannel = await db.get(`clyde.${interaction.user.id}.privateChannel`);
-
-                    if (memberChannel !== interaction.channelId) return interaction.editReply(localize(locale, 'YOU_ARE_NOT_OWNER_CHANNEL'));
-
                     if (args[0] === 'selected') {
                         let members = interaction.values;
 
@@ -2200,11 +2195,6 @@ client.on('interactionCreate', async interaction => {
                     await interaction.deferReply({ ephemeral: true });
 
                     if (interaction.guildId !== '1086707622759125053') return interaction.editReply(localize(locale, 'COMPONENT_NOT_AVAILABLE', localize(locale, 'SERVER')));
-
-                    let memberChannel2 = await db.get(`clyde.${interaction.user.id}.privateChannel`);
-
-                    if (memberChannel2 !== interaction.channelId) return interaction.editReply(localize(locale, 'YOU_ARE_NOT_OWNER_CHANNEL'));
-
                     if (args[0] === 'selected') {
                         let members = interaction.values;
 
@@ -2230,13 +2220,9 @@ client.on('interactionCreate', async interaction => {
                     await interaction.deferReply({ ephemeral: true });
 
                     if (interaction.guildId !== '1086707622759125053') return interaction.editReply(localize(locale, 'COMPONENT_NOT_AVAILABLE', localize(locale, 'SERVER')));
-
-                    let memberChannel3 = await db.get(`clyde.${interaction.user.id}.privateChannel`);
-
-                    if (memberChannel3 !== interaction.channelId) return interaction.editReply(localize(locale, 'YOU_ARE_NOT_OWNER_CHANNEL'));
-
+                    
                     await interaction.channel.delete();
-                    await db.delete(`clyde.${interaction.user.id}.privateChannel`);
+                    await db.delete(`clyde.${interaction.user.id}`);
                     break;
                 default:
                     logger('warning', 'COMMAND', 'Message component', interaction.customId, 'not found');
@@ -2518,7 +2504,11 @@ client.on('guildMemberAdd', async member => {
 client.on('guildMemberRemove', async member => {
     if (member.guild.id !== '1086707622759125053') return;
 
-    await db.delete(`clyde.${member.id}.privateChannel`);
+    let channel = await db.get(`clyde.${member.id}.privateChannel`);
+
+    client.channels.cache.get(channel).delete().catch(() => null);
+
+    await db.delete(`clyde.${member.id}`);
 });
 
 client.login(process.env.DISCORD_TOKEN);
