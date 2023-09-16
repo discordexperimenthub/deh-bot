@@ -2136,25 +2136,25 @@ client.on('interactionCreate', async interaction => {
                     let sentMessage = await privateChannel.send({
                         components: [
                             new ActionRowBuilder()
-                            .setComponents(
-                                new ButtonBuilder()
-                                .setCustomId(`${interaction.user.id}:clyde_private_add`)
-                                .setEmoji(emojis.add)
-                                .setLabel(localize(locale, 'ADD_MEMBERS'))
-                                .setStyle(ButtonStyle.Secondary),
-                                new ButtonBuilder()
-                                .setCustomId(`${interaction.user.id}:clyde_private_remove`)
-                                .setEmoji(emojis.remove)
-                                .setLabel(localize(locale, 'REMOVE_MEMBERS'))
-                                .setStyle(ButtonStyle.Secondary)
-                            ),
+                                .setComponents(
+                                    new ButtonBuilder()
+                                        .setCustomId(`${interaction.user.id}:clyde_private_add`)
+                                        .setEmoji(emojis.add)
+                                        .setLabel(localize(locale, 'ADD_MEMBERS'))
+                                        .setStyle(ButtonStyle.Secondary),
+                                    new ButtonBuilder()
+                                        .setCustomId(`${interaction.user.id}:clyde_private_remove`)
+                                        .setEmoji(emojis.remove)
+                                        .setLabel(localize(locale, 'REMOVE_MEMBERS'))
+                                        .setStyle(ButtonStyle.Secondary)
+                                ),
                             new ActionRowBuilder()
-                            .setComponents(
-                                new ButtonBuilder()
-                                .setCustomId(`${interaction.user.id}:clyde_private_delete`)
-                                .setLabel(localize(locale, 'DELETE_CHANNEL'))
-                                .setStyle(ButtonStyle.Danger)
-                            )
+                                .setComponents(
+                                    new ButtonBuilder()
+                                        .setCustomId(`${interaction.user.id}:clyde_private_delete`)
+                                        .setLabel(localize(locale, 'DELETE_CHANNEL'))
+                                        .setStyle(ButtonStyle.Danger)
+                                )
                         ]
                     });
 
@@ -2182,12 +2182,12 @@ client.on('interactionCreate', async interaction => {
                     } else interaction.editReply({
                         components: [
                             new ActionRowBuilder()
-                            .setComponents(
-                                new UserSelectMenuBuilder()
-                                .setCustomId(`${interaction.user.id}:clyde_private_add:selected`)
-                                .setPlaceholder(localize(locale, 'MEMBERS_SELECT'))
-                                .setMaxValues(interaction.guild.members.cache.size > 25 ? 25 : interaction.guild.members.cache.size)
-                            )
+                                .setComponents(
+                                    new UserSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:clyde_private_add:selected`)
+                                        .setPlaceholder(localize(locale, 'MEMBERS_SELECT'))
+                                        .setMaxValues(interaction.guild.members.cache.size > 25 ? 25 : interaction.guild.members.cache.size)
+                                )
                         ]
                     });
                     break;
@@ -2207,12 +2207,12 @@ client.on('interactionCreate', async interaction => {
                     } else interaction.editReply({
                         components: [
                             new ActionRowBuilder()
-                            .setComponents(
-                                new UserSelectMenuBuilder()
-                                .setCustomId(`${interaction.user.id}:clyde_private_remove:selected`)
-                                .setPlaceholder(localize(locale, 'MEMBERS_SELECT'))
-                                .setMaxValues(interaction.guild.members.cache.size > 25 ? 25 : interaction.guild.members.cache.size)
-                            )
+                                .setComponents(
+                                    new UserSelectMenuBuilder()
+                                        .setCustomId(`${interaction.user.id}:clyde_private_remove:selected`)
+                                        .setPlaceholder(localize(locale, 'MEMBERS_SELECT'))
+                                        .setMaxValues(interaction.guild.members.cache.size > 25 ? 25 : interaction.guild.members.cache.size)
+                                )
                         ]
                     });
                     break;
@@ -2220,7 +2220,7 @@ client.on('interactionCreate', async interaction => {
                     await interaction.deferReply({ ephemeral: true });
 
                     if (interaction.guildId !== '1086707622759125053') return interaction.editReply(localize(locale, 'COMPONENT_NOT_AVAILABLE', localize(locale, 'SERVER')));
-                    
+
                     await interaction.channel.delete();
                     await db.delete(`clyde.${interaction.user.id}`);
                     break;
@@ -2474,10 +2474,13 @@ client.on('messageReactionAdd', async (reaction, user) => {
 });
 
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
-    let subscriber = !oldMember.roles.cache.has('1150833335199875126') && newMember.roles.cache.has('1150833335199875126');
-    let premium = !oldMember.roles.cache.has('1150839581273489479') && newMember.roles.cache.has('1150839581273489479');
-    let beast = !oldMember.roles.cache.has('1150840476589633658') && newMember.roles.cache.has('1150840476589633658');
+    let subscriber = false;
+    let premium = false;
+    let beast = false;
 
+    if (!oldMember.roles.cache.has('1150833335199875126') && newMember.roles.cache.has('1150833335199875126')) subscriber = true;
+    if (!oldMember.roles.cache.has('1150839581273489479') && newMember.roles.cache.has('1150839581273489479')) premium = true;
+    if (!oldMember.roles.cache.has('1150840476589633658') && newMember.roles.cache.has('1150840476589633658')) beast = true;
     if (subscriber || premium || beast) client.channels.cache.get('1089807623496421417').send({
         content: `Thanks to <@${newMember.id}> for buying **${subscriber ? 'Subscriber (Tier 1)' : premium ? 'Premium (Tier 2)' : 'Beast (Tier 3)'}** subscription!`,
         allowedMentions: {
