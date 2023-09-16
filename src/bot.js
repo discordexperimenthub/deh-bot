@@ -2115,7 +2115,7 @@ client.on('interactionCreate', async interaction => {
                     if (!dehMember.roles.cache.has('1150833323267084359') && !developerIds.includes(interaction.user.id)) return interaction.editReply(localize(locale, 'ACTION_REQUIRES_TIER_1'));
                     if (await db.get(`clyde.${interaction.user.id}.privateChannel`)) return interaction.editReply(localize(locale, 'PRIVATE_CHANNEL_ALREADY_EXISTS'));
 
-                    let privateChannel = await client.guilds.cache.get(serverId).channels.create({
+                    let privateChannel = await interaction.guild.channels.create({
                         name: interaction.user.username,
                         type: ChannelType.GuildText,
                         parent: '1152525974878031933',
