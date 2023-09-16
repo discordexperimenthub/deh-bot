@@ -1,7 +1,7 @@
 const { locales } = require("./localization");
 const logger = require("./logger");
 
-function getUntranslatedKeys(locale) {
+function getUntranslatedKeys(locale, noKeys) {
   let localeKeys = Object.keys(locales["en-US"]);
   let percentage = 0;
 
@@ -9,7 +9,7 @@ function getUntranslatedKeys(locale) {
     if (locales[locale]?.[key]) {
       percentage++;
     } else {
-      logger("info", "I18N", `Untranslated Key (${locale}):`, key);
+      if (noKeys === false) logger("info", "I18N", `Untranslated Key (${locale}):`, key);
     }
   }
 
@@ -24,11 +24,15 @@ function getUntranslatedKeys(locale) {
 (() => {
   const mode = process.argv[2];
 
+  let noKeys = false;
+
+  if(process.argv.includes('nokeys')) noKeys = true;
+
   if (Object.keys(locales).includes(mode)) {
     const locale = process.argv[2];
 
     if (locale && locales[locale]) {
-      return getUntranslatedKeys(locale);
+      return getUntranslatedKeys(locale, noKeys);
     } else {
       return logger(
         "warning",
