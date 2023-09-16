@@ -2139,12 +2139,11 @@ client.on('interactionCreate', async interaction => {
                             .setComponents(
                                 new ButtonBuilder()
                                 .setCustomId(`${interaction.user.id}:clyde_private_add`)
-                                .setEmoji(emojis.add)
+                                .setEmoji(emojis.remove)
                                 .setLabel(localize(locale, 'ADD_MEMBERS'))
                                 .setStyle(ButtonStyle.Secondary),
                                 new ButtonBuilder()
                                 .setCustomId(`${interaction.user.id}:clyde_private_remove`)
-                                .setEmoji(emojis.add)
                                 .setLabel(localize(locale, 'REMOVE_MEMBERS'))
                                 .setStyle(ButtonStyle.Secondary)
                             ),
@@ -2179,12 +2178,12 @@ client.on('interactionCreate', async interaction => {
 
                         for (let member of members) {
                             await interaction.channel.permissionOverwrites.create(member, {
-                                SendMessages: true
+                                ViewChannel: true
                             });
                             await new Promise(resolve => setTimeout(resolve, 1000));
                         };
 
-                        return interaction.editReply(localize(locale, 'ADDED_MEMBERS_SUCCESS', members.map(id => `<@${id}>`).join(', ')));
+                        return interaction.editReply(localize(locale, 'ADD_MEMBERS_SUCCESS', members.map(id => `<@${id}>`).join(', ')));
                     } else interaction.editReply({
                         components: [
                             new ActionRowBuilder()
@@ -2214,7 +2213,7 @@ client.on('interactionCreate', async interaction => {
                             await new Promise(resolve => setTimeout(resolve, 1000));
                         };
 
-                        return interaction.editReply(localize(locale, 'ADDED_MEMBERS_SUCCESS', members.map(id => `<@${id}>`).join(', ')));
+                        return interaction.editReply(localize(locale, 'REMOVE_MEMBERS_SUCCESS', members.map(id => `<@${id}>`).join(', ')));
                     } else interaction.editReply({
                         components: [
                             new ActionRowBuilder()
