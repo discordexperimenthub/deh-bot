@@ -2105,7 +2105,7 @@ client.on('interactionCreate', async interaction => {
                     automodToxicContentConfigure(interaction, automod, locale);
                     break;
                 case 'clyde_private_channel':
-                    await interaction.deferReply();
+                    await interaction.deferReply({ ephemeral: true });
 
                     if (interaction.guildId !== '1086707622759125053') return interaction.editReply(localize(locale, 'COMPONENT_NOT_AVAILABLE', localize(locale, 'SERVER')));
 

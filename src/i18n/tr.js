@@ -150,7 +150,7 @@ module.exports = {
     SERVER: 'Sunucu',
     COMPONENT_NOT_AVAILABLE: 'Bu komponent bu {{0}} içerisinde kullanılamıyor!',
     ACTION_REQUIRES_DEH_MEMBER: 'Bu eylemi gerçekteştirebilmek için [Discord Experiment Hub](https://discord.gg/experiments) üyesi olman gerekiyor!',
-    ACTION_REQUIRES_TIER_1: 'Bu eylemi gerçekleştirebilmek için Discord Experiment Hub\'da en az **[Subscriber (Tier 1)](https://canary.discord.com/channels/1089540433010491392/role-subscriptions)** olman gerekiyor!',
+    ACTION_REQUIRES_TIER_1: 'Bu eylemi gerçekleştirebilmek için Discord Experiment Hub\'da en az **[Subscriber (Tier 1)](<https://canary.discord.com/channels/1089540433010491392/role-subscriptions>)** olman gerekiyor!',
     PRIVATE_CHANNEL_ALREADY_EXISTS: 'Zaten bir özel kanalın var!',
     ADD_MEMBERS: 'Üye Ekle',
     REMOVE_MEMBERS: 'Üye Kaldır',

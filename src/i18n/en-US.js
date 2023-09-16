@@ -156,7 +156,7 @@ module.exports = {
     SERVER: 'Server',
     COMPONENT_NOT_AVAILABLE: 'This message component is not available in this {{0}}!',
     ACTION_REQUIRES_DEH_MEMBERSHIP: 'You have to be a member of [Discord Experiment Hub](https://discord.gg/experiments) to perform this action!',
-    ACTION_REQUIRES_TIER_1: 'You have to be at least **[Subscriber (Tier 1)](https://canary.discord.com/channels/1089540433010491392/role-subscriptions)** in Discord Experiment Hub to perform this action!',
+    ACTION_REQUIRES_TIER_1: 'You have to be at least **[Subscriber (Tier 1)](<https://canary.discord.com/channels/1089540433010491392/role-subscriptions>)** in Discord Experiment Hub to perform this action!',
     PRIVATE_CHANNEL_ALREADY_EXISTS: 'You already have a private channel!',
     ADD_MEMBERS: 'Add Members',
     REMOVE_MEMBERS: 'Remove Members',
