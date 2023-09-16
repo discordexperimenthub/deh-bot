@@ -1663,7 +1663,7 @@ client.on('interactionCreate', async interaction => {
                                         .setCustomId(`${interaction.user.id}:automod_ai_add_blacklist_channels_select`)
                                         .setPlaceholder(localize(locale, 'CHANNELS_SELECT'))
                                         .setMaxValues(interaction.guild.channels.cache.size > 25 ? 25 : interaction.guild.channels.cache.size)
-                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum)
+                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum, ChannelType.GuildCategory)
                                 )
                         ]
                     });
@@ -1696,7 +1696,7 @@ client.on('interactionCreate', async interaction => {
                                         .setCustomId(`${interaction.user.id}:automod_ai_remove_blacklist_channels_select`)
                                         .setPlaceholder(localize(locale, 'CHANNELS_SELECT'))
                                         .setMaxValues(interaction.guild.channels.cache.size > 25 ? 25 : interaction.guild.channels.cache.size)
-                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum)
+                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum, ChannelType.GuildCategory)
                                 )
                         ]
                     });
@@ -1857,7 +1857,7 @@ client.on('interactionCreate', async interaction => {
                                         .setCustomId(`${interaction.user.id}:automod_bad_content_add_blacklist_channels_select`)
                                         .setPlaceholder(localize(locale, 'CHANNELS_SELECT'))
                                         .setMaxValues(interaction.guild.channels.cache.size > 25 ? 25 : interaction.guild.channels.cache.size)
-                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum)
+                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum, ChannelType.GuildCategory)
                                 )
                         ]
                     });
@@ -1877,7 +1877,7 @@ client.on('interactionCreate', async interaction => {
                                         .setCustomId(`${interaction.user.id}:automod_toxic_content_add_blacklist_channels_select`)
                                         .setPlaceholder(localize(locale, 'CHANNELS_SELECT'))
                                         .setMaxValues(interaction.guild.channels.cache.size > 25 ? 25 : interaction.guild.channels.cache.size)
-                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum)
+                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum, ChannelType.GuildCategory)
                                 )
                         ]
                     });
@@ -1923,7 +1923,7 @@ client.on('interactionCreate', async interaction => {
                                         .setCustomId(`${interaction.user.id}:automod_bad_content_remove_blacklist_channels_select`)
                                         .setPlaceholder(localize(locale, 'CHANNELS_SELECT'))
                                         .setMaxValues(interaction.guild.channels.cache.size > 25 ? 25 : interaction.guild.channels.cache.size)
-                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum)
+                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum, ChannelType.GuildCategory)
                                 )
                         ]
                     });
@@ -1943,7 +1943,7 @@ client.on('interactionCreate', async interaction => {
                                         .setCustomId(`${interaction.user.id}:automod_toxic_content_remove_blacklist_channels_select`)
                                         .setPlaceholder(localize(locale, 'CHANNELS_SELECT'))
                                         .setMaxValues(interaction.guild.channels.cache.size > 25 ? 25 : interaction.guild.channels.cache.size)
-                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum)
+                                        .setChannelTypes(ChannelType.GuildText, ChannelType.GuildForum, ChannelType.GuildCategory)
                                 )
                         ]
                     });
