@@ -912,7 +912,7 @@ client.on('interactionCreate', async interaction => {
             let [userId, customId, ...args] = interaction.customId.split(':');
             let locale = interaction.locale;
 
-            if (userId !== interaction.user.id) return interaction.reply({
+            if (userId !== 'everyone' && userId !== interaction.user.id) return interaction.reply({
                 content: localize(locale, 'COMPONENT_NOT_YOURS'),
                 ephemeral: true
             });
