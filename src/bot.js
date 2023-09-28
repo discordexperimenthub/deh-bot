@@ -19,8 +19,7 @@ const client = new Client({
         'GuildMessages',
         'MessageContent',
         'GuildMessageReactions',
-        'DirectMessages',
-        'GuildMembers'
+        'DirectMessages'
     ]
 });
 const webhooks = {
