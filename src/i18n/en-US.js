@@ -166,4 +166,8 @@ module.exports = {
     PRIVATE_CHANNEL_CREATED: 'Your private channel {{0}} has been created successfully!',
     YOU_ARE_NOT_OWNER_CHANNEL: 'You are not the owner of this channel!',
     MEMBERS_SELECT: 'Select members...',
+    TERMS_OF_SERVICE: 'Terms of Service',
+    TERMS_OF_SERVICE_DESCRIPTION: 'By using this bot, you agree to our **[Terms of Service](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/terms-of-service.md>)**.',
+    PRIVACY_POLICY: 'Privacy Policy',
+    PRIVACY_POLICY_DESCRIPTION: 'By using this bot, you agree to our **[Privacy Policy](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/privacy-policy.md>)**.'
 };

@@ -160,4 +160,8 @@ module.exports = {
     PRIVATE_CHANNEL_CREATED: 'Özel kanalın {{0}} başarıyla oluşturuldu!',
     YOU_ARE_NOT_OWNER_CHANNEL: 'Sen bu kanalın sahibi değilsin!',
     MEMBERS_SELECT: 'Üye seç...',
+    TERMS_OF_SERVICE: 'Hizmet Şartları',
+    TERMS_OF_SERVICE_DESCRIPTION: 'Bu botu kullanarak, **[Hizmet Şartlarımızı](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/terms-of-service.md>)** kabul etmiş olursun.',
+    PRIVACY_POLICY: 'Gizlilik Politikası',
+    PRIVACY_POLICY_DESCRIPTION: 'Bu botu kullanarak, **[Gizlilik Politikamızı](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/privacy-policy.md>)** kabul etmiş olursun.'
 };
