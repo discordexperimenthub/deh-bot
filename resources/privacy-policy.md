@@ -10,7 +10,7 @@ Welcome to Experiment Hub! Experiment Hub bot ("the Bot") is designed to enhance
 
 2.1. **User Data**: The Bot may collect and store user data, including user IDs and server settings, to provide its services.
 
-2.2. **API Key**: To access additional AI models and features, users are required to add their own PurGPT API key from https://purgpt.xyz. We do not collect or store these API keys.
+2.2. **API Key**: To access additional AI models and features, users are required to add their own PurGPT API key from https://purgpt.xyz. We collect and securely store these API keys to enable the use of our service. We will handle API keys with the utmost care to prevent unauthorized access.
 
 ## 3. Data Usage
 
