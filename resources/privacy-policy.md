@@ -34,8 +34,14 @@ Welcome to Experiment Hub! Experiment Hub bot ("the Bot") is designed to enhance
 
 7.1. We reserve the right to update this Privacy Policy to reflect changes in our data practices. Any modifications will be posted on our [Discord server](https://discord.gg/experiments).
 
-## 8. Contact Us
+## 8. Your Choices
 
-8.1. If you have any questions, concerns, or requests regarding your personal data or this Privacy Policy, please contact us through our Discord server.
+8.1 You have the right to request data deletion. Just contact us, as highlighted in point nine.
+
+8.2 You can choose to stop using the bot at any time by removing it from your Discord server.
+
+## 9. Contact Us
+
+9.1. If you have any questions, concerns, or requests regarding your personal data or this Privacy Policy, please contact us through our Discord server.
 
 Thank you for choosing Experiment Hub!
