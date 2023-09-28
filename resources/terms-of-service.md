@@ -28,7 +28,7 @@ Welcome to Experiment Hub! Experiment Hub bot ("the Bot") is designed to enhance
 
 ## 7. Modifications to the Terms
 
-7.1. We reserve the right to modify or update these Terms at any time. Any changes will be effective immediately upon posting the updated Terms on our website. Users are responsible for regularly reviewing these Terms for updates.
+7.1. We reserve the right to modify or update these Terms at any time. Any changes will be effective immediately upon posting the updated Terms on our [Discord server](https://discord.gg/experiments). Users are responsible for regularly reviewing these Terms for updates.
 
 ## 8. Conclusion
 
