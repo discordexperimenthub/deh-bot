@@ -2514,3 +2514,36 @@ client.on('guildMemberRemove', async member => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
+
+async function checkFirstDayOfMonth() {
+    let today = new Date();
+
+    if (today.getDate() === 1) {
+        let users = await db.get('clyde');
+
+        for (let user of Object.keys(users)) {
+            let userFound = await client.user.fetch(user).catch(() => null);
+
+            if (!userFound) {
+                await db.delete(`clyde.${user}`);
+
+                client.channels.cache.get('1089842190840246342').send(`User **${user}** was removed from the database because they no longer exist.`);
+            };
+        };
+
+        let servers = await db.get('guilds');
+
+        for (let server of Object.keys(servers)) {
+            let serverFound = await client.guilds.fetch(server).catch(() => null);
+
+            if (!serverFound) {
+                await db.delete(`guilds.${server}`);
+
+                client.channels.cache.get('1089842190840246342').send(`Server **${server}** was removed from the database because it no longer exists.`);
+            };
+        };
+    };
+};
+
+// Set an interval to check if it's the first day of the month every 12 hours
+setInterval(checkFirstDayOfMonth, 43200000);
