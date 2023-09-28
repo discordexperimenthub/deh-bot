@@ -1,6 +1,6 @@
 # Experiment Hub Discord Bot - Terms of Service
 
-""Last Updated: 28 September, 2023**
+**Last Updated: 28 September, 2023**
 
 ## 1. Introduction
 
