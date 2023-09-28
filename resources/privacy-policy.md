@@ -20,7 +20,7 @@ Welcome to Experiment Hub! Experiment Hub bot ("the Bot") is designed to enhance
 
 4.1. **Security**: We are committed to protecting your data and employ reasonable security measures to prevent unauthorized access, disclosure, alteration, or destruction of your information.
 
-4.2. **Data Retention**: We will retain your data only for as long as necessary to fulfill the purposes outlined in this Privacy Policy or as required by law.
+4.2. **Data Retention**: We will retain your data only for as long as the service exists to fulfill the purposes outlined in this Privacy Policy or as required by law.
 
 ## 5. Third-Party Services
 
