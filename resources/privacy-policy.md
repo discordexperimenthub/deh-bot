@@ -22,6 +22,8 @@ Welcome to Experiment Hub! Experiment Hub bot ("the Bot") is designed to enhance
 
 4.2. **Data Retention**: We will retain your data only for as long as the service exists to fulfill the purposes outlined in this Privacy Policy or as required by law.
 
+4.3. **Data Deletion**: Our system checks users and servers each month. If a user or server no longer exists, all data associated with that user or server will be deleted.
+
 ## 5. Third-Party Services
 
 5.1. The Bot may utilize third-party services for certain functionalities, such as the use of [PurGPT](https://purgpt.xyz) for AI models. Users are encouraged to review the privacy policies of these third-party services.
