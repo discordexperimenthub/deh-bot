@@ -1038,7 +1038,7 @@ client.on('interactionCreate', async interaction => {
                     let channelId = interaction.values[0];
                     let webhook2 = await client.channels.cache.get(channelId).createWebhook({ name: 'home' });
 
-                    channel.send('**There are no Highlights to show you yet!**\nBut you could write some!').catch(() => { });
+                    client.channels.cache.get(channelId).send('**There are no Highlights to show you yet!**\nBut you could write some!').catch(() => { });
 
                     await home.setChannel(channelId);
                     await home.setWebhook(webhook2.url);
