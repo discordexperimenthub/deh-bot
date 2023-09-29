@@ -1040,7 +1040,7 @@ client.on('interactionCreate', async interaction => {
 
                     channel.send('**There are no Highlights to show you yet!**\nBut you could write some!').catch(() => { });
 
-                    await home.setChannel(channel.id);
+                    await home.setChannel(channelId);
                     await home.setWebhook(webhook2.url);
                     await interaction.followUp({
                         content: localize(locale, 'SETTING_CHANNEL_SUCCESS', localize(locale, 'HOME'), `<#${channelId}>`),
