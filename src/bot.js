@@ -1,4 +1,4 @@
-const { Client, Collection, WebhookClient, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, ChannelSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, RoleSelectMenuBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, OverwriteType, PermissionsBitField, UserSelectMenuBuilder } = require('discord.js');
+const { Client, Collection, WebhookClient, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, ChannelSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, RoleSelectMenuBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, OverwriteType, PermissionsBitField, UserSelectMenuBuilder, MessageType } = require('discord.js');
 const { readdirSync, writeFileSync, readFileSync, mkdirSync, writeFile } = require('node:fs');
 const { default: axios } = require('axios');
 const logger = require('./modules/logger');
@@ -2480,7 +2480,7 @@ client.on('interactionCreate', async interaction => {
 client.on('messageCreate', async message => {
     try {
         if (!message.guild || !message.member) return;
-        if (message.type === 0 && message.content !== '' && message.reference?.messageId) {
+        if (message.type === MessageType.Reply && message.content !== '' && message.reference?.messageId) {
             const home = await new Home(message.guildId).setup();
 
             home.check('reply', message);
