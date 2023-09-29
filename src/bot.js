@@ -1036,12 +1036,12 @@ client.on('interactionCreate', async interaction => {
                     await interaction.deferUpdate();
 
                     let channelId = interaction.values[0];
-                    let webhook = await client.channels.cache.get(channelId).createWebhook({ name: 'home' });
+                    let webhook2 = await client.channels.cache.get(channelId).createWebhook({ name: 'home' });
 
                     channel.send('**There are no Highlights to show you yet!**\nBut you could write some!').catch(() => { });
 
                     await home.setChannel(channel.id);
-                    await home.setWebhook(webhook.url);
+                    await home.setWebhook(webhook2.url);
                     await interaction.followUp({
                         content: localize(locale, 'SETTING_CHANNEL_SUCCESS', localize(locale, 'HOME'), `<#${channelId}>`),
                         ephemeral: true
