@@ -147,4 +147,23 @@ module.exports = {
     PROFANITY: 'Ненормативна лексика',
     THREAT: 'Загроза',
     API_IS_DOWN: 'API зараз не працює. Будь ласка, повторіть спробу пізніше'
+    DELETE_THREAD_NOT_A_THREAD: 'Цю команду можна виконати лише в каналах потоків.',
+    DELETE_THREAD_NOT_OWN: 'Ви можете видалити лише власні гілки!!',
+    SERVER: 'Сервер',
+    COMPONENT_NOT_AVAILABLE: 'Цей компонент повідомлення недоступний у цьому {{0}}!',
+    ACTION_REQUIRES_DEH_MEMBERSHIP: 'Ви повинні бути учасником [Discord Experiment Hub](https://discord.gg/experiments) щоб виконати цю дію!',
+    ACTION_REQUIRES_TIER_1: 'Ви повинні бути принаймні **[Subscriber (Tier 1)](<https://canary.discord.com/channels/1089540433010491392/role-subscriptions>)** у Discord Experiment Hub, щоб виконати цю дію!',
+    PRIVATE_CHANNEL_ALREADY_EXISTS: 'У вас вже є приватний канал!',
+    ADD_MEMBERS: 'Додати учасників',
+    REMOVE_MEMBERS: 'Видалити учасників',
+    ADD_MEMBERS_SUCCESS: '{{0}} учасників успішно додано!',
+    REMOVE_MEMBERS_SUCCESS: '{{0}} учасників успішно видалено!',
+    DELETE_CHANNEL: 'Видалити канал',
+    PRIVATE_CHANNEL_CREATED: 'Ваш приватний канал {{0}} успішно створено!',
+    YOU_ARE_NOT_OWNER_CHANNEL: 'Ви не є власником цього каналу!',
+    MEMBERS_SELECT: 'Виберіть учасників...',
+    TERMS_OF_SERVICE: 'Умови використання',
+    TERMS_OF_SERVICE_DESCRIPTION: 'Використовуючи цього бота, ви погоджуєтеся з нашими **[Terms of Service](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/terms-of-service.md>)**.',
+    PRIVACY_POLICY: 'Політика конфіденційності',
+    PRIVACY_POLICY_DESCRIPTION: 'Використовуючи цього бота, ви погоджуєтеся з нашими **[Privacy Policy](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/privacy-policy.md>)**.'
 };
