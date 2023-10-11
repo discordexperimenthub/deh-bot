@@ -15,21 +15,15 @@ module.exports = {
     async execute(interaction) {
         await interaction.deferReply();
 
-        let users = await db.get('users');
+        let users = await db.get('users') ?? {};
 
-        if (!users) {
-            users = [];
-        };
+        let leaderboard = Object.entries(users);
 
-        users.sort((a, b) => b.real - a.real);
+        leaderboard.sort((a, b) => b[1].real - a[1].real);
 
-        let leaderboard = [];
-
-        for (let i = 0; i < 10; i++) {
-            if (users[i]) {
-                leaderboard.push(`${i + 1}. ${users[i].name} - ${users[i].real}`);
-            };
-        };
+        leaderboard = leaderboard.map((user, index) => {
+            return `${index + 1}. <@${user[0]}> - ${user[1].real}`;
+        });
 
         await interaction.editReply({
             embeds: [
