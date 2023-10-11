@@ -2552,9 +2552,8 @@ client.on('messageCreate', async message => {
     let user = await db.get(`users.${message.author.id}`);
 
     if (!user.real) user.real = 0;
-
     if (message.content.toLowerCase().includes('real')) {
-        real++;
+        user.real++;
 
         await db.set(`users.${message.author.id}`, user);
 
