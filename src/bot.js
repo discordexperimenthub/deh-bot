@@ -2553,11 +2553,13 @@ client.on('messageCreate', async message => {
 
     if (!user.real) user.real = 0;
 
-    if (message.content.toLowerCase().includes('real')) real++;
+    if (message.content.toLowerCase().includes('real')) {
+        real++;
 
-    await db.set(`users.${message.author.id}`, user);
+        await db.set(`users.${message.author.id}`, user);
 
-    if (message.guildId === '1089540433010491392') message.reply(`You have said real **${user.real}** times.`);
+        if (message.guildId === '1089540433010491392') message.reply(`You have said real **${user.real}** times.`);
+    };
 });
 
 client.login(process.env.DISCORD_TOKEN);
