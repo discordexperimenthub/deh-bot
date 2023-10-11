@@ -19,11 +19,11 @@ module.exports = {
 
         let leaderboard = Object.entries(users);
 
-        leaderboard.sort((a, b) => b[1].real - a[1].real);
+        leaderboard.sort((a, b) => (b[1].real ?? 0) - (a[1].real ?? 0));
 
         leaderboard = leaderboard.map((user, index) => {
             return `${index + 1}. <@${user[0]}> - ${user[1].real}`;
-        });
+        }).splice(0, 10);
 
         await interaction.editReply({
             embeds: [
