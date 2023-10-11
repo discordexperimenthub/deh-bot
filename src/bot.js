@@ -2548,6 +2548,18 @@ client.on('guildMemberRemove', async member => {
     await db.delete(`clyde.${member.id}`);
 });
 
+client.on('messageCreate', async message => {
+    let user = await db.get(`users.${message.author.id}`);
+
+    if (!user.real) user.real = 0;
+
+    if (message.content.toLowerCase().includes('real')) real++;
+
+    await db.set(`users.${message.author.id}`, user);
+
+    if (message.guildId === '1089540433010491392') message.reply(`You have said real **${user.real}** times.`);
+});
+
 client.login(process.env.DISCORD_TOKEN);
 
 // Set an interval to check if it's the first day of the month every day
