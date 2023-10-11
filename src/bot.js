@@ -2549,6 +2549,8 @@ client.on('guildMemberRemove', async member => {
 });
 
 client.on('messageCreate', async message => {
+    if (message.author.bot) return;
+
     let user = await db.get(`users.${message.author.id}`) ?? {};
 
     if (!user.real) user.real = 0;
