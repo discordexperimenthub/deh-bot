@@ -2549,7 +2549,7 @@ client.on('guildMemberRemove', async member => {
 });
 
 client.on('messageCreate', async message => {
-    let user = await db.get(`users.${message.author.id}`);
+    let user = await db.get(`users.${message.author.id}`) ?? {};
 
     if (!user.real) user.real = 0;
     if (message.content.toLowerCase().includes('real')) {
