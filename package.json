@@ -1,24 +1,26 @@
 {
-  "name": "discord.js-bot-template",
-  "version": "1.0.0-beta.2",
-  "description": "This is a template for a Discord bot. It is written in JavaScript and uses the discord.js library. It is designed to be easy to use and easy to modify.",
-  "main": "./src",
-  "scripts": {
-    "start": "node ./src",
-    "i18n": "node ./src/modules/i18n.helper.js"
-  },
-  "keywords": [],
-  "author": "Tolgchu",
-  "license": "MIT",
-  "dependencies": {
-    "@tolga1452/logchu": "^2.0.2",
-    "axios": "^1.4.0",
-    "better-sqlite3": "^8.5.0",
-    "chalk": "^4.1.2",
-    "cron": "^2.4.0",
-    "diff": "^5.1.0",
-    "discord.js": "^14.12.1",
-    "dotenv": "^16.3.1",
-    "quick.db": "^9.1.7"
-  }
+	"name": "discord.js-bot-template",
+	"version": "1.0.0-beta.2",
+	"description": "This is a template for a Discord bot. It is written in JavaScript and uses the discord.js library. It is designed to be easy to use and easy to modify.",
+	"main": "./src",
+	"scripts": {
+		"start": "node ./src",
+		"i18n": "node ./src/modules/i18n.helper.js"
+	},
+	"keywords": [],
+	"author": "Tolgchu",
+	"license": "MIT",
+	"dependencies": {
+		"@tolga1452/logchu": "^2.0.2",
+		"axios": "^1.4.0",
+		"better-sqlite3": "^8.5.0",
+		"chalk": "^4.1.2",
+		"cron": "^2.4.0",
+		"diff": "^5.1.0",
+		"discord.js": "^14.12.1",
+		"dotenv": "^16.3.1",
+		"eslint-config-neon": "^0.1.57",
+		"prettier-eslint": "^15.0.1",
+		"quick.db": "^9.1.7"
+	}
 }
