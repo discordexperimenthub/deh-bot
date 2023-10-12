@@ -2559,7 +2559,7 @@ client.on('messageCreate', async message => {
 
         await db.set(`users.${message.author.id}`, user);
 
-        if (message.guildId === '1089540433010491392') message.reply(`You have said real **${user.real}** times.`);
+        if (message.guildId === '1089540433010491392') await message.reply(`You have said real **${user.real}** times.`).then(msg => setTimeout(() => msg.delete(), 5000));
     };
 });
 
