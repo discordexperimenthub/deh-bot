@@ -163,5 +163,10 @@ module.exports = {
     TERMS_OF_SERVICE: 'Hizmet Şartları',
     TERMS_OF_SERVICE_DESCRIPTION: 'Bu botu kullanarak, **[Hizmet Şartlarımızı](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/terms-of-service.md>)** kabul etmiş olursun.',
     PRIVACY_POLICY: 'Gizlilik Politikası',
-    PRIVACY_POLICY_DESCRIPTION: 'Bu botu kullanarak, **[Gizlilik Politikamızı](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/privacy-policy.md>)** kabul etmiş olursun.'
+    PRIVACY_POLICY_DESCRIPTION: 'Bu botu kullanarak, **[Gizlilik Politikamızı](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/privacy-policy.md>)** kabul etmiş olursun.',
+    BUGFIXTOOLS: 'Hata Düzeltme Araçları',
+    DOUBLE_JOIN_MESSAGES: 'Çift Katılma Mesajları',
+    DOUBLE_JOIN_MESSAGES_DESCRIPTION: 'Bu özellik, kullanıcıların sunucuya katıldıklarında iki katılma mesajı gönderilmesini engeller.',
+    ENABLE_DOUBLE_JOIN_MESSAGES: 'Çift Katılma Mesajlarını Aç',
+    DISABLE_DOUBLE_JOIN_MESSAGES: 'Çift Katılma Mesajlarını Kapat',
 };

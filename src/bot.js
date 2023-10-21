@@ -12,6 +12,8 @@ const timer = require('./modules/timer');
 const Home = require('./modules/home');
 const AutoMod = require('./modules/automod');
 const { automodSettings, homeSettings, automodAIConfigure, automodBadContentConfigure, automodToxicContentConfigure } = require('./modules/settings');
+const BugFixTools = require("./modules/bugFixTools");
+const { bugFixToolsSettings } = require("./modules/settings");
 
 const client = new Client({
     intents: [
@@ -951,6 +953,7 @@ client.on('interactionCreate', async interaction => {
 
             const home = await new Home(guildId).setup();
             const automod = await new AutoMod(guildId).setup();
+            const bugFixTools = await new BugFixTools(guildId).setup();
 
             switch (customId) {
                 case 'settings':
@@ -964,6 +967,11 @@ client.on('interactionCreate', async interaction => {
                             await interaction.deferUpdate();
 
                             automodSettings(interaction, automod, locale);
+                            break;
+                        case 'bugFixTools':
+                            await interaction.deferUpdate();
+
+                            bugFixToolsSettings(interaction, bugFixTools, locale);
                             break;
                     };
                     break;
@@ -2258,6 +2266,12 @@ client.on('interactionCreate', async interaction => {
                     await interaction.channel.delete();
                     await db.delete(`clyde.${interaction.user.id}`);
                     break;
+                case 'bugfixtools_toggle':
+                    await interaction.deferUpdate();
+                    await bugFixTools.toggle(args[0]);
+
+                    bugFixToolsSettings(interaction, bugFixTools, locale);
+                    break;
                 default:
                     logger('warning', 'COMMAND', 'Message component', interaction.customId, 'not found');
             };
@@ -2561,6 +2575,16 @@ client.on('messageCreate', async message => {
 
         if (message.guildId === '1089540433010491392') message.reply(`You have said real **${user.real}** times.`);
     };
+});
+
+client.on('messageCreate', async message => {
+    if (message.type !== MessageType.UserJoin) return;
+
+    let bugFixTools = await new BugFixTools(message.guildId).setup();
+
+    if (bugFixTools.data.lastJoin === message.author.id) return message.delete().catch(() => null);
+
+    bugFixTools.setLastJoin(message.author.id);
 });
 
 client.login(process.env.DISCORD_TOKEN);

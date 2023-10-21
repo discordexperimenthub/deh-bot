@@ -18,9 +18,10 @@ module.exports = {
         yellow: 'FEE75C',
         red: 'ED4245'
     },
-    features: ['home', 'automod'],
+    features: ['home', 'automod', 'bugFixTools'],
     beta: {
-        home: true
+        home: true,
+        bugFixTools: true
     },
     emojis: {
         beta: '<:beta1:1071445535510249493><:beta2:1071445584038334504><:beta3:1071445631786303498>',
@@ -40,7 +41,8 @@ module.exports = {
         fallback: '<:refresh:1064152296092610640>',
         set: '<:edit:1079417776638283856>',
         add: '<:create:1079056996545855488>',
-        remove: '<:delete:1079026158206734498>'
+        remove: '<:delete:1079026158206734498>',
+        bugFixTools: '<:staff:1064149851497037845>'
     },
     automodTrainData: [
         {

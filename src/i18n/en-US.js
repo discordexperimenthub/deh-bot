@@ -169,5 +169,10 @@ module.exports = {
     TERMS_OF_SERVICE: 'Terms of Service',
     TERMS_OF_SERVICE_DESCRIPTION: 'By using this bot, you agree to our **[Terms of Service](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/terms-of-service.md>)**.',
     PRIVACY_POLICY: 'Privacy Policy',
-    PRIVACY_POLICY_DESCRIPTION: 'By using this bot, you agree to our **[Privacy Policy](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/privacy-policy.md>)**.'
+    PRIVACY_POLICY_DESCRIPTION: 'By using this bot, you agree to our **[Privacy Policy](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/privacy-policy.md>)**.',
+    BUGFIXTOOLS: 'Bug Fix Tools',
+    DOUBLE_JOIN_MESSAGES: 'Double Join Messages',
+    DOUBLE_JOIN_MESSAGES_DESCRIPTION: 'Fixes the issue where users receive double join messages when they join a server.',
+    ENABLE_DOUBLE_JOIN_MESSAGES: 'Enable Double Join Messages',
+    DISABLE_DOUBLE_JOIN_MESSAGES: 'Disable Double Join Messages',
 };

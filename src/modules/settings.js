@@ -4,6 +4,7 @@ const AutoMod = require("./automod");
 const Home = require("./home");
 const { localize } = require("./localization");
 const EmbedMaker = require("./embed");
+const BugFixTools = require("./bugFixTools");
 
 /**
  * @param {import("discord.js").Interaction} interaction 
@@ -451,6 +452,36 @@ module.exports.automodToxicContentConfigure = (interaction, automod, locale) => 
                         .setEmoji(emojis.remove.split(':')[2].replace('>', ''))
                         .setLabel(localize(locale, 'REMOVE_BLACKLIST_CHANNELS'))
                         .setStyle(ButtonStyle.Secondary)
+                )
+        ]
+    });
+};
+
+/**
+ * @param {import("discord.js").Interaction} interaction 
+ * @param {BugFixTools} bugFixTools
+ * @param {Locale} locale
+ */
+module.exports.bugFixToolsSettings = (interaction, bugFixTools, locale) => {
+    interaction.editReply({
+        embeds: [
+            new EmbedMaker(interaction.client)
+                .setTitle(`${emojis.bugFixTools} ${localize(locale, 'BUGFIXTOOLS')} ${emojis.beta}`)
+                .setFields(
+                    {
+                        name: localize(locale, 'DOUBLE_JOIN_MESSAGES'),
+                        value: `${localize(locale, 'DOUBLE_JOIN_MESSAGES_DESCRIPTION')}\n${bugFixTools.data.doubleJoinMessages ? `${emojis.enabled} ${localize(locale, 'ENABLED')}` : `${emojis.disabled} ${localize(locale, 'DISABLED')}`}`,
+                        inline: false
+                    }
+                )
+        ],
+        components: [
+            new ActionRowBuilder()
+                .setComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`${interaction.user.id}:bugfixtools_toggle:doubleJoinMessages`)
+                        .setLabel(localize(locale, `${bugFixTools.data.doubleJoinMessages ? 'DISABLE_DOUBLE_JOIN_MESSAGES' : 'ENABLE_DOUBLE_JOIN_MESSAGES'}`))
+                        .setStyle(bugFixTools.data.doubleJoinMessages ? ButtonStyle.Danger : ButtonStyle.Success)
                 )
         ]
     });
