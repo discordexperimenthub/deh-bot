@@ -1,23 +1,23 @@
 const {
-	Client,
-	Collection,
-	WebhookClient,
-	ActionRowBuilder,
-	ButtonBuilder,
-	ButtonStyle,
-	ChannelType,
-	PermissionFlagsBits,
-	ChannelSelectMenuBuilder,
-	ModalBuilder,
-	TextInputBuilder,
-	TextInputStyle,
-	RoleSelectMenuBuilder,
-	StringSelectMenuBuilder,
-	StringSelectMenuOptionBuilder,
-	OverwriteType,
-	PermissionsBitField,
-	UserSelectMenuBuilder,
-	MessageType,
+    Client,
+    Collection,
+    WebhookClient,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ChannelType,
+    PermissionFlagsBits,
+    ChannelSelectMenuBuilder,
+    ModalBuilder,
+    TextInputBuilder,
+    TextInputStyle,
+    RoleSelectMenuBuilder,
+    StringSelectMenuBuilder,
+    StringSelectMenuOptionBuilder,
+    OverwriteType,
+    PermissionsBitField,
+    UserSelectMenuBuilder,
+    MessageType,
 } = require('discord.js');
 const { readdirSync, writeFileSync, readFileSync, mkdirSync, writeFile } = require('node:fs');
 const { default: axios } = require('axios');
@@ -36,50 +36,50 @@ const BugFixTools = require("./modules/bugFixTools");
 const { bugFixToolsSettings } = require("./modules/settings");
 
 const client = new Client({
-	intents: ['Guilds', 'GuildMessages', 'MessageContent', 'GuildMessageReactions', 'DirectMessages'],
+    intents: ['Guilds', 'GuildMessages', 'MessageContent', 'GuildMessageReactions', 'DirectMessages'],
 });
 const webhooks = {
-	extraStuff: new WebhookClient({
-		url: process.env.EXTRA_STUFF_WEBHOOK,
-	}),
-	otherChanges: new WebhookClient({
-		url: process.env.OTHER_CHANGES_WEBHOOK,
-	}),
+    extraStuff: new WebhookClient({
+        url: process.env.EXTRA_STUFF_WEBHOOK,
+    }),
+    otherChanges: new WebhookClient({
+        url: process.env.OTHER_CHANGES_WEBHOOK,
+    }),
 };
 const db = new QuickDB();
 
 async function checkFirstDayOfMonth() {
-	let today = new Date();
+    let today = new Date();
 
-	if (today.getDate() === 1) {
-		let users = await db.get('clyde');
+    if (today.getDate() === 1) {
+        let users = await db.get('clyde');
 
-		for (let user of Object.keys(users)) {
-			let userFound = await client.user.fetch(user).catch(() => null);
+        for (let user of Object.keys(users)) {
+            let userFound = await client.user.fetch(user).catch(() => null);
 
-			if (!userFound) {
-				await db.delete(`clyde.${user}`);
+            if (!userFound) {
+                await db.delete(`clyde.${user}`);
 
-				client.channels.cache
-					.get('1089842190840246342')
-					.send(`User **${user}** was removed from the database because they no longer exist.`);
-			}
-		}
+                client.channels.cache
+                    .get('1089842190840246342')
+                    .send(`User **${user}** was removed from the database because they no longer exist.`);
+            }
+        }
 
-		let servers = await db.get('guilds');
+        let servers = await db.get('guilds');
 
-		for (let server of Object.keys(servers)) {
-			let serverFound = await client.guilds.fetch(server).catch(() => null);
+        for (let server of Object.keys(servers)) {
+            let serverFound = await client.guilds.fetch(server).catch(() => null);
 
-			if (!serverFound) {
-				await db.delete(`guilds.${server}`);
+            if (!serverFound) {
+                await db.delete(`guilds.${server}`);
 
-				client.channels.cache
-					.get('1089842190840246342')
-					.send(`Server **${server}** was removed from the database because it no longer exists.`);
-			}
-		}
-	}
+                client.channels.cache
+                    .get('1089842190840246342')
+                    .send(`Server **${server}** was removed from the database because it no longer exists.`);
+            }
+        }
+    }
 }
 
 client.commands = new Collection();
@@ -90,939 +90,938 @@ if (commandFiles.length > 0) logger('info', 'COMMAND', 'Found', commandFiles.len
 else logger('warning', 'COMMAND', 'No commands found');
 
 for (const file of commandFiles) {
-	const command = require(`./commands/${file}`);
+    const command = require(`./commands/${file}`);
 
-	client.commands.set(command.data.name, command);
+    client.commands.set(command.data.name, command);
 
-	logger('success', 'COMMAND', 'Loaded command', command.data.name);
+    logger('success', 'COMMAND', 'Loaded command', command.data.name);
 }
 
 async function fetchSupportArticles(file, title, url) {
-	let oldSupportArticles = '';
+    let oldSupportArticles = '';
 
-	try {
-		oldSupportArticles = readFileSync(`articles/${file}.json`, 'utf-8');
-	} catch (error) {
-		logger('error', 'ARTICLE', 'Error while reading', `articles/${file}.json`, error);
-	}
+    try {
+        oldSupportArticles = readFileSync(`articles/${file}.json`, 'utf-8');
+    } catch (error) {
+        logger('error', 'ARTICLE', 'Error while reading', `articles/${file}.json`, error);
+    }
 
-	let supportArticles = (await axios.get(url)).data?.articles;
+    let supportArticles = (await axios.get(url)).data?.articles;
 
-	writeFileSync(`articles/${file}.json`, JSON.stringify(supportArticles, null, 4), 'utf-8');
-	logger('success', 'ARTICLE', `Fetched ${title} articles`);
+    writeFileSync(`articles/${file}.json`, JSON.stringify(supportArticles, null, 4), 'utf-8');
+    logger('success', 'ARTICLE', `Fetched ${title} articles`);
 
-	if (oldSupportArticles !== '') {
-		oldSupportArticles = JSON.parse(oldSupportArticles);
+    if (oldSupportArticles !== '') {
+        oldSupportArticles = JSON.parse(oldSupportArticles);
 
-		let removed = [];
-		let added = [];
-		let changed = [];
+        let removed = [];
+        let added = [];
+        let changed = [];
 
-		for (let data of supportArticles) {
-			if (!oldSupportArticles.filter((s) => s.id === data.id)[0]) added.push(data);
-		}
+        for (let data of supportArticles) {
+            if (!oldSupportArticles.filter((s) => s.id === data.id)[0]) added.push(data);
+        }
 
-		for (let data of oldSupportArticles) {
-			if (!supportArticles.filter((s) => s.id === data.id)[0]) removed.push(data);
-		}
+        for (let data of oldSupportArticles) {
+            if (!supportArticles.filter((s) => s.id === data.id)[0]) removed.push(data);
+        }
 
-		for (let data of supportArticles) {
-			if (
-				oldSupportArticles.filter((s) => s.id === data.id)[0] &&
-				(oldSupportArticles.filter((s) => s.id === data.id)[0].name !== data.name ||
-					oldSupportArticles.filter((s) => s.id === data.id)[0].body !== data.body ||
-					oldSupportArticles.filter((s) => s.id === data.id)[0].title !== data.title)
-			)
-				changed.push(data);
-		}
+        for (let data of supportArticles) {
+            if (
+                oldSupportArticles.filter((s) => s.id === data.id)[0] &&
+                (oldSupportArticles.filter((s) => s.id === data.id)[0].name !== data.name ||
+                    oldSupportArticles.filter((s) => s.id === data.id)[0].body !== data.body ||
+                    oldSupportArticles.filter((s) => s.id === data.id)[0].title !== data.title)
+            )
+                changed.push(data);
+        }
 
-		logger('success', 'ARTICLE', 'Generated diff for', `${file}.json`);
+        logger('success', 'ARTICLE', 'Generated diff for', `${file}.json`);
 
-		if (added.length > 0 || removed.length > 0 || changed.length > 0) {
-			for (let data of added) {
-				const embed = new EmbedMaker(client)
-					.setColor(colors.green)
-					.setTitle(`Added ${title} Article`)
-					.setFields(
-						{
-							name: 'Link',
-							value: data.html_url,
-							inline: false,
-						},
-						{
-							name: 'Id',
-							value: data.id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Author Id',
-							value: data.author_id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Comments Enabled',
-							value: data.comments_disabled ? '❌' : '✅',
-							inline: true,
-						},
-						{
-							name: 'Draft',
-							value: data.draft ? '✅' : '❌',
-							inline: true,
-						},
-						{
-							name: 'Section Id',
-							value: data.section_id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Created At',
-							value: `<t:${Math.floor(new Date(data.created_at).getTime() / 1000)}:R>`,
-							inline: true,
-						},
-						{
-							name: 'Name',
-							value: data.name,
-							inline: true,
-						},
-						{
-							name: 'Title',
-							value: data.title,
-							inline: true,
-						},
-						{
-							name: 'Outdated',
-							value: data.outdated ? '✅' : '❌',
-							inline: true,
-						},
-						{
-							name: 'Outdated Locales',
-							value: data.outdated_locales.length > 0 ? data.outdated_locales.join(', ') : 'None',
-							inline: true,
-						},
-						{
-							name: 'Tags',
-							value: data.label_names.length > 0 ? data.label_names.join(', ') : 'None',
-							inline: true,
-						},
-					);
+        if (added.length > 0 || removed.length > 0 || changed.length > 0) {
+            for (let data of added) {
+                const embed = new EmbedMaker(client)
+                    .setColor(colors.green)
+                    .setTitle(`Added ${title} Article`)
+                    .setFields(
+                        {
+                            name: 'Link',
+                            value: data.html_url,
+                            inline: false,
+                        },
+                        {
+                            name: 'Id',
+                            value: data.id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Author Id',
+                            value: data.author_id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Comments Enabled',
+                            value: data.comments_disabled ? '❌' : '✅',
+                            inline: true,
+                        },
+                        {
+                            name: 'Draft',
+                            value: data.draft ? '✅' : '❌',
+                            inline: true,
+                        },
+                        {
+                            name: 'Section Id',
+                            value: data.section_id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Created At',
+                            value: `<t:${Math.floor(new Date(data.created_at).getTime() / 1000)}:R>`,
+                            inline: true,
+                        },
+                        {
+                            name: 'Name',
+                            value: data.name,
+                            inline: true,
+                        },
+                        {
+                            name: 'Title',
+                            value: data.title,
+                            inline: true,
+                        },
+                        {
+                            name: 'Outdated',
+                            value: data.outdated ? '✅' : '❌',
+                            inline: true,
+                        },
+                        {
+                            name: 'Outdated Locales',
+                            value: data.outdated_locales.length > 0 ? data.outdated_locales.join(', ') : 'None',
+                            inline: true,
+                        },
+                        {
+                            name: 'Tags',
+                            value: data.label_names.length > 0 ? data.label_names.join(', ') : 'None',
+                            inline: true,
+                        },
+                    );
 
-				webhooks.otherChanges.send({
-					content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
-					embeds: [embed],
-				});
+                webhooks.otherChanges.send({
+                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                    embeds: [embed],
+                });
 
-				// Wait 3 seconds to prevent ratelimit
-				await new Promise((resolve) => setTimeout(resolve, 3000));
-			}
+                // Wait 3 seconds to prevent ratelimit
+                await new Promise((resolve) => setTimeout(resolve, 3000));
+            }
 
-			for (let data of changed) {
-				let diffSupportArticleText = '';
-				let diffSupportArticle = diffLines(
-					oldSupportArticles.filter((s) => s.id === data.id)[0].body,
-					data.body,
-				).filter((l) => l.added || l.removed);
+            for (let data of changed) {
+                let diffSupportArticleText = '';
+                let diffSupportArticle = diffLines(
+                    oldSupportArticles.filter((s) => s.id === data.id)[0].body,
+                    data.body,
+                ).filter((l) => l.added || l.removed);
 
-				diffSupportArticleText = diffSupportArticle
-					.map((line) =>
-						line.added
-							? '+ ' +
-							  line.value
-									.split('\n')
-									.filter((l) => l !== '')
-									.join('\n+ ')
-							: '- ' +
-							  line.value
-									.split('\n')
-									.filter((l) => l !== '')
-									.join('\n- '),
-					)
-					.join('\n');
+                diffSupportArticleText = diffSupportArticle
+                    .map((line) =>
+                        line.added
+                            ? '+ ' +
+                            line.value
+                                .split('\n')
+                                .filter((l) => l !== '')
+                                .join('\n+ ')
+                            : '- ' +
+                            line.value
+                                .split('\n')
+                                .filter((l) => l !== '')
+                                .join('\n- '),
+                    )
+                    .join('\n');
 
-				const embed = new EmbedMaker(client)
-					.setColor(colors.yellow)
-					.setTitle(`Updated ${title} Article`)
-					.setFields(
-						{
-							name: 'Link',
-							value: data.html_url,
-							inline: false,
-						},
-						{
-							name: 'Id',
-							value: data.id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Author Id',
-							value: data.author_id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Comments Enabled',
-							value: data.comments_disabled ? '❌' : '✅',
-							inline: true,
-						},
-						{
-							name: 'Draft',
-							value: data.draft ? '✅' : '❌',
-							inline: true,
-						},
-						{
-							name: 'Section Id',
-							value: data.section_id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Created At',
-							value: `<t:${Math.floor(new Date(data.created_at).getTime() / 1000)}:R>`,
-							inline: true,
-						},
-						{
-							name: 'Updated At',
-							value: `<t:${Math.floor(new Date(data.updated_at).getTime() / 1000)}:R>`,
-							inline: true,
-						},
-						{
-							name: 'Name',
-							value: data.name,
-							inline: true,
-						},
-						{
-							name: 'Title',
-							value: data.title,
-							inline: true,
-						},
-						{
-							name: 'Outdated',
-							value: data.outdated ? '✅' : '❌',
-							inline: true,
-						},
-						{
-							name: 'Outdated Locales',
-							value: data.outdated_locales.length > 0 ? data.outdated_locales.join(', ') : 'None',
-							inline: true,
-						},
-						{
-							name: 'Tags',
-							value: data.label_names.length > 0 ? data.label_names.join(', ') : 'None',
-							inline: true,
-						},
-					);
+                const embed = new EmbedMaker(client)
+                    .setColor(colors.yellow)
+                    .setTitle(`Updated ${title} Article`)
+                    .setFields(
+                        {
+                            name: 'Link',
+                            value: data.html_url,
+                            inline: false,
+                        },
+                        {
+                            name: 'Id',
+                            value: data.id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Author Id',
+                            value: data.author_id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Comments Enabled',
+                            value: data.comments_disabled ? '❌' : '✅',
+                            inline: true,
+                        },
+                        {
+                            name: 'Draft',
+                            value: data.draft ? '✅' : '❌',
+                            inline: true,
+                        },
+                        {
+                            name: 'Section Id',
+                            value: data.section_id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Created At',
+                            value: `<t:${Math.floor(new Date(data.created_at).getTime() / 1000)}:R>`,
+                            inline: true,
+                        },
+                        {
+                            name: 'Updated At',
+                            value: `<t:${Math.floor(new Date(data.updated_at).getTime() / 1000)}:R>`,
+                            inline: true,
+                        },
+                        {
+                            name: 'Name',
+                            value: data.name,
+                            inline: true,
+                        },
+                        {
+                            name: 'Title',
+                            value: data.title,
+                            inline: true,
+                        },
+                        {
+                            name: 'Outdated',
+                            value: data.outdated ? '✅' : '❌',
+                            inline: true,
+                        },
+                        {
+                            name: 'Outdated Locales',
+                            value: data.outdated_locales.length > 0 ? data.outdated_locales.join(', ') : 'None',
+                            inline: true,
+                        },
+                        {
+                            name: 'Tags',
+                            value: data.label_names.length > 0 ? data.label_names.join(', ') : 'None',
+                            inline: true,
+                        },
+                    );
 
-				if (diffSupportArticleText !== '')
-					embed.setDescription(
-						`\`\`\`diff\n${
-							diffSupportArticleText.length > 3500
-								? `${diffSupportArticleText.slice(0, 3500)}...`
-								: diffSupportArticleText
-						}\`\`\``,
-					);
+                if (diffSupportArticleText !== '')
+                    embed.setDescription(
+                        `\`\`\`diff\n${diffSupportArticleText.length > 3500
+                            ? `${diffSupportArticleText.slice(0, 3500)}...`
+                            : diffSupportArticleText
+                        }\`\`\``,
+                    );
 
-				webhooks.otherChanges.send({
-					content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
-					embeds: [embed],
-				});
+                webhooks.otherChanges.send({
+                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                    embeds: [embed],
+                });
 
-				// Wait 3 seconds to prevent ratelimit
-				await new Promise((resolve) => setTimeout(resolve, 3000));
-			}
+                // Wait 3 seconds to prevent ratelimit
+                await new Promise((resolve) => setTimeout(resolve, 3000));
+            }
 
-			for (let data of removed) {
-				const embed = new EmbedMaker(client)
-					.setColor(colors.red)
-					.setTitle(`Removed ${title} Article`)
-					.setFields(
-						{
-							name: 'Link',
-							value: data.html_url,
-							inline: false,
-						},
-						{
-							name: 'Id',
-							value: data.id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Author Id',
-							value: data.author_id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Comments Enabled',
-							value: data.comments_disabled ? '❌' : '✅',
-							inline: true,
-						},
-						{
-							name: 'Draft',
-							value: data.draft ? '✅' : '❌',
-							inline: true,
-						},
-						{
-							name: 'Section Id',
-							value: data.section_id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Created At',
-							value: `<t:${Math.floor(new Date(data.created_at).getTime() / 1000)}:R>`,
-							inline: true,
-						},
-						{
-							name: 'Updated At',
-							value: `<t:${Math.floor(new Date(data.updated_at).getTime() / 1000)}:R>`,
-							inline: true,
-						},
-						{
-							name: 'Name',
-							value: data.name,
-							inline: true,
-						},
-						{
-							name: 'Title',
-							value: data.title,
-							inline: true,
-						},
-						{
-							name: 'Outdated',
-							value: data.outdated ? '✅' : '❌',
-							inline: true,
-						},
-						{
-							name: 'Outdated Locales',
-							value: data.outdated_locales.length > 0 ? data.outdated_locales.join(', ') : 'None',
-							inline: true,
-						},
-						{
-							name: 'Tags',
-							value: data.label_names.length > 0 ? data.label_names.join(', ') : 'None',
-							inline: true,
-						},
-					);
+            for (let data of removed) {
+                const embed = new EmbedMaker(client)
+                    .setColor(colors.red)
+                    .setTitle(`Removed ${title} Article`)
+                    .setFields(
+                        {
+                            name: 'Link',
+                            value: data.html_url,
+                            inline: false,
+                        },
+                        {
+                            name: 'Id',
+                            value: data.id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Author Id',
+                            value: data.author_id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Comments Enabled',
+                            value: data.comments_disabled ? '❌' : '✅',
+                            inline: true,
+                        },
+                        {
+                            name: 'Draft',
+                            value: data.draft ? '✅' : '❌',
+                            inline: true,
+                        },
+                        {
+                            name: 'Section Id',
+                            value: data.section_id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Created At',
+                            value: `<t:${Math.floor(new Date(data.created_at).getTime() / 1000)}:R>`,
+                            inline: true,
+                        },
+                        {
+                            name: 'Updated At',
+                            value: `<t:${Math.floor(new Date(data.updated_at).getTime() / 1000)}:R>`,
+                            inline: true,
+                        },
+                        {
+                            name: 'Name',
+                            value: data.name,
+                            inline: true,
+                        },
+                        {
+                            name: 'Title',
+                            value: data.title,
+                            inline: true,
+                        },
+                        {
+                            name: 'Outdated',
+                            value: data.outdated ? '✅' : '❌',
+                            inline: true,
+                        },
+                        {
+                            name: 'Outdated Locales',
+                            value: data.outdated_locales.length > 0 ? data.outdated_locales.join(', ') : 'None',
+                            inline: true,
+                        },
+                        {
+                            name: 'Tags',
+                            value: data.label_names.length > 0 ? data.label_names.join(', ') : 'None',
+                            inline: true,
+                        },
+                    );
 
-				webhooks.otherChanges.send({
-					content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
-					embeds: [embed],
-				});
+                webhooks.otherChanges.send({
+                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                    embeds: [embed],
+                });
 
-				// Wait 3 seconds to prevent ratelimit
-				await new Promise((resolve) => setTimeout(resolve, 3000));
-			}
+                // Wait 3 seconds to prevent ratelimit
+                await new Promise((resolve) => setTimeout(resolve, 3000));
+            }
 
-			logger('success', 'ARTICLE', 'Generated response for', `${file}.json`);
-		}
-	}
+            logger('success', 'ARTICLE', 'Generated response for', `${file}.json`);
+        }
+    }
 }
 
 async function fetchSupportSections(file, title, url) {
-	let oldSupportSections = '';
+    let oldSupportSections = '';
 
-	try {
-		oldSupportSections = readFileSync(`articles/${file}.json`, 'utf-8');
-	} catch (error) {
-		try {
-			writeFileSync(`articles/${file}.json`, '', 'utf-8');
+    try {
+        oldSupportSections = readFileSync(`articles/${file}.json`, 'utf-8');
+    } catch (error) {
+        try {
+            writeFileSync(`articles/${file}.json`, '', 'utf-8');
 
-			oldSupportSections = readFileSync(`articles/${file}.json`, 'utf-8');
-		} catch (error) {
-			mkdirSync('articles');
-			writeFileSync(`articles/${file}.json`, '', 'utf-8');
+            oldSupportSections = readFileSync(`articles/${file}.json`, 'utf-8');
+        } catch (error) {
+            mkdirSync('articles');
+            writeFileSync(`articles/${file}.json`, '', 'utf-8');
 
-			oldSupportSections = readFileSync(`articles/${file}.json`, 'utf-8');
-		}
-	}
+            oldSupportSections = readFileSync(`articles/${file}.json`, 'utf-8');
+        }
+    }
 
-	let supportSections = (await axios.get(url)).data?.sections;
+    let supportSections = (await axios.get(url)).data?.sections;
 
-	writeFileSync(`articles/${file}.json`, JSON.stringify(supportSections, null, 4), 'utf-8');
-	logger('success', 'ARTICLE', `Fetched ${title} sections`);
+    writeFileSync(`articles/${file}.json`, JSON.stringify(supportSections, null, 4), 'utf-8');
+    logger('success', 'ARTICLE', `Fetched ${title} sections`);
 
-	if (oldSupportSections !== '') {
-		oldSupportSections = JSON.parse(oldSupportSections);
+    if (oldSupportSections !== '') {
+        oldSupportSections = JSON.parse(oldSupportSections);
 
-		let removed = [];
-		let added = [];
-		let changed = [];
+        let removed = [];
+        let added = [];
+        let changed = [];
 
-		for (let data of supportSections) {
-			if (!oldSupportSections.filter((s) => s.id === data.id)[0]) added.push(data);
-		}
+        for (let data of supportSections) {
+            if (!oldSupportSections.filter((s) => s.id === data.id)[0]) added.push(data);
+        }
 
-		for (let data of oldSupportSections) {
-			if (!supportSections.filter((s) => s.id === data.id)[0]) removed.push(data);
-		}
+        for (let data of oldSupportSections) {
+            if (!supportSections.filter((s) => s.id === data.id)[0]) removed.push(data);
+        }
 
-		for (let data of supportSections) {
-			if (
-				oldSupportSections.filter((s) => s.id === data.id)[0] &&
-				oldSupportSections.filter((s) => s.id === data.id)[0].name !== data.name
-			)
-				changed.push(data);
-		}
+        for (let data of supportSections) {
+            if (
+                oldSupportSections.filter((s) => s.id === data.id)[0] &&
+                oldSupportSections.filter((s) => s.id === data.id)[0].name !== data.name
+            )
+                changed.push(data);
+        }
 
-		logger('success', 'ARTICLE', 'Generated diff for', `${file}.json`);
+        logger('success', 'ARTICLE', 'Generated diff for', `${file}.json`);
 
-		if (added.length > 0 || removed.length > 0 || changed.length > 0) {
-			for (let data of added) {
-				const embed = new EmbedMaker(client)
-					.setColor(colors.green)
-					.setTitle(`Added ${title} Section`)
-					.setFields(
-						{
-							name: 'Link',
-							value: data.html_url,
-							inline: false,
-						},
-						{
-							name: 'Id',
-							value: data.id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Category Id',
-							value: data.category_id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Created At',
-							value: `<t:${Math.floor(new Date(data.created_at).getTime() / 1000)}:R>`,
-							inline: true,
-						},
-						{
-							name: 'Name',
-							value: data.name,
-							inline: true,
-						},
-						{
-							name: 'Description',
-							value: data.description === '' ? 'None' : data.description,
-							inline: true,
-						},
-						{
-							name: 'Outdated',
-							value: data.outdated ? '✅' : '❌',
-							inline: true,
-						},
-						{
-							name: 'Parent Section Id',
-							value: data.parent_section_id ?? 'None',
-							inline: true,
-						},
-						{
-							name: 'Theme Template',
-							value: data.theme_template,
-							inline: true,
-						},
-					);
+        if (added.length > 0 || removed.length > 0 || changed.length > 0) {
+            for (let data of added) {
+                const embed = new EmbedMaker(client)
+                    .setColor(colors.green)
+                    .setTitle(`Added ${title} Section`)
+                    .setFields(
+                        {
+                            name: 'Link',
+                            value: data.html_url,
+                            inline: false,
+                        },
+                        {
+                            name: 'Id',
+                            value: data.id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Category Id',
+                            value: data.category_id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Created At',
+                            value: `<t:${Math.floor(new Date(data.created_at).getTime() / 1000)}:R>`,
+                            inline: true,
+                        },
+                        {
+                            name: 'Name',
+                            value: data.name,
+                            inline: true,
+                        },
+                        {
+                            name: 'Description',
+                            value: data.description === '' ? 'None' : data.description,
+                            inline: true,
+                        },
+                        {
+                            name: 'Outdated',
+                            value: data.outdated ? '✅' : '❌',
+                            inline: true,
+                        },
+                        {
+                            name: 'Parent Section Id',
+                            value: data.parent_section_id ?? 'None',
+                            inline: true,
+                        },
+                        {
+                            name: 'Theme Template',
+                            value: data.theme_template,
+                            inline: true,
+                        },
+                    );
 
-				webhooks.otherChanges.send({
-					content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
-					embeds: [embed],
-				});
+                webhooks.otherChanges.send({
+                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                    embeds: [embed],
+                });
 
-				// Wait 3 seconds to prevent ratelimit
-				await new Promise((resolve) => setTimeout(resolve, 3000));
-			}
+                // Wait 3 seconds to prevent ratelimit
+                await new Promise((resolve) => setTimeout(resolve, 3000));
+            }
 
-			for (let data of changed) {
-				const embed = new EmbedMaker(client)
-					.setColor(colors.yellow)
-					.setTitle(`Updated ${title} Section`)
-					.setFields(
-						{
-							name: 'Link',
-							value: data.html_url,
-							inline: false,
-						},
-						{
-							name: 'Id',
-							value: data.id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Category Id',
-							value: data.category_id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Created At',
-							value: `<t:${Math.floor(new Date(data.created_at).getTime() / 1000)}:R>`,
-							inline: true,
-						},
-						{
-							name: 'Updated At',
-							value: `<t:${Math.floor(new Date(data.updated_at).getTime() / 1000)}:R>`,
-							inline: true,
-						},
-						{
-							name: 'Name',
-							value: data.name,
-							inline: true,
-						},
-						{
-							name: 'Description',
-							value: data.description === '' ? 'None' : data.description,
-							inline: true,
-						},
-						{
-							name: 'Outdated',
-							value: data.outdated ? '✅' : '❌',
-							inline: true,
-						},
-						{
-							name: 'Parent Section Id',
-							value: data.parent_section_id ?? 'None',
-							inline: true,
-						},
-						{
-							name: 'Theme Template',
-							value: data.theme_template,
-							inline: true,
-						},
-					);
+            for (let data of changed) {
+                const embed = new EmbedMaker(client)
+                    .setColor(colors.yellow)
+                    .setTitle(`Updated ${title} Section`)
+                    .setFields(
+                        {
+                            name: 'Link',
+                            value: data.html_url,
+                            inline: false,
+                        },
+                        {
+                            name: 'Id',
+                            value: data.id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Category Id',
+                            value: data.category_id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Created At',
+                            value: `<t:${Math.floor(new Date(data.created_at).getTime() / 1000)}:R>`,
+                            inline: true,
+                        },
+                        {
+                            name: 'Updated At',
+                            value: `<t:${Math.floor(new Date(data.updated_at).getTime() / 1000)}:R>`,
+                            inline: true,
+                        },
+                        {
+                            name: 'Name',
+                            value: data.name,
+                            inline: true,
+                        },
+                        {
+                            name: 'Description',
+                            value: data.description === '' ? 'None' : data.description,
+                            inline: true,
+                        },
+                        {
+                            name: 'Outdated',
+                            value: data.outdated ? '✅' : '❌',
+                            inline: true,
+                        },
+                        {
+                            name: 'Parent Section Id',
+                            value: data.parent_section_id ?? 'None',
+                            inline: true,
+                        },
+                        {
+                            name: 'Theme Template',
+                            value: data.theme_template,
+                            inline: true,
+                        },
+                    );
 
-				webhooks.otherChanges.send({
-					content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
-					embeds: [embed],
-				});
+                webhooks.otherChanges.send({
+                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                    embeds: [embed],
+                });
 
-				// Wait 3 seconds to prevent ratelimit
-				await new Promise((resolve) => setTimeout(resolve, 3000));
-			}
+                // Wait 3 seconds to prevent ratelimit
+                await new Promise((resolve) => setTimeout(resolve, 3000));
+            }
 
-			for (let data of removed) {
-				const embed = new EmbedMaker(client)
-					.setColor(colors.red)
-					.setTitle(`Removed ${title} Section`)
-					.setFields(
-						{
-							name: 'Link',
-							value: data.html_url,
-							inline: false,
-						},
-						{
-							name: 'Id',
-							value: data.id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Category Id',
-							value: data.category_id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Created At',
-							value: `<t:${Math.floor(new Date(data.created_at).getTime() / 1000)}:R>`,
-							inline: true,
-						},
-						{
-							name: 'Updated At',
-							value: `<t:${Math.floor(new Date(data.updated_at).getTime() / 1000)}:R>`,
-							inline: true,
-						},
-						{
-							name: 'Name',
-							value: data.name,
-							inline: true,
-						},
-						{
-							name: 'Description',
-							value: data.description === '' ? 'None' : data.description,
-							inline: true,
-						},
-						{
-							name: 'Outdated',
-							value: data.outdated ? '✅' : '❌',
-							inline: true,
-						},
-						{
-							name: 'Parent Section Id',
-							value: data.parent_section_id ?? 'None',
-							inline: true,
-						},
-						{
-							name: 'Theme Template',
-							value: data.theme_template,
-							inline: true,
-						},
-					);
+            for (let data of removed) {
+                const embed = new EmbedMaker(client)
+                    .setColor(colors.red)
+                    .setTitle(`Removed ${title} Section`)
+                    .setFields(
+                        {
+                            name: 'Link',
+                            value: data.html_url,
+                            inline: false,
+                        },
+                        {
+                            name: 'Id',
+                            value: data.id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Category Id',
+                            value: data.category_id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Created At',
+                            value: `<t:${Math.floor(new Date(data.created_at).getTime() / 1000)}:R>`,
+                            inline: true,
+                        },
+                        {
+                            name: 'Updated At',
+                            value: `<t:${Math.floor(new Date(data.updated_at).getTime() / 1000)}:R>`,
+                            inline: true,
+                        },
+                        {
+                            name: 'Name',
+                            value: data.name,
+                            inline: true,
+                        },
+                        {
+                            name: 'Description',
+                            value: data.description === '' ? 'None' : data.description,
+                            inline: true,
+                        },
+                        {
+                            name: 'Outdated',
+                            value: data.outdated ? '✅' : '❌',
+                            inline: true,
+                        },
+                        {
+                            name: 'Parent Section Id',
+                            value: data.parent_section_id ?? 'None',
+                            inline: true,
+                        },
+                        {
+                            name: 'Theme Template',
+                            value: data.theme_template,
+                            inline: true,
+                        },
+                    );
 
-				webhooks.otherChanges.send({
-					content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
-					embeds: [embed],
-				});
+                webhooks.otherChanges.send({
+                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                    embeds: [embed],
+                });
 
-				// Wait 3 seconds to prevent ratelimit
-				await new Promise((resolve) => setTimeout(resolve, 3000));
-			}
+                // Wait 3 seconds to prevent ratelimit
+                await new Promise((resolve) => setTimeout(resolve, 3000));
+            }
 
-			logger('success', 'ARTICLE', 'Generated response for', `${file}.json`);
-		}
-	}
+            logger('success', 'ARTICLE', 'Generated response for', `${file}.json`);
+        }
+    }
 }
 
 async function checkArticles() {
-	try {
-		await fetchSupportSections(
-			'supportSections',
-			'Support',
-			'https://hammerandchisel.zendesk.com/api/v2/help_center/en-us/sections',
-		);
-		await fetchSupportSections(
-			'creatorSupportSections',
-			'Creator Support',
-			'https://discordcreatorsupport.zendesk.com/api/v2/help_center/en-us/sections',
-		);
-		await fetchSupportSections(
-			'developerSupportSections',
-			'Developer Support',
-			'https://discorddevs.zendesk.com/api/v2/help_center/en-us/sections',
-		);
-		await fetchSupportArticles(
-			'supportArticles',
-			'Support',
-			'https://hammerandchisel.zendesk.com/api/v2/help_center/en-us/articles',
-		);
-		await fetchSupportArticles(
-			'creatorSupportArticles',
-			'Creator Support',
-			'https://discordcreatorsupport.zendesk.com/api/v2/help_center/en-us/articles',
-		);
-		await fetchSupportArticles(
-			'developerSupportArticles',
-			'Developer Support',
-			'https://discorddevs.zendesk.com/api/v2/help_center/en-us/articles',
-		);
-	} catch (error) {
-		return logger(
-			'error',
-			'ARTICLE',
-			'Error checking articles',
-			`${error?.response?.status} ${error?.response?.statusText}\n`,
-			error,
-		);
-	}
+    try {
+        await fetchSupportSections(
+            'supportSections',
+            'Support',
+            'https://hammerandchisel.zendesk.com/api/v2/help_center/en-us/sections',
+        );
+        await fetchSupportSections(
+            'creatorSupportSections',
+            'Creator Support',
+            'https://discordcreatorsupport.zendesk.com/api/v2/help_center/en-us/sections',
+        );
+        await fetchSupportSections(
+            'developerSupportSections',
+            'Developer Support',
+            'https://discorddevs.zendesk.com/api/v2/help_center/en-us/sections',
+        );
+        await fetchSupportArticles(
+            'supportArticles',
+            'Support',
+            'https://hammerandchisel.zendesk.com/api/v2/help_center/en-us/articles',
+        );
+        await fetchSupportArticles(
+            'creatorSupportArticles',
+            'Creator Support',
+            'https://discordcreatorsupport.zendesk.com/api/v2/help_center/en-us/articles',
+        );
+        await fetchSupportArticles(
+            'developerSupportArticles',
+            'Developer Support',
+            'https://discorddevs.zendesk.com/api/v2/help_center/en-us/articles',
+        );
+    } catch (error) {
+        return logger(
+            'error',
+            'ARTICLE',
+            'Error checking articles',
+            `${error?.response?.status} ${error?.response?.statusText}\n`,
+            error,
+        );
+    }
 }
 
 async function checkBlogPosts() {
-	let oldBlogPosts = '';
+    let oldBlogPosts = '';
 
-	try {
-		oldBlogPosts = readFileSync('blog/posts.json', 'utf-8');
-	} catch (error) {
-		try {
-			writeFileSync('blog/posts.json', '[]');
+    try {
+        oldBlogPosts = readFileSync('blog/posts.json', 'utf-8');
+    } catch (error) {
+        try {
+            writeFileSync('blog/posts.json', '[]');
 
-			oldBlogPosts = readFileSync('blog/posts.json', 'utf-8');
-			oldBlogPosts = JSON.parse(oldBlogPosts);
-		} catch (error) {
-			try {
-				mkdirSync('blog');
-				writeFileSync('blog/posts.json', '[]');
+            oldBlogPosts = readFileSync('blog/posts.json', 'utf-8');
+            oldBlogPosts = JSON.parse(oldBlogPosts);
+        } catch (error) {
+            try {
+                mkdirSync('blog');
+                writeFileSync('blog/posts.json', '[]');
 
-				oldBlogPosts = readFileSync('blog/posts.json', 'utf-8');
-				oldBlogPosts = JSON.parse(oldBlogPosts);
-			} catch (error) {
-				return logger('error', 'BLOG', 'Error checking blog posts', '\n', error);
-			}
-		}
-	}
+                oldBlogPosts = readFileSync('blog/posts.json', 'utf-8');
+                oldBlogPosts = JSON.parse(oldBlogPosts);
+            } catch (error) {
+                return logger('error', 'BLOG', 'Error checking blog posts', '\n', error);
+            }
+        }
+    }
 
-	let blogPosts = (
-		await axios.get('https://raw.githubusercontent.com/xHyroM/discord-datamining/master/data/blog/posts.json')
-	).data;
+    let blogPosts = (
+        await axios.get('https://raw.githubusercontent.com/xHyroM/discord-datamining/master/data/blog/posts.json')
+    ).data;
 
-	writeFileSync('blog/posts.json', JSON.stringify(blogPosts, null, 4));
+    writeFileSync('blog/posts.json', JSON.stringify(blogPosts, null, 4));
 
-	if (typeof oldBlogPosts === 'string') oldBlogPosts = JSON.parse(oldBlogPosts);
-	if (oldBlogPosts.length === 0) return logger('success', 'BLOG', 'No blog posts found');
+    if (typeof oldBlogPosts === 'string') oldBlogPosts = JSON.parse(oldBlogPosts);
+    if (oldBlogPosts.length === 0) return logger('success', 'BLOG', 'No blog posts found');
 
-	logger('info', 'BLOG', 'Found', blogPosts.length, 'blog posts');
+    logger('info', 'BLOG', 'Found', blogPosts.length, 'blog posts');
 
-	let removed = [];
-	let added = [];
-	let changed = [];
+    let removed = [];
+    let added = [];
+    let changed = [];
 
-	for (let data of blogPosts) {
-		if (!oldBlogPosts.filter((s) => s.id === data.id)[0]) added.push(data);
-	}
+    for (let data of blogPosts) {
+        if (!oldBlogPosts.filter((s) => s.id === data.id)[0]) added.push(data);
+    }
 
-	for (let data of oldBlogPosts) {
-		if (!blogPosts.filter((s) => s.id === data.id)[0]) removed.push(data);
-	}
+    for (let data of oldBlogPosts) {
+        if (!blogPosts.filter((s) => s.id === data.id)[0]) removed.push(data);
+    }
 
-	for (let data of blogPosts) {
-		if (
-			oldBlogPosts.filter((s) => s.id === data.id)[0] &&
-			(oldBlogPosts.filter((s) => s.id === data.id)[0].title !== data.title ||
-				oldBlogPosts.filter((s) => s.id === data.id)[0].description !== data.description ||
-				oldBlogPosts.filter((s) => s.id === data.id)[0].body !== data.body)
-		)
-			changed.push(data);
-	}
+    for (let data of blogPosts) {
+        if (
+            oldBlogPosts.filter((s) => s.id === data.id)[0] &&
+            (oldBlogPosts.filter((s) => s.id === data.id)[0].title !== data.title ||
+                oldBlogPosts.filter((s) => s.id === data.id)[0].description !== data.description ||
+                oldBlogPosts.filter((s) => s.id === data.id)[0].body !== data.body)
+        )
+            changed.push(data);
+    }
 
-	logger('success', 'BLOG', 'Generated diff for', 'posts.json');
+    logger('success', 'BLOG', 'Generated diff for', 'posts.json');
 
-	if (added.length > 0 || removed.length > 0 || changed.length > 0) {
-		for (let data of added) {
-			try {
-				const embed = new EmbedMaker(client)
-					.setColor(colors.green)
-					.setTitle('Added Blog Post')
-					.setFields(
-						{
-							name: 'Link',
-							value: data.link.toString(),
-							inline: false,
-						},
-						{
-							name: 'Id',
-							value: data.id.toString(),
-							inline: true,
-						},
-						{
-							name: 'Title',
-							value: data.title.toString(),
-							inline: true,
-						},
-						{
-							name: 'Description',
-							value: data.description.toString(),
-							inline: false,
-						},
-						{
-							name: 'Published At',
-							value: `<t:${Math.floor(new Date(data.pubDate).getTime() / 1000)}:R>`,
-							inline: true,
-						},
-					)
-					.setImage(data['media:thumbnail']);
+    if (added.length > 0 || removed.length > 0 || changed.length > 0) {
+        for (let data of added) {
+            try {
+                const embed = new EmbedMaker(client)
+                    .setColor(colors.green)
+                    .setTitle('Added Blog Post')
+                    .setFields(
+                        {
+                            name: 'Link',
+                            value: data.link.toString(),
+                            inline: false,
+                        },
+                        {
+                            name: 'Id',
+                            value: data.id.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Title',
+                            value: data.title.toString(),
+                            inline: true,
+                        },
+                        {
+                            name: 'Description',
+                            value: data.description.toString(),
+                            inline: false,
+                        },
+                        {
+                            name: 'Published At',
+                            value: `<t:${Math.floor(new Date(data.pubDate).getTime() / 1000)}:R>`,
+                            inline: true,
+                        },
+                    )
+                    .setImage(data['media:thumbnail']);
 
-				embed.data.footer.text = 'Powered by xHyroM/discord-datamining';
+                embed.data.footer.text = 'Powered by xHyroM/discord-datamining';
 
-				webhooks.otherChanges.send({
-					content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
-					embeds: [embed],
-				});
-			} catch (error) {
-				logger('error', 'BLOG', 'Error sending webhook', '\n', error, JSON.stringify(data, null, 4));
-			}
+                webhooks.otherChanges.send({
+                    content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                    embeds: [embed],
+                });
+            } catch (error) {
+                logger('error', 'BLOG', 'Error sending webhook', '\n', error, JSON.stringify(data, null, 4));
+            }
 
-			// Wait 3 seconds to prevent ratelimit
-			await new Promise((resolve) => setTimeout(resolve, 3000));
-		}
+            // Wait 3 seconds to prevent ratelimit
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+        }
 
-		for (let data of changed) {
-			let diffBlogPostText = '';
-			let diffBlogPost = diffLines(oldBlogPosts.filter((s) => s.id === data.id)[0].body, data.body).filter(
-				(l) => l.added || l.removed,
-			);
+        for (let data of changed) {
+            let diffBlogPostText = '';
+            let diffBlogPost = diffLines(oldBlogPosts.filter((s) => s.id === data.id)[0].body, data.body).filter(
+                (l) => l.added || l.removed,
+            );
 
-			diffBlogPostText = diffBlogPost
-				.map((line) =>
-					line.added
-						? '+ ' +
-						  line.value
-								.split('\n')
-								.filter((l) => l !== '')
-								.join('\n+ ')
-						: '- ' +
-						  line.value
-								.split('\n')
-								.filter((l) => l !== '')
-								.join('\n- '),
-				)
-				.join('\n');
+            diffBlogPostText = diffBlogPost
+                .map((line) =>
+                    line.added
+                        ? '+ ' +
+                        line.value
+                            .split('\n')
+                            .filter((l) => l !== '')
+                            .join('\n+ ')
+                        : '- ' +
+                        line.value
+                            .split('\n')
+                            .filter((l) => l !== '')
+                            .join('\n- '),
+                )
+                .join('\n');
 
-			const embed = new EmbedMaker(client)
-				.setColor(colors.yellow)
-				.setTitle('Updated Blog Post')
-				.setFields(
-					{
-						name: 'Link',
-						value: data.link.toString(),
-						inline: false,
-					},
-					{
-						name: 'Id',
-						value: data.id.toString(),
-						inline: true,
-					},
-					{
-						name: 'Title',
-						value: data.title.toString(),
-						inline: true,
-					},
-					{
-						name: 'Description',
-						value: data.description.toString(),
-						inline: false,
-					},
-					{
-						name: 'Published At',
-						value: `<t:${Math.floor(new Date(data.pubDate).getTime() / 1000)}:R>`,
-						inline: true,
-					},
-				)
-				.setImage(data['media:thumbnail']);
+            const embed = new EmbedMaker(client)
+                .setColor(colors.yellow)
+                .setTitle('Updated Blog Post')
+                .setFields(
+                    {
+                        name: 'Link',
+                        value: data.link.toString(),
+                        inline: false,
+                    },
+                    {
+                        name: 'Id',
+                        value: data.id.toString(),
+                        inline: true,
+                    },
+                    {
+                        name: 'Title',
+                        value: data.title.toString(),
+                        inline: true,
+                    },
+                    {
+                        name: 'Description',
+                        value: data.description.toString(),
+                        inline: false,
+                    },
+                    {
+                        name: 'Published At',
+                        value: `<t:${Math.floor(new Date(data.pubDate).getTime() / 1000)}:R>`,
+                        inline: true,
+                    },
+                )
+                .setImage(data['media:thumbnail']);
 
-			embed.data.footer.text = 'Powered by xHyroM/discord-datamining';
+            embed.data.footer.text = 'Powered by xHyroM/discord-datamining';
 
-			if (diffBlogPost !== '') embed.setDescription(`\`\`\`diff\n${diffBlogPostText}\`\`\``);
+            if (diffBlogPost !== '') embed.setDescription(`\`\`\`diff\n${diffBlogPostText}\`\`\``);
 
-			webhooks.otherChanges.send({
-				content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
-				embeds: [embed],
-			});
+            webhooks.otherChanges.send({
+                content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                embeds: [embed],
+            });
 
-			// Wait 3 seconds to prevent ratelimit
-			await new Promise((resolve) => setTimeout(resolve, 3000));
-		}
+            // Wait 3 seconds to prevent ratelimit
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+        }
 
-		for (let data of removed) {
-			const embed = new EmbedMaker(client)
-				.setColor(colors.red)
-				.setTitle('Removed Blog Post')
-				.setFields(
-					{
-						name: 'Link',
-						value: data.link.toString(),
-						inline: false,
-					},
-					{
-						name: 'Id',
-						value: data.id.toString(),
-						inline: true,
-					},
-					{
-						name: 'Title',
-						value: data.title.toString(),
-						inline: true,
-					},
-					{
-						name: 'Description',
-						value: data.description.toString(),
-						inline: false,
-					},
-					{
-						name: 'Published At',
-						value: `<t:${Math.floor(new Date(data.pubDate).getTime() / 1000)}:R>`,
-						inline: true,
-					},
-				)
-				.setImage(data['media:thumbnail']);
+        for (let data of removed) {
+            const embed = new EmbedMaker(client)
+                .setColor(colors.red)
+                .setTitle('Removed Blog Post')
+                .setFields(
+                    {
+                        name: 'Link',
+                        value: data.link.toString(),
+                        inline: false,
+                    },
+                    {
+                        name: 'Id',
+                        value: data.id.toString(),
+                        inline: true,
+                    },
+                    {
+                        name: 'Title',
+                        value: data.title.toString(),
+                        inline: true,
+                    },
+                    {
+                        name: 'Description',
+                        value: data.description.toString(),
+                        inline: false,
+                    },
+                    {
+                        name: 'Published At',
+                        value: `<t:${Math.floor(new Date(data.pubDate).getTime() / 1000)}:R>`,
+                        inline: true,
+                    },
+                )
+                .setImage(data['media:thumbnail']);
 
-			embed.data.footer.text = 'Powered by xHyroM/discord-datamining';
+            embed.data.footer.text = 'Powered by xHyroM/discord-datamining';
 
-			webhooks.otherChanges.send({
-				content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
-				embeds: [embed],
-			});
+            webhooks.otherChanges.send({
+                content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                embeds: [embed],
+            });
 
-			// Wait 3 seconds to prevent ratelimit
-			await new Promise((resolve) => setTimeout(resolve, 3000));
-		}
+            // Wait 3 seconds to prevent ratelimit
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+        }
 
-		logger('success', 'ARTICLE', 'Generated response for', `posts.json`);
-	}
+        logger('success', 'ARTICLE', 'Generated response for', `posts.json`);
+    }
 }
 
 async function checkSubdomains() {
-	try {
-		let oldSubdomains = '';
+    try {
+        let oldSubdomains = '';
 
-		try {
-			oldSubdomains = JSON.parse(readFileSync('domain/subdomains.json'));
-		} catch (error) {
-			try {
-				writeFileSync('domain/subdomains.json', '[]');
+        try {
+            oldSubdomains = JSON.parse(readFileSync('domain/subdomains.json'));
+        } catch (error) {
+            try {
+                writeFileSync('domain/subdomains.json', '[]');
 
-				oldSubdomains = JSON.parse(readFileSync('domain/subdomains.json'));
-			} catch (error) {
-				try {
-					mkdirSync('domain');
-					writeFileSync('domain/subdomains.json', '[]');
+                oldSubdomains = JSON.parse(readFileSync('domain/subdomains.json'));
+            } catch (error) {
+                try {
+                    mkdirSync('domain');
+                    writeFileSync('domain/subdomains.json', '[]');
 
-					oldSubdomains = JSON.parse(readFileSync('domain/subdomains.json'));
-				} catch (error) {
-					logger('error', 'SUBDOMAIN', 'Error while checking subdomains', '\n', error);
-				}
-			}
-		}
+                    oldSubdomains = JSON.parse(readFileSync('domain/subdomains.json'));
+                } catch (error) {
+                    logger('error', 'SUBDOMAIN', 'Error while checking subdomains', '\n', error);
+                }
+            }
+        }
 
-		let subdomains = (
-			await axios.get(
-				'https://raw.githubusercontent.com/xHyroM/discord-datamining/master/data/domains/discord.com.json',
-			)
-		).data?.subdomains;
+        let subdomains = (
+            await axios.get(
+                'https://raw.githubusercontent.com/xHyroM/discord-datamining/master/data/domains/discord.com.json',
+            )
+        ).data?.subdomains;
 
-		writeFileSync('domain/subdomains.json', JSON.stringify(subdomains, null, 4));
+        writeFileSync('domain/subdomains.json', JSON.stringify(subdomains, null, 4));
 
-		if (oldSubdomains === '') return logger('error', 'SUBDOMAIN', 'Subdomains empty');
+        if (oldSubdomains === '') return logger('error', 'SUBDOMAIN', 'Subdomains empty');
 
-		let added = subdomains.filter((s) => !oldSubdomains.includes(s));
-		let removed = oldSubdomains.filter((s) => !subdomains.includes(s));
+        let added = subdomains.filter((s) => !oldSubdomains.includes(s));
+        let removed = oldSubdomains.filter((s) => !subdomains.includes(s));
 
-		if (added.length === 0 && removed.length === 0) return logger('warning', 'SUBDOMAIN', 'No subdomain changes');
+        if (added.length === 0 && removed.length === 0) return logger('warning', 'SUBDOMAIN', 'No subdomain changes');
 
-		logger('info', 'SUBDOMAIN', 'Subdomain changes', `${added.length} added, ${removed.length} removed`);
+        logger('info', 'SUBDOMAIN', 'Subdomain changes', `${added.length} added, ${removed.length} removed`);
 
-		webhooks.otherChanges
-			.send({
-				content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
-				embeds: [
-					new EmbedMaker(client)
-						.setTitle('Subdomains')
-						.setDescription(
-							`\`\`\`diff\n${removed.map((s) => `- https://${s}.discord.com`).join('\n')}\n${added
-								.map((s) => `+ https://${s}.discord.com`)
-								.join('\n')}\n\`\`\``,
-						)
-						.setFooterText('Powered by xHyroM/discord-datamining'),
-				],
-			})
-			.catch((error) => logger('error', 'SUBDOMAIN', 'Error while sending webhook', '\n', error));
+        webhooks.otherChanges
+            .send({
+                content: `<@&${roleIds.otherChanges}> <@&${roleIds.urlStuff}>`,
+                embeds: [
+                    new EmbedMaker(client)
+                        .setTitle('Subdomains')
+                        .setDescription(
+                            `\`\`\`diff\n${removed.map((s) => `- https://${s}.discord.com`).join('\n')}\n${added
+                                .map((s) => `+ https://${s}.discord.com`)
+                                .join('\n')}\n\`\`\``,
+                        )
+                        .setFooterText('Powered by xHyroM/discord-datamining'),
+                ],
+            })
+            .catch((error) => logger('error', 'SUBDOMAIN', 'Error while sending webhook', '\n', error));
 
-		logger('success', 'SUBDOMAIN', 'Generated response for', 'subdomains.json');
-	} catch (error) {
-		logger('error', 'SUBDOMAIN', 'Error while checking subdomains', '\n', error?.rawError);
-	}
+        logger('success', 'SUBDOMAIN', 'Generated response for', 'subdomains.json');
+    } catch (error) {
+        logger('error', 'SUBDOMAIN', 'Error while checking subdomains', '\n', error?.rawError);
+    }
 }
 
 async function check() {
-	await checkArticles();
-	await checkBlogPosts();
-	await checkSubdomains();
+    await checkArticles();
+    await checkBlogPosts();
+    await checkSubdomains();
 }
 
 client.on('ready', async () => {
-	logger('info', 'BOT', 'Logged in as', client.user.tag);
-	logger('info', 'COMMAND', 'Registering commands');
+    logger('info', 'BOT', 'Logged in as', client.user.tag);
+    logger('info', 'COMMAND', 'Registering commands');
 
-	axios
-		.put(
-			`https://discord.com/api/v10/applications/${client.user.id}/commands`,
-			client.commands.map((command) => command.data.toJSON()),
-			{
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
-				},
-			},
-		)
-		.then(() => logger('success', 'COMMAND', 'Registered commands'))
-		.catch((error) =>
-			logger(
-				'error',
-				'COMMAND',
-				'Error while registering commands',
-				`${error?.response?.status} ${error?.response?.statusText}\n`,
-				JSON.stringify(error?.response?.data ?? error, null, 4),
-			),
-		);
+    axios
+        .put(
+            `https://discord.com/api/v10/applications/${client.user.id}/commands`,
+            client.commands.map((command) => command.data.toJSON()),
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
+                },
+            },
+        )
+        .then(() => logger('success', 'COMMAND', 'Registered commands'))
+        .catch((error) =>
+            logger(
+                'error',
+                'COMMAND',
+                'Error while registering commands',
+                `${error?.response?.status} ${error?.response?.statusText}\n`,
+                JSON.stringify(error?.response?.data ?? error, null, 4),
+            ),
+        );
 
-	check();
-	setInterval(check, 1000 * 60 * 5);
-	checkFirstDayOfMonth();
+    check();
+    setInterval(check, 1000 * 60 * 5);
+    checkFirstDayOfMonth();
 });
 
 client.on('interactionCreate', async interaction => {
@@ -2623,131 +2622,130 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on('messageCreate', async (message) => {
-	try {
-		if (!message.guild || !message.member) return;
-		if (message.type === MessageType.Reply && message.content !== '' && message.reference?.messageId) {
-			const home = await new Home(message.guildId).setup();
+    try {
+        if (!message.guild || !message.member) return;
+        if (message.type === MessageType.Reply && message.content !== '' && message.reference?.messageId) {
+            const home = await new Home(message.guildId).setup();
 
-			home.check('reply', message);
-		}
-		if (
-			message.type === 0 &&
-			message.content !== '' &&
-			!message.author.bot &&
-			!message.member.permissions.has('ManageMessages') &&
-			message.channel.type !== ChannelType.GuildAnnouncement
-		) {
-			const automod = await new AutoMod(message.guildId).setup();
+            home.check('reply', message);
+        }
+        if (
+            message.type === 0 &&
+            message.content !== '' &&
+            !message.author.bot &&
+            !message.member.permissions.has('ManageMessages') &&
+            message.channel.type !== ChannelType.GuildAnnouncement
+        ) {
+            const automod = await new AutoMod(message.guildId).setup();
 
-			let blocked = false;
+            let blocked = false;
 
-			if (
-				!blocked &&
-				automod.data.ai.enabled &&
-				!automod.data.ai.channelBlacklist.includes(message.channelId) &&
-				!automod.data.ai.channelBlacklist.includes(message.channel.parentId) &&
-				!automod.data.ai.roleBlacklist.filter((role) => message.member.roles.cache.get(role))[0]
-			)
-				blocked = await automod.ai(message);
-			if (
-				!blocked &&
-				automod.data.badContent.enabled &&
-				!automod.data.badContent.channelBlacklist.includes(message.channelId) &&
-				!automod.data.badContent.channelBlacklist.includes(message.channel.parentId) &&
-				!automod.data.badContent.roleBlacklist.filter((role) => message.member.roles.cache.get(role))[0]
-			)
-				blocked = await automod.badContent(message);
-			if (
-				!blocked &&
-				automod.data.toxicContent.enabled &&
-				!automod.data.toxicContent.channelBlacklist.includes(message.channelId) &&
-				!automod.data.toxicContent.channelBlacklist.includes(message.channel.parentId) &&
-				!automod.data.toxicContent.roleBlacklist.filter((role) => message.member.roles.cache.get(role))[0]
-			)
-				blocked = await automod.toxicContent(message);
-		}
-	} catch (error) {
-		logger('error', 'EVENT', 'Error while executing messageCreate:', `${error.message}\n`, error.stack);
-	}
+            if (
+                !blocked &&
+                automod.data.ai.enabled &&
+                !automod.data.ai.channelBlacklist.includes(message.channelId) &&
+                !automod.data.ai.channelBlacklist.includes(message.channel.parentId) &&
+                !automod.data.ai.roleBlacklist.filter((role) => message.member.roles.cache.get(role))[0]
+            )
+                blocked = await automod.ai(message);
+            if (
+                !blocked &&
+                automod.data.badContent.enabled &&
+                !automod.data.badContent.channelBlacklist.includes(message.channelId) &&
+                !automod.data.badContent.channelBlacklist.includes(message.channel.parentId) &&
+                !automod.data.badContent.roleBlacklist.filter((role) => message.member.roles.cache.get(role))[0]
+            )
+                blocked = await automod.badContent(message);
+            if (
+                !blocked &&
+                automod.data.toxicContent.enabled &&
+                !automod.data.toxicContent.channelBlacklist.includes(message.channelId) &&
+                !automod.data.toxicContent.channelBlacklist.includes(message.channel.parentId) &&
+                !automod.data.toxicContent.roleBlacklist.filter((role) => message.member.roles.cache.get(role))[0]
+            )
+                blocked = await automod.toxicContent(message);
+        }
+    } catch (error) {
+        logger('error', 'EVENT', 'Error while executing messageCreate:', `${error.message}\n`, error.stack);
+    }
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
-	if (!reaction.message.guild) return;
+    if (!reaction.message.guild) return;
 
-	const home = await new Home(reaction.message.guildId).setup();
+    const home = await new Home(reaction.message.guildId).setup();
 
-	home.check('reaction', reaction, user);
+    home.check('reaction', reaction, user);
 });
 
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
-	let subscriber = false;
-	let premium = false;
-	let beast = false;
+    let subscriber = false;
+    let premium = false;
+    let beast = false;
 
-	if (!oldMember.roles.cache.has('1150833335199875126') && newMember.roles.cache.has('1150833335199875126'))
-		subscriber = true;
-	if (!oldMember.roles.cache.has('1150839581273489479') && newMember.roles.cache.has('1150839581273489479'))
-		premium = true;
-	if (!oldMember.roles.cache.has('1150840476589633658') && newMember.roles.cache.has('1150840476589633658'))
-		beast = true;
-	if (subscriber || premium || beast)
-		client.channels.cache.get('1151920854175862784').send({
-			content: `Thanks to <@${newMember.id}> for buying **${
-				subscriber ? 'Subscriber (Tier 1)' : premium ? 'Premium (Tier 2)' : 'Beast (Tier 3)'
-			}** subscription!`,
-			allowedMentions: {
-				parse: [],
-			},
-		});
+    if (!oldMember.roles.cache.has('1150833335199875126') && newMember.roles.cache.has('1150833335199875126'))
+        subscriber = true;
+    if (!oldMember.roles.cache.has('1150839581273489479') && newMember.roles.cache.has('1150839581273489479'))
+        premium = true;
+    if (!oldMember.roles.cache.has('1150840476589633658') && newMember.roles.cache.has('1150840476589633658'))
+        beast = true;
+    if (subscriber || premium || beast)
+        client.channels.cache.get('1151920854175862784').send({
+            content: `Thanks to <@${newMember.id}> for buying **${subscriber ? 'Subscriber (Tier 1)' : premium ? 'Premium (Tier 2)' : 'Beast (Tier 3)'
+                }** subscription!`,
+            allowedMentions: {
+                parse: [],
+            },
+        });
 });
 
 client.on('guildMemberAdd', async (member) => {
-	if (member.guild.id !== '1086707622759125053') return;
+    if (member.guild.id !== '1086707622759125053') return;
 
-	await member.guild.members.fetch();
+    await member.guild.members.fetch();
 
-	if (member.guild.members.cache.size >= 100) {
-		await member.guild.members.prune({
-			days: 0,
-			roles: ['1087086754537934938'],
-		});
+    if (member.guild.members.cache.size >= 100) {
+        await member.guild.members.prune({
+            days: 0,
+            roles: ['1087086754537934938'],
+        });
 
-		client.channels.cache
-			.get('1089807623496421417')
-			.send(
-				"# <a:a_dehClyde:1098205219575300108> Clyde's Home\n(<@&1089850303031033937>)\n---\n**Clyde's Home** has been cleared! You can rejoin the server [here](https://canary.discord.com/channels/1089540433010491392/1117827130236096622).",
-			);
-	} else if (member.guild.members.cache.size >= 90)
-		client.channels.cache
-			.get('1090658895531352194')
-			.send(
-				'**There are only 10 members left to reach 100 members! This means the server will be cleared soon! Please join our main server to rejoin here: https://discord.gg/experiments **',
-			);
+        client.channels.cache
+            .get('1089807623496421417')
+            .send(
+                "# <a:a_dehClyde:1098205219575300108> Clyde's Home\n(<@&1089850303031033937>)\n---\n**Clyde's Home** has been cleared! You can rejoin the server [here](https://canary.discord.com/channels/1089540433010491392/1117827130236096622).",
+            );
+    } else if (member.guild.members.cache.size >= 90)
+        client.channels.cache
+            .get('1090658895531352194')
+            .send(
+                '**There are only 10 members left to reach 100 members! This means the server will be cleared soon! Please join our main server to rejoin here: https://discord.gg/experiments **',
+            );
 });
 
 client.on('guildMemberRemove', async (member) => {
-	if (member.guild.id !== '1086707622759125053') return;
+    if (member.guild.id !== '1086707622759125053') return;
 
-	let channel = await db.get(`clyde.${member.id}.privateChannel`);
+    let channel = await db.get(`clyde.${member.id}.privateChannel`);
 
-	client.channels.cache
-		.get(channel)
-		.delete()
-		.catch(() => null);
+    client.channels.cache
+        .get(channel)
+        .delete()
+        .catch(() => null);
 
-	await db.delete(`clyde.${member.id}`);
+    await db.delete(`clyde.${member.id}`);
 });
 
 client.on('messageCreate', async (message) => {
-	if (message.author.bot) return;
+    if (message.author.bot) return;
 
-	let user = (await db.get(`users.${message.author.id}`)) ?? {};
+    let user = (await db.get(`users.${message.author.id}`)) ?? {};
 
-	if (!user.real) user.real = 0;
-	if (message.content.toLowerCase().includes('real')) {
-		user.real++;
+    if (!user.real) user.real = 0;
+    if (message.content.toLowerCase().includes('real')) {
+        user.real++;
 
-		await db.set(`users.${message.author.id}`, user);
+        await db.set(`users.${message.author.id}`, user);
 
         if (message.guildId === '1089540433010491392') message.reply(`You have said real **${user.real}** times.`);
     };
