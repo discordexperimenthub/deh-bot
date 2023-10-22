@@ -173,4 +173,17 @@ module.exports = {
 	PRIVATE_CHANNEL_CREATED: 'Ihr privater Kanal {{0}} wurde erfolgreich erstellt!',
 	YOU_ARE_NOT_OWNER_CHANNEL: 'Sie sind nicht der Eigentümer dieses Kanals!',
 	MEMBERS_SELECT: 'Mitglieder auswählen...',
+	MEMBERS_SELECT: 'Select members...',
+	TERMS_OF_SERVICE: 'Allgemeine Geschäftsbedingungen',
+	TERMS_OF_SERVICE_DESCRIPTION:
+		'Durch die Nutzung dieses Bots erklären Sie sich mit unseren **[Nutzungsbedingungen](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/terms-of-service.md>)** einverstanden.',
+	PRIVACY_POLICY: 'Datenschutzrichtlinie',
+	PRIVACY_POLICY_DESCRIPTION:
+		'Durch die Nutzung dieses Bots erklären Sie sich mit unserer **[Datenschutzrichtlinie](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/privacy-policy.md>)** einverstanden.',
+	BUGFIXTOOLS: 'Bug Fix Tools',
+	DOUBLE_JOIN_MESSAGES: 'Double Join Messages',
+	DOUBLE_JOIN_MESSAGES_DESCRIPTION:
+		'Behebt das Problem, dass Benutzer doppelte Join-Nachrichten erhalten, wenn sie einem Server beitreten.',
+	ENABLE_DOUBLE_JOIN_MESSAGES: 'Doppelte Join-Nachrichten aktivieren',
+	DISABLE_DOUBLE_JOIN_MESSAGES: 'Doppelte Join-Nachrichten deaktivieren',
 };

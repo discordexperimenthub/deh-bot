@@ -175,4 +175,15 @@ module.exports = {
 	PRIVATE_CHANNEL_CREATED: 'Din private kanal {{0}} er blevet oprettet!',
 	YOU_ARE_NOT_OWNER_CHANNEL: 'Du er ikke ejer af denne kanal!',
 	MEMBERS_SELECT: 'Vælg medlemmer...',
+	TERMS_OF_SERVICE: 'Vilkår for brug af tjenesten',
+	TERMS_OF_SERVICE_DESCRIPTION:
+		'Ved at bruge denne bot accepterer du vores **[Terms of Service](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/terms-of-service.md>)**.',
+	PRIVACY_POLICY: 'Privatlivspolitik',
+	PRIVACY_POLICY_DESCRIPTION:
+		'Ved at bruge denne bot accepterer du vores **[Privatlivspolitik](<https://github.com/discordexperimenthub/deh-bot/blob/main/resources/privacy-policy.md>)**.',
+	BUGFIXTOOLS: 'Bug Fix Tools',
+	DOUBLE_JOIN_MESSAGES: 'Double Join-meddelelser',
+	DOUBLE_JOIN_MESSAGES_DESCRIPTION: 'Løser problemet, hvor brugere modtager dobbelte join-meddelelser, når de joiner en server.',
+	ENABLE_DOUBLE_JOIN_MESSAGES: 'Aktiver dobbelte join-meddelelser',
+	DISABLE_DOUBLE_JOIN_MESSAGES: 'Deaktiver dobbelt join-meddelelser',
 };
